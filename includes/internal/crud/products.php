@@ -1,0 +1,388 @@
+<?php
+
+namespace WooHive\Internal\Crud;
+
+use WooHive\Config\Constants;
+
+use \WC_Product_Factory;
+use \WP_Error;
+use \WP_Query;
+
+
+/** Prevenir el acceso directo al script. */
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+class Products {
+
+    /**
+     * Lista de propiedades inválidas que no deberían usarse al actualizar o crear productos.
+     *
+     * @var array
+     */
+    private static array $invalid_props = [
+        'id',              // No permitimos actualizar el ID del producto.
+        'date_created',    // Propiedades relacionadas con la creación.
+        'date_modified',   // Propiedades relacionadas con la modificación.
+        'permalink',       // Propiedad de solo lectura.
+        'average_rating',  // Calculada automáticamente.
+        'rating_count',    // Calculada automáticamente.
+        'review_count',    // Calculada automáticamente.
+        'downloads',       // Si no corresponde a un producto descargable.
+    ];
+
+    /**
+     * Limpia los datos para eliminar propiedades inválidas.
+     *
+     * @param array $data Datos sin procesar.
+     *
+     * @return array Datos filtrados con las propiedades inválidas eliminadas.
+     */
+    public static function clean_data( array $data ): array {
+        return array_filter(
+            $data,
+            fn( $key ) => ! in_array( $key, self::$invalid_props, true ),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    /**
+     * Actualiza los datos de un producto específico en WooCommerce.
+     *
+     * @param int   $product_id El ID del producto que será actualizado.
+     * @param array $data       Datos del producto a actualizar.
+     *
+     * @return bool|WP_Error Devuelve true si la actualización fue exitosa o un WP_Error en caso de fallo.
+     */
+    public static function update( int $product_id, array $data ): WP_Error|true {
+        $product = wc_get_product( $product_id );
+        if ( ! $product ) {
+            return new WP_Error( 'product_not_found', __( "El producto con ID $product_id no existe.", Constants::TEXT_DOMAIN ) );
+        }
+
+        $filtered_data = self::clean_data( $data );
+        if ( empty( $filtered_data ) ) {
+            return new WP_Error( 'invalid_data', __( 'No se proporcionaron campos válidos para actualizar.', Constants::TEXT_DOMAIN ) );
+        }
+
+        try {
+            $product->set_props( $filtered_data );
+            $product->save();
+
+            // Manejo de imágenes si están presentes en los datos
+            if ( isset( $filtered_data['images'] ) && is_array( $filtered_data['images'] ) ) {
+                $image_ids = [];
+
+                foreach ( $filtered_data['images'] as $index => $image_data ) {
+                    $image_url = $image_data['src'];
+                    $external_id = $image_data['id'] ?? null;
+
+                    $uploaded_images = self::upload_image( $image_url, $product_id, $external_id );
+                    if ( is_wp_error( $uploaded_images ) ) {
+                        continue;
+                    }
+
+                    $image_ids = array_merge( $image_ids, $uploaded_images );
+                    if ( $index === 0 && ! empty( $uploaded_images[0] ) ) {
+                        set_post_thumbnail( $product_id, $uploaded_images[0] );
+                    }
+                }
+
+                if ( ! empty( $image_ids ) ) {
+                    update_post_meta( $product_id, '_product_image_gallery', implode( ',', $image_ids ) );
+                }
+            }
+
+            return true;
+        } catch ( \Exception $e ) {
+            return new WP_Error( 'save_error', __( 'Error al guardar el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
+        }
+    }
+
+    /**
+     * Actualiza múltiples productos en WooCommerce.
+     *
+     * @param array $products Lista de productos a actualizar. Cada elemento debe ser un array con las claves:
+     *                        - 'id' (int): El ID del producto.
+     *                        - 'data' (array): Los datos a actualizar para ese producto.
+     *
+     * @return array Un array asociativo con resultados para cada producto, y estadísticas generales.
+     */
+    public static function update_batch( array $products ): array {
+        $results       = array();
+        $error_count   = 0;
+        $total_updates = 0;
+
+        foreach ( $products as $product_data ) {
+            if ( ! isset( $product_data['id'] ) || ! isset( $product_data['data'] ) ) {
+                $results[] = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
+                ++$error_count;
+                continue;
+            }
+
+            $product_id = $product_data['id'];
+            $data       = $product_data['data'];
+
+            $result = self::update( $product_id, $data );
+
+            if ( is_wp_error( $result ) ) {
+                $results[ $product_id ] = $result;
+                ++$error_count;
+            } else {
+                $results[ $product_id ] = true;
+                ++$total_updates;
+            }
+        }
+
+        // Sumary
+        $results['error_count']    = $error_count;
+        $results['total_updates']  = $total_updates;
+        $results['total_products'] = count( $products );
+
+        return $results;
+    }
+
+
+    /**
+     * Crea un nuevo producto en WooCommerce.
+     *
+     * @param array $data Datos para crear el producto.
+     *
+     * @return int|WP_Error El ID del producto creado o un WP_Error en caso de fallo.
+     */
+    public static function create(array $data): int|WP_Error {
+        $filtered_data = self::clean_data($data);
+        if (empty($filtered_data)) {
+            return new WP_Error('invalid_data', __('No se proporcionaron campos válidos para crear el producto.', Constants::TEXT_DOMAIN));
+        }
+
+        try {
+            if (!empty($filtered_data['sku'])) {
+                $existing_product_id = wc_get_product_id_by_sku($filtered_data['sku']);
+                if ($existing_product_id) {
+                    return new WP_Error(
+                        'product_exists',
+                        sprintf(__('El producto con SKU "%s" ya existe.', Constants::TEXT_DOMAIN), $filtered_data['sku'])
+                    );
+                }
+            }
+
+            $product_type = $filtered_data['type'] ?? 'simple';
+            unset($filtered_data['type']);
+
+            $product_class = WC_Product_Factory::get_product_classname(0, $product_type);
+            $product = new $product_class();
+
+            $product->set_props($filtered_data);
+            $product->save();
+
+            $product_id = $product->get_id();
+            if (!empty($filtered_data['images'])) {
+                $image_ids = [];
+
+                foreach ($filtered_data['images'] as $index => $image_data) {
+                    $image_url = $image_data['src']; // URL de la imagen
+                    $external_id = $image_data['id']; // ID externo de la imagen
+
+                    $uploaded_images = self::upload_image($image_url, $product_id, $external_id);
+                    if (is_wp_error($uploaded_images)) {
+                        continue;
+                    }
+
+                    $image_ids = array_merge($image_ids, $uploaded_images);
+                    if ($index === 0 && !empty($uploaded_images[0])) {
+                        set_post_thumbnail($product_id, $uploaded_images[0]);
+                    }
+                }
+
+                if (!empty($image_ids)) {
+                    update_post_meta($product_id, '_product_image_gallery', implode(',', $image_ids));
+                }
+            }
+
+            return $product_id;
+        } catch (\Exception $e) {
+            return new WP_Error('create_error', __('Error al crear el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN));
+        }
+    }
+
+    /**
+     * Crea múltiples productos en WooCommerce.
+     *
+     * @param array $products Lista de datos de productos para crear.
+     *
+     * @return array Un array asociativo con resultados para cada producto y estadísticas generales.
+     */
+    public static function create_batch( array $products ): array {
+        $results       = array();
+        $error_count   = 0;
+        $total_creates = 0;
+
+        foreach ( $products as $data ) {
+            $result = self::create( $data );
+
+            if ( is_wp_error( $result ) ) {
+                $results[] = $result;
+                ++$error_count;
+            } else {
+                $results[] = $result; // El ID del producto creado.
+                ++$total_creates;
+            }
+        }
+
+        $results['error_count']   = $error_count;
+        $results['total_creates'] = $total_creates;
+        $results['total_products'] = count( $products );
+
+        return $results;
+    }
+
+    /**
+     * Crea o actualiza un producto en WooCommerce.
+     *
+     * @param int|null $product_id El ID del producto a actualizar. Si es null, se creará un nuevo producto.
+     * @param array    $data       Datos del producto a crear o actualizar.
+     *
+     * @return int|WP_Error El ID del producto creado/actualizado o un WP_Error en caso de fallo.
+     */
+    public static function create_or_update( int $product_id = null, array $data ): int|WP_Error {
+        if ( ! empty( $data['sku'] ) ) {
+            $product_id = wc_get_product_id_by_sku( $data['sku'] );
+        }
+
+        if ( $product_id ) {
+            $product = wc_get_product( $product_id );
+
+            if ( $product ) {
+                $result = self::update( $product_id, $data );
+                return is_wp_error( $result ) ? $result : $product_id;
+            }
+        }
+
+        // Si no existe el producto, lo creamos
+        return self::create( $data );
+    }
+
+    /**
+     * Crea o actualiza múltiples productos en WooCommerce.
+     *
+     * @param array $products Lista de productos a procesar. Cada elemento debe ser un array con las claves:
+     *                        - 'id' (int|null): El ID del producto a actualizar. Si es null, se creará un nuevo producto.
+     *                        - 'data' (array): Los datos del producto a crear o actualizar.
+     *
+     * @return array Un array asociativo con resultados para cada producto y estadísticas generales:
+     *               - 'error_count' (int): Número de errores.
+     *               - 'total_creates' (int): Número de productos creados.
+     *               - 'total_updates' (int): Número de productos actualizados.
+     *               - 'total_products' (int): Total de productos procesados.
+     */
+    public static function create_or_update_batch( array $products ): array {
+        $results       = [];
+        $error_count   = 0;
+        $total_creates = 0;
+        $total_updates = 0;
+
+        foreach ( $products as $product_data ) {
+            $product_id = $product_data['id'] ?? null;
+            $data       = $product_data['data'] ?? null;
+
+            if ( ! $data ) {
+                $results[] = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
+                ++$error_count;
+                continue;
+            }
+
+            $result = self::create_or_update( $product_id, $data );
+
+            if ( is_wp_error( $result ) ) {
+                $results[] = $result;
+                ++$error_count;
+            } else {
+                $results[] = $result; // ID del producto creado o actualizado
+                if ( $product_id ) {
+                    ++$total_updates;
+                } else {
+                    ++$total_creates;
+                }
+            }
+        }
+
+        $results['error_count']   = $error_count;
+        $results['total_creates'] = $total_creates;
+        $results['total_updates'] = $total_updates;
+        $results['total_products'] = count( $products );
+
+        return $results;
+    }
+
+    /**
+     * Subir una imagen a la biblioteca de medios de WordPress y asociarla a un producto de WooCommerce.
+     *
+     * @param string $image_url URL de la imagen a subir.
+     * @param int $product_id ID del producto de WooCommerce al que se asociará la imagen.
+     * @param string|null $external_id ID externo (opcional), para evitar duplicados.
+     *
+     * @return WP_Error|array Array de IDs de imágenes que se han agregado a la galería del producto o un objeto WP_Error si ocurre un error.
+     */
+    public static function upload_image(string $image_url, int $product_id, ?string $external_id = null) {
+        $image_id = self::search_image($image_url, $external_id);
+        if ($image_id) {
+            return [ $image_id ];
+        }
+
+        $galeria = [];
+        $image_id = media_sideload_image($image_url, $product_id, null, 'id');
+        if (is_wp_error($image_id)) {
+            return new WP_Error('upload_error', 'Error al subir la imagen: ' . $image_id->get_error_message());
+        }
+
+        $galeria[] = $image_id;
+        if ($external_id) {
+            update_post_meta($image_id, '_external_image_id', $external_id);
+        }
+
+        return $galeria;
+    }
+
+    /**
+     * Buscar una imagen en la biblioteca de medios de WordPress por su URL o por un ID externo.
+     *
+     * @param string $image_url URL de la imagen a buscar.
+     * @param string|null $external_id ID externo (opcional)
+     *
+     * @return int|null El ID de la imagen si existe, o null si no se encuentra.
+     */
+    public static function search_image(string $image_url, ?string $external_id = null): ?int {
+        $image_id = attachment_url_to_postid($image_url);
+        if (!$image_id && $external_id) {
+            $image_id = self::search_by_external_id($external_id);
+        }
+
+        return $image_id;
+    }
+
+    /**
+     * Buscar una imagen en la biblioteca de medios por su ID externo.
+     *
+     * @param string $external_id ID externo
+     *
+     * @return int|null El ID de la imagen si existe, o null si no se encuentra.
+     */
+    private static function search_by_external_id(string $external_id): ?int {
+        $args = array(
+            'post_type'  => 'attachment',
+            'meta_key'   => '_external_image_id',
+            'meta_value' => $external_id,
+            'posts_per_page' => 1,
+        );
+
+        $query = new WP_Query($args);
+        if ($query->have_posts()) {
+            $post = $query->posts[0];
+            return $post->ID;
+        }
+
+        return null; // No se encontró ninguna imagen con el ID externo
+    }
+}

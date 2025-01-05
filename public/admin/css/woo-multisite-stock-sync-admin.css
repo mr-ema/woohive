@@ -1,0 +1,555 @@
+:root {
+    /* Primary and Secondary Colors */
+    --wmss-color-primary: #000000;
+    --wmss-color-secondary: #666666;
+
+    --wmss-color-link-hover: #dfe4ff;
+
+    /* Background Colors */
+    --wmss-color-bg-primary: #FFFFFF;
+    --wmss-color-bg-secondary: #DEDEDE;
+
+    /* Status Colors */
+    --wmss-color-success: #98fb98;
+    --wmss-color-error: #ff7f7f;
+    --wmss-color-warning: #ffdd99;
+    --wmss-color-info: #99ccff;
+}
+
+.woo-multisite-stock-sync-check-credentials-indicator {
+    display: inline-block;
+    height: 1.875rem;
+    line-height: 1.875rem;
+    background-repeat: no-repeat;
+    background-position: left center;
+    margin-left: 0.625rem;
+    padding-left: 1.3125rem;
+    vertical-align: top;
+    border-radius: 0.375rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Success, failure, and processing states for credentials check */
+.woo-multisite-stock-sync-check-credentials-processing {
+    background-image: url("../img/wpspin_light.gif");
+}
+
+.woo-multisite-stock-sync-check-credentials-success {
+    background-image: url("../img/yes.png");
+}
+
+.woo-multisite-stock-sync-check-credentials-fail {
+    background-image: url("../img/no.png");
+}
+
+/* Table styles for the credentials table */
+td.forminp-wmss_credentials_table>table th,
+td.forminp-wmss_credentials_table>table td {
+    width: auto;
+    margin-bottom: 0.56rem;
+    padding: 1rem 0.62rem;
+}
+
+/* Column styles for minimal layout */
+td.forminp-wmss_credentials_table>table td.min,
+td.forminp-wmss_credentials_table>table th.min {
+    width: 2%;
+    white-space: nowrap;
+    margin-right: 0.31rem;
+}
+
+/* Styles for input fields in the credentials table */
+td.forminp-wmss_credentials_table>table input {
+    max-width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.16rem;
+    border: 1px solid var(--wmss-color-secondary, #dee2e6);
+}
+
+/* Styling for the footer links in the credentials table */
+td.forminp-wmss_credentials_table>table tfoot a {
+    display: inline-block;
+}
+
+/* Hide close button on dialog */
+.wmss-api-check-dialog-container .ui-dialog-titlebar-close {
+    text-indent: -9999px !important;
+}
+
+.wmss-api-check-dialog-container .ui-dialog-titlebar-close:before {
+    display: none !important;
+}
+
+/* Styling for focus on the close button in dialog */
+.wmss-api-check-dialog-container .ui-dialog-titlebar-close:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Table styles for API check app */
+.wmss-api-check-dialog-container #wmss-api-check-app table {
+    width: 100%;
+    margin-bottom: 1.25rem;
+    border-radius: 0.37rem;
+}
+
+/* Table header style for API check app */
+.wmss-api-check-dialog-container #wmss-api-check-app table th {
+    text-align: left;
+    width: 6.25rem;
+}
+
+/* Table cell styles for API check app */
+.wmss-api-check-dialog-container #wmss-api-check-app table td {
+    text-align: left;
+}
+
+/* Styling for error messages in the API check table */
+.wmss-api-check-dialog-container #wmss-api-check-app table .error {
+    color: var(--wmss-color-error, #c92a2a);
+}
+
+.wmss-api-check-dialog-container #wmss-api-check-app table .error pre {
+    display: block;
+    width: 25rem;
+    overflow-x: scroll;
+    background: var(--wmss-color-bg-primary, #f1f3f5);
+    padding: 1rem;
+    border-radius: 0.37rem;
+}
+
+/* Table styles for checks status in API check app */
+.wmss-api-check-dialog-container #wmss-api-check-app table.wmss-checks-table th {
+    width: 75%;
+}
+
+/* Icon styles for check status in the API check app */
+.wmss-api-check-dialog-container #wmss-api-check-app table .wmss-check-status {
+    background-repeat: no-repeat;
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+}
+
+.wmss-api-check-dialog-container #wmss-api-check-app table .wmss-check-status.pending {
+    background-image: url("../img/wpspin_light.gif");
+}
+
+.wmss-api-check-dialog-container #wmss-api-check-app table .wmss-check-status.error {
+    background-image: url("../img/no.png");
+}
+
+.wmss-api-check-dialog-container #wmss-api-check-app table .wmss-check-status.ok {
+    background-image: url("../img/yes.png");
+}
+
+/* Styling for successful check status */
+.wmss-api-check-dialog-container #wmss-api-check-app .wmss-api-check-ok {
+    color: var(--wmss-color-success, #087f5b);
+}
+
+/* Table styling for error report */
+#wmss-error-dialog table.wmss-error-data-table {
+    width: 100%;
+    border-radius: 0.3rem;
+}
+
+#wmss-error-dialog table.wmss-error-data-table * {
+    box-sizing: border-box;
+}
+
+/* Table header and padding styles for error data */
+#wmss-error-dialog table.wmss-error-data-table th {
+    padding: 0.3125rem 0.625rem 0.3125rem 0;
+}
+
+#wmss-error-dialog table.wmss-error-data-table td {
+    padding: 0.3rem 0 0.3rem 0.6rem;
+}
+
+/* Text alignment for error data table */
+#wmss-error-dialog table.wmss-error-data-table th,
+#wmss-error-dialog table.wmss-error-data-table td {
+    text-align: left;
+}
+
+/* Vertical alignment for error data header */
+#wmss-error-dialog table.wmss-error-data-table th {
+    vertical-align: baseline;
+}
+
+/* Preformatted text for error data */
+#wmss-error-dialog table.wmss-error-data-table td pre {
+    background: var(--wmss-color-bg-primary, #f1f3f5);
+    border: 0.0625rem solid var(--wmss-color-secondary, #dee2e6);
+    padding: 0.625rem;
+    overflow: auto;
+    margin: 0;
+    width: 0;
+    min-width: 100%;
+    height: 12.5rem;
+    border-radius: 0.375rem;
+}
+
+/* Focus and box-shadow styles for error action buttons */
+#wmss-error-dialog .wmss-actions button.button:focus {
+    box-shadow: none;
+}
+
+/* Header styling for app section */
+.wmss-app .header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.wmss-app .header p {
+    font-size: 1rem;
+}
+
+.wmss-app .header h2 {
+    font-size: 2rem;
+    color: var(--wmss-color-info, #1864ab);
+}
+
+/* Styling for processing and completed states in header */
+.wmss-app .header .process h2 {
+    color: var(--wmss-color-info, #1864ab);
+}
+
+.wmss-app .header .completed h2 {
+    color: var(--wmss-color-success, #2b8a3e);
+}
+
+/* Site grid layout for the app */
+.wmss-app .sites {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Styling for each site in the app */
+.wmss-app .sites .site {
+    background: var(--wmss-color-bg-primary, #ffffff);
+    border: 0.1rem solid var(--wmss-color-secondary, #dee2e6);
+    margin: 0 1.2rem 1.2rem 0;
+    border-radius: 0.37rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Header style for each site */
+.wmss-app .sites .site .site-header {
+    display: flex;
+    border-bottom: 0.1rem solid var(--wmss-color-secondary, #dee2e6);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Title style for each site */
+.wmss-app .sites .site .site-header .title {
+    flex: auto;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+/* Status icon for each site */
+.wmss-app .sites .site .site-header .status {
+    flex: none;
+    padding: 0.6rem 1rem;
+}
+
+/* Icon styles for site status */
+.wmss-app .sites .site .site-header .status .icon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    background-repeat: no-repeat;
+    background-position: left top;
+}
+
+/* Processing state icon for site */
+.wmss-app .sites .site .site-header .status.process .icon {
+    background-image: url("../img/wpspin_light.gif");
+}
+
+/* Success state icon for site */
+.wmss-app .sites .site .site-header .status.completed .icon {
+    background-image: url("../img/yes.png");
+}
+
+/* Error state icon for site */
+.wmss-app .sites .site .site-header .status.error .icon {
+    background-image: url("../img/no.png");
+}
+
+.wmss-app .sites .site .content {
+    padding: 1rem;
+    font-size: 0.875rem;
+}
+
+.wmss-app .sites .site .content table th,
+.wss-app .sites .site .content table td {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Button styles */
+.wmss-app .sites .site .actions button.button {
+    line-height: 1.5rem;
+    min-height: 1.5rem;
+    padding: 0 0.8rem;
+    border-radius: 0.37rem;
+}
+
+/* Table styling for the stock sync report */
+#woo-multisite-stock-sync-report table {
+    width: 100%;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-radius: 0.37rem;
+}
+
+/* Header styles for the stock sync report */
+#woo-multisite-stock-sync-report table th {
+    padding: 1.3rem;
+    text-align: center;
+
+    @media (max-width: 767px) {
+        padding: 0.8rem;
+    }
+}
+
+/* Cell styles for the stock sync report */
+#woo-multisite-stock-sync-report table td {
+    padding: 1rem;
+    text-align: center;
+
+    @media (max-width: 767px) {
+        padding: 0.6rem;
+    }
+}
+
+#woo-multisite-stock-sync-report table tbody tr:hover {
+    background-color: var(--wmss-color-link-hover, #e9f5ff);
+}
+
+/* Error row styles for the stock sync report */
+#woo-multisite-stock-sync-report table .error {
+    background: var(--wmss-color-error, #ffe3e3);
+}
+
+/* Log table styles for stock sync report */
+.wmss-log-table {
+    margin-bottom: 1.25rem;
+}
+
+.wmss-log-table tr.type-error {
+    background: var(--wmss-color-error, #ffe3e3);
+}
+
+/* Description text styles for stock sync report */
+.wmss-descs {
+    margin: 0 0 0.62rem;
+}
+
+.wmss-descs .desc {
+    margin-right: 0.62rem;
+}
+
+/* Sync result styles in the stock sync report */
+.wmss-sync-result {
+    border-radius: 0.5rem;
+    font-weight: bold;
+    color: var(--wmss-color-primary, #ffffff);
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+    text-align: center;
+    line-height: 1rem;
+    font-size: 0.75rem;
+    vertical-align: text-top;
+}
+
+/* Various sync result status styles */
+.wmss-sync-result.sync-result-info {
+    background: var(--wmss-color-info, #1971c2);
+}
+
+.wmss-sync-result.sync-result-success {
+    background: var(--wmss-color-success, #2f9e44);
+}
+
+.wmss-sync-result.sync-result-warning {
+    background: var(--wmss-color-warning, #f08c00);
+}
+
+.wmss-sync-result.sync-result-error {
+    background: var(--wmss-color-error, #e03131);
+}
+
+.wmss-sync-result.sync-result-na {
+    background: var(--wmss-color-secondary, #ced4da);
+}
+
+/* Tool container and tool layout styles */
+#woo-multisite-stock-sync-tools .tools {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+}
+
+#woo-multisite-stock-sync-tools .tools .tool {
+    flex: auto;
+    display: flex;
+    flex-direction: column;
+    max-width: 18.75rem;
+    margin: 0 1.25rem 1.25rem 0;
+    background: var(--wmss-bg-color-primary, #ffffff);
+    border: 0.1rem solid var(--wmss-color-secondary, #dee2e6);
+    padding: 1.25rem;
+    border-radius: 0.37rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    height: auto;
+
+    .action {
+        margin-top: auto;
+    }
+}
+
+/* Tool title styles */
+#woo-multisite-stock-sync-tools .tools .tool .title {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Tool description styles */
+#woo-multisite-stock-sync-tools .tools .tool .desc {
+    margin-bottom: 1.25rem;
+}
+
+/* Icon styles for the tools section */
+.wmss-icon {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-repeat: no-repeat;
+    background-position: left top;
+    vertical-align: text-top;
+}
+
+.wmss-icon.process {
+    background-image: url("../img/wpspin_light.gif");
+}
+
+.wmss-icon.warning {
+    background-image: url("../img/warning.png");
+}
+
+.wmss-icon.completed {
+    background-image: url("../img/yes.png");
+}
+
+/**
+ * Tabs
+ */
+.wmss-tabs .dashicons-external {
+    font-size: 1rem;
+    height: 1rem;
+    width: 1rem;
+}
+
+.wmss-tabs> :is(a, button).nav-tab {
+    border-top-right-radius: 0.26rem;
+    border-top-left-radius: 0.26rem;
+}
+
+/**
+ * Alert
+ */
+.wmss-alert {
+    background: var(--wmss-color-warning);
+    border: 0.16rem solid var(--wmss-color-secondary, #ff7b00);
+    padding: 0.6rem 1rem;
+    margin: 1rem 0;
+}
+
+/**
+ * Debugger
+ */
+#wmss-debug-window {
+    position: relative;
+    border: 0.16rem solid #000;
+    border-radius: 0.36rem;
+    max-height: 25rem;
+    background-color: var(--wmss-color-bg-primary);
+    color: var(--wmss-color-primary);
+    padding: 1rem;
+    overflow-y: auto;
+    font-size: 1rem;
+
+    .debug-header {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin: 2rem 0 1rem 0;
+        color: var(--wmss-color-primary);
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5rem;
+    }
+
+    .debug-footer {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--wmss-color-info);
+        margin-top: 2rem;
+        text-align: center;
+        border-top: 2px solid #ccc;
+        padding-top: 1rem;
+    }
+}
+
+#wmss-debug-messages p {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 0.26rem;
+}
+
+#wmss-debug-messages .info {
+    background-color: var(--wmss-color-info);
+    color: var(--wmss-color-primary);
+}
+
+#wmss-debug-messages .warning {
+    background-color: var(--wmss-color-warning);
+    color: var(--wmss-color-primary);
+}
+
+#wmss-debug-messages .error {
+    background-color: var(--wmss-color-error);
+    color: var(--wmss-color-primary);
+}
+
+#wmss-debug-messages .success {
+    background-color: var(--wmss-color-success);
+    color: var(--wmss-color-primary);
+}
+
+#wmss-clear-debug {
+    background-color: var(--wmss-color-bg-secondary);
+    color: var(--wmss-color-primary);
+    padding: 0.16rem 1.6rem;
+    border: none;
+    cursor: pointer;
+    margin-top: 1rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+}
+
+#wmss-clear-debug:hover {
+    background-color: var(--wmss-color-bg-secondary);
+    opacity: 0.8;
+}
