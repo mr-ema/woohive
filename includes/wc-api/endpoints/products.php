@@ -80,6 +80,16 @@ class Products {
     }
 
     /**
+     * Obtener un producto desde el sitio de WooCommerce por su ID.
+     *
+     * @param string $id El ID del producto.
+     * @return Response La respuesta de la API.
+     */
+    public function pull( $id ) {
+        return $this->client->get( "products/{$id}" );
+    }
+
+    /**
      * Obtener un producto desde el sitio de WooCommerce por su SKU.
      *
      * @param string $sku El SKU del producto.
