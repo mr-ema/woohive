@@ -77,6 +77,7 @@ class Init {
 
         self::load_class( 'includes/internal/crud/products.php' );
         self::load_class( 'includes/internal/crud/categories.php' );
+        self::load_class( 'includes/internal/crud/attributes.php' );
 
         if ( is_admin() ) {
             self::admin_includes();

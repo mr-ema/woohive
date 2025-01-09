@@ -3,6 +3,7 @@
 namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
+use WooHive\Internal\Crud\Attributes;
 
 use \WC_Product_Factory;
 use \WP_Error;
@@ -117,7 +118,7 @@ class Products {
         foreach ( $products as $product_data ) {
             if ( ! isset( $product_data['id'] ) || ! isset( $product_data['data'] ) ) {
                 $results[] = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
-                ++$error_count;
+                $error_count += 1;
                 continue;
             }
 
@@ -128,17 +129,16 @@ class Products {
 
             if ( is_wp_error( $result ) ) {
                 $results[ $product_id ] = $result;
-                ++$error_count;
+                $error_count += 1;
             } else {
                 $results[ $product_id ] = true;
-                ++$total_updates;
+                $total_updates += 1;
             }
         }
 
         // Sumary
         $results['error_count']    = $error_count;
         $results['total_updates']  = $total_updates;
-        $results['total_products'] = count( $products );
 
         return $results;
     }
@@ -176,6 +176,8 @@ class Products {
 
             $product->set_props($filtered_data);
             $product->save();
+
+            $unused = Attributes::create_or_update_batch( $product, $filtered_data['attributes'] );
 
             $product_id = $product->get_id();
             if (!empty($filtered_data['images'])) {
@@ -224,16 +226,15 @@ class Products {
 
             if ( is_wp_error( $result ) ) {
                 $results[] = $result;
-                ++$error_count;
+                $error_count += 1;
             } else {
                 $results[] = $result; // El ID del producto creado.
-                ++$total_creates;
+                $total_creates += 1;
             }
         }
 
         $results['error_count']   = $error_count;
         $results['total_creates'] = $total_creates;
-        $results['total_products'] = count( $products );
 
         return $results;
     }
@@ -272,16 +273,18 @@ class Products {
      *                        - 'data' (array): Los datos del producto a crear o actualizar.
      *
      * @return array Un array asociativo con resultados para cada producto y estadísticas generales:
-     *               - 'error_count' (int): Número de errores.
-     *               - 'total_creates' (int): Número de productos creados.
-     *               - 'total_updates' (int): Número de productos actualizados.
-     *               - 'total_products' (int): Total de productos procesados.
+     *               - 'error_count'        (int)
+     *               - 'total_updated'      (int)
+     *               - 'total_created'      (int)
+     *               - 'total_processed'    (int)
      */
     public static function create_or_update_batch( array $products ): array {
-        $results       = [];
-        $error_count   = 0;
-        $total_creates = 0;
-        $total_updates = 0;
+        $results = [];
+
+        $error_count     = 0;
+        $total_creates   = 0;
+        $total_updates   = 0;
+        $total_processed = 0;
 
         foreach ( $products as $product_data ) {
             $product_id = $product_data['id'] ?? null;
@@ -289,29 +292,31 @@ class Products {
 
             if ( ! $data ) {
                 $results[] = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
-                ++$error_count;
+                $error_count += 1;
                 continue;
             }
 
             $result = self::create_or_update( $product_id, $data );
 
             if ( is_wp_error( $result ) ) {
-                $results[] = $result;
-                ++$error_count;
+                $results[]    = $result;
+                $error_count += 1;
             } else {
                 $results[] = $result; // ID del producto creado o actualizado
                 if ( $product_id ) {
-                    ++$total_updates;
+                    $total_updates += 1;
                 } else {
-                    ++$total_creates;
+                    $total_creates   += 1;
                 }
+
+                $total_processed += 1;
             }
         }
 
-        $results['error_count']   = $error_count;
-        $results['total_creates'] = $total_creates;
-        $results['total_updates'] = $total_updates;
-        $results['total_products'] = count( $products );
+        $results['error_count']     = $error_count;
+        $results['total_creates']   = $total_creates;
+        $results['total_updates']   = $total_updates;
+        $results['total_processed'] = $total_processed;
 
         return $results;
     }

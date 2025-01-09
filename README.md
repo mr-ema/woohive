@@ -1,7 +1,3 @@
-¡Por supuesto! A continuación te proporciono un ejemplo de archivo `README.md` para tu plugin **WooHive**. Este archivo proporciona una guía completa sobre cómo instalar, configurar y utilizar el plugin.
-
----
-
 # WooHive - WooCommerce Multisite Synchronization Plugin
 
 WooHive es un plugin de WordPress para WooCommerce que permite la sincronización de productos y stock entre múltiples tiendas de WooCommerce utilizando la API de WooCommerce. Facilita la gestión de inventarios en entornos multisitio, asegurando que tus tiendas se mantengan actualizadas con la misma información de productos.
@@ -101,23 +97,6 @@ Puedes personalizar el comportamiento de WooHive modificando los siguientes par�
 
 - **Configuración de la API de WooCommerce**: Modifica los detalles de la API para cada tienda desde la sección **WooHive > Configuración**.
 - **Filtros de Productos**: Personaliza los filtros de búsqueda según tus necesidades en la página de reportes.
-
----
-
-## Hooks y Filtros
-
-WooHive incluye varios hooks y filtros que puedes usar para personalizar la funcionalidad del plugin según tus necesidades.
-
-### Ejemplo: Filtrar productos antes de la sincronización
-
-```php
-add_filter('woohive_filter_products', 'custom_filter_products', 10, 2);
-
-function custom_filter_products($products, $site) {
-    // Personaliza los productos antes de sincronizarlos
-    return $products;
-}
-```
 
 ---
 
