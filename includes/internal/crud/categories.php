@@ -41,29 +41,52 @@ class Categories {
     }
 
     /**
-     * Asocia o actualiza las categorías de un producto.
+     * Asocia categorías existentes a un producto usando nombre o slug (sin crear nuevas categorías).
      *
      * @param WC_Product $product El objeto del producto.
-     * @param array $categories Datos de las categorías a asociar o actualizar.
+     * @param array $categories Datos de las categorías a asociar (pueden ser nombres o slugs).
      *
      * @return bool|WP_Error Devuelve true en caso de éxito o WP_Error en caso de fallo.
      */
     public static function assign_categories( WC_Product $product, array $categories ): bool|WP_Error {
-        // Validar datos de categorías.
         if ( empty( $categories ) ) {
             return new WP_Error( 'invalid_data', __( 'Las categorías no pueden estar vacías.', Constants::TEXT_DOMAIN ) );
         }
 
-        // Limpiar los datos antes de insertarlos.
         $filtered_categories = array_map( 'sanitize_text_field', $categories );
 
-        // Asociar las categorías al producto.
-        $product->set_category_ids( $filtered_categories );
+        $category_ids = [];
+        foreach ( $categories as $category ) {
+            $category_name = (function() use ( $category) {
+                if ( isset( $category['name'] ) ) {
+                    return sanitize_text_field( $category['name'] );
+                } else if ( isset( $category['slug'] ) ) {
+                    return sanitize_text_field( $category['slug'] );
+                }
 
-        // Guardar el producto con las categorías asignadas.
-        $result = $product->save();
+                return  '';
+            })();
 
-        return $result ? true : new WP_Error( 'category_error', __( 'Error al asignar categorías al producto.', Constants::TEXT_DOMAIN ) );
+            if ( $category_name ) {
+                $term = term_exists( $category_name, 'product_cat' );
+                if ( $term && ! is_wp_error( $term ) ) {
+                    $category_ids[] = $term['term_id'];
+                }
+            }
+        }
+
+        if ( empty( $category_ids ) ) {
+            return new WP_Error( 'invalid_categories', __( 'No se encontraron categorías válidas.', Constants::TEXT_DOMAIN ) );
+        }
+
+        $product->set_category_ids( $category_ids );
+        try {
+            $product->save();
+        } catch ( Exception $e ) {
+            return new WP_Error( 'category_error', __( 'Error al guardar las categorías en el producto.', Constants::TEXT_DOMAIN ) );
+        }
+
+        return true;
     }
 
     /**
@@ -129,6 +152,43 @@ class Categories {
         }
 
         return self::create( $filtered_data );
+    }
+
+    /**
+     * Crea múltiples categorías en un solo lote.
+     *
+     * @param array $categories Lista de datos para crear las categorías.
+     *
+     * @return array Resultado para cada categoría y estadísticas generales.
+     *               - 'error_count'        (int)
+     *               - 'total_created'      (int)
+     *               - 'total_processed'    (int)
+     */
+    public static function create_batch( array $categories ): array {
+        $results = array();
+        $error_count = 0;
+        $total_processed = 0;
+        $total_created = 0;
+
+        foreach ( $categories as $data ) {
+            $result = self::create( $data );
+
+            if ( is_wp_error( $result ) ) {
+                $results[] = $result;
+                $error_count += 1;
+            } else {
+                $results[] = $result;
+                $total_processed += 1;
+                $total_created += 1;
+            }
+        }
+
+        // Resumen de las estadísticas
+        $results['error_count'] = $error_count;
+        $results['total_processed'] = $total_processed;
+        $results['total_created'] = $total_created;
+
+        return $results;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
 use WooHive\Internal\Crud\Attributes;
+use WooHive\Internal\Crud\Categories;
 
 use \WC_Product_Factory;
 use \WP_Error;
@@ -70,6 +71,9 @@ class Products {
         try {
             $product->set_props( $filtered_data );
             $product->save();
+
+            $unused = Attributes::create_or_update_batch( $product, $filtered_data['attributes'] );
+            $unused = Categories::assign_categories( $product, $filtered_data['categories'] );
 
             // Manejo de imágenes si están presentes en los datos
             if ( isset( $filtered_data['images'] ) && is_array( $filtered_data['images'] ) ) {
@@ -178,6 +182,7 @@ class Products {
             $product->save();
 
             $unused = Attributes::create_or_update_batch( $product, $filtered_data['attributes'] );
+            $unused = Categories::assign_categories( $product, $filtered_data['categories'] );
 
             $product_id = $product->get_id();
             if (!empty($filtered_data['images'])) {

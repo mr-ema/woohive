@@ -74,6 +74,7 @@ class Init {
         self::load_class( 'includes/wc-api/check-api.php' );
         self::load_class( 'includes/wc-api/client.php' );
         self::load_class( 'includes/wc-api/endpoints/products.php' );
+        self::load_class( 'includes/wc-api/endpoints/product_categories.php' );
 
         self::load_class( 'includes/internal/crud/products.php' );
         self::load_class( 'includes/internal/crud/categories.php' );

@@ -2,6 +2,7 @@
 
 namespace WooHive\WCApi;
 
+use WooHive\WCApi\Endpoints\Product_Categories;
 use WooHive\WCApi\Endpoints\Products;
 
 
@@ -20,14 +21,14 @@ class Client {
     /** @var Products */
     public Products $products;
 
-    /** @var Client_Products_Categories */
-    public $products_categories;
+    /** @var Product_Categories */
+    public Product_Categories $product_categories;
 
     /** @var Client_Products_Attributes */
-    public $products_attributes;
+    //public $products_attributes;
 
     /** @var Client_Products_Variations */
-    public $products_variations;
+    //public $products_variations;
 
     /**
      * Constructor para inicializar el cliente de la API.
@@ -43,8 +44,8 @@ class Client {
             'Content-Type'  => 'application/json',
         );
 
-        $this->products = new Products( $this );
-        // $this->products_categories = new Client_Products_Categories( $this );
+        $this->products           = new Products( $this );
+        $this->product_categories = new Product_Categories( $this );
         // $this->products_attributes = new Client_Products_Attributes( $this );
         // $this->products_variations = new Client_Products_Variations( $this );
     }

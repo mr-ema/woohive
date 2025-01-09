@@ -202,7 +202,7 @@ class Admin_Page {
         }
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-        $res    = $client->get( "products/{$product_id}" );
+        $res    = $client->products->pull( $product_id );
         if ( $res->has_error() || empty( $res->body() ) ) {
             wp_send_json_error( __(
                 'El producto especificado no pudo ser localizado. Por favor verifica el ID del producto e intenta nuevamente.',
@@ -211,6 +211,16 @@ class Admin_Page {
         }
 
         $product = $res->body();
+        if ( ! empty( $product['categories'] ) ) {
+            $ids = array_column( $product['categories'], 'id' );
+
+            $categories_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
+            if ( ! $categories_res->has_error() ) {
+                $categories = $categories_res->body();
+                $unused = Crud\Categories::create_batch( $categories );
+            }
+        }
+
         $created_product = Crud\Products::create_or_update( null, $product );
         if ( is_wp_error( $created_product ) ) {
             wp_send_json_error( json_encode( $created_product ) );
