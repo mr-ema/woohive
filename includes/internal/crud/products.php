@@ -366,7 +366,7 @@ class Products {
     public static function search_image(string $image_url, ?string $external_id = null): ?int {
         $image_id = attachment_url_to_postid($image_url);
         if (!$image_id && $external_id) {
-            $image_id = self::search_by_external_id($external_id);
+            $image_id = self::search_image_by_external_id($external_id);
         }
 
         return $image_id;
@@ -379,7 +379,7 @@ class Products {
      *
      * @return int|null El ID de la imagen si existe, o null si no se encuentra.
      */
-    private static function search_by_external_id(string $external_id): ?int {
+    private static function search_image_by_external_id(string $external_id): ?int {
         $args = array(
             'post_type'  => 'attachment',
             'meta_key'   => '_external_image_id',
