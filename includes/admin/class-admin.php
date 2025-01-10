@@ -214,16 +214,27 @@ class Admin_Page {
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
 
-            $categories_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
-            if ( ! $categories_res->has_error() ) {
-                $categories = $categories_res->body();
-                $unused = Crud\Categories::create_batch( $categories );
+            $variations_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
+            if ( ! $variations_res->has_error() ) {
+                $variations = $variations_res->body();
+                $unused = Crud\Categories::create_batch( $variations );
             }
         }
 
-        $created_product = Crud\Products::create_or_update( null, $product );
-        if ( is_wp_error( $created_product ) ) {
-            wp_send_json_error( json_encode( $created_product ) );
+        $new_product_id = Crud\Products::create_or_update( null, $product );
+        if ( is_wp_error( $new_product_id ) ) {
+            wp_send_json_error( json_encode( $new_product_id ) );
+        }
+
+        if ( $new_product_id && ! empty( $product['variations'] ) ) {
+            $ids = $product['variations'];
+
+            $variations_res = $client->product_variations->pull_all( $product['id'], [ 'include' => implode( ',', $ids ) ] );
+            if ( ! $variations_res->has_error() ) {
+                $variations = $variations_res->body();
+                $unused = Crud\Variations::create_or_update_batch( $new_product_id, $variations );
+                wp_send_json_error($unused);
+            }
         }
 
         wp_send_json_success( __( 'El producto fue importado exitosamente.', Constants::TEXT_DOMAIN ) );

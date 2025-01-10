@@ -47,6 +47,48 @@ class Attributes {
     }
 
     /**
+     * Obtiene y filtra los atributos de un producto según los criterios especificados.
+     *
+     * @param WC_Product $product El objeto del producto.
+     * @param array $filters (Opcional) Criterios para filtrar los atributos.
+     *                       Ejemplo: ['visible' => true, 'variation' => false].
+     *
+     * @return array Lista de atributos filtrados.
+     */
+    public static function get_filtered_attributes( WC_Product $product, array $filters = [] ): array {
+        $attributes = $product->get_attributes();
+        $filtered_attributes = [];
+
+        foreach ( $attributes as $key => $attribute ) {
+            if ( ! $attribute instanceof WC_Product_Attribute ) {
+                continue;
+            }
+
+            $attribute_data = [
+                'id'        => $attribute->get_id(),
+                'name'      => $attribute->get_name(),
+                'options'   => $attribute->get_options(),
+                'visible'   => $attribute->get_visible(),
+                'variation' => $attribute->get_variation(),
+            ];
+
+            $matches_filters = true;
+            foreach ( $filters as $filter_key => $filter_value ) {
+                if ( isset( $attribute_data[ $filter_key ] ) && $attribute_data[ $filter_key ] !== $filter_value ) {
+                    $matches_filters = false;
+                    break;
+                }
+            }
+
+            if ( $matches_filters && ! empty( $attribute_data ) ) {
+                $filtered_attributes[ $key ] = $attribute_data;
+            }
+        }
+
+        return $filtered_attributes;
+    }
+
+    /**
      * Actualiza un atributo de producto (puede ser de taxonomía o personalizado).
      *
      * @param WC_Product $product El objeto del producto.
