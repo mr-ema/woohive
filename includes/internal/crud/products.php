@@ -389,8 +389,7 @@ class Products {
 
         $query = new WP_Query($args);
         if ($query->have_posts()) {
-            $post = $query->posts[0];
-            return $post->ID;
+            return $query->posts[0]->ID;
         }
 
         return null; // No se encontró ninguna imagen con el ID externo
