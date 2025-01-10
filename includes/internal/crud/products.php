@@ -79,18 +79,18 @@ class Products {
             if ( isset( $filtered_data['images'] ) && is_array( $filtered_data['images'] ) ) {
                 $image_ids = [];
 
-                foreach ( $filtered_data['images'] as $index => $image_data ) {
+                foreach ($filtered_data['images'] as $index => $image_data) {
                     $image_url = $image_data['src'];
-                    $external_id = $image_data['id'] ?? null;
+                    $external_id = $image_data['id'];
 
-                    $uploaded_images = self::upload_image( $image_url, $product_id, $external_id );
-                    if ( is_wp_error( $uploaded_images ) ) {
+                    $uploaded_image = self::upload_image($image_url, $product_id, $external_id);
+                    if ( is_wp_error( $uploaded_image ) ) {
                         continue;
                     }
 
-                    $image_ids = array_merge( $image_ids, $uploaded_images );
-                    if ( $index === 0 && ! empty( $uploaded_images[0] ) ) {
-                        set_post_thumbnail( $product_id, $uploaded_images[0] );
+                    $image_ids[] = $uploaded_image;
+                    if ( $index === 0 && $uploaded_image ) {
+                        set_post_thumbnail($product_id, $uploaded_image);
                     }
                 }
 
@@ -195,21 +195,21 @@ class Products {
                 $image_ids = [];
 
                 foreach ($filtered_data['images'] as $index => $image_data) {
-                    $image_url = $image_data['src']; // URL de la imagen
-                    $external_id = $image_data['id']; // ID externo de la imagen
+                    $image_url = $image_data['src'];
+                    $external_id = $image_data['id'];
 
-                    $uploaded_images = self::upload_image($image_url, $product_id, $external_id);
-                    if (is_wp_error($uploaded_images)) {
+                    $uploaded_image = self::upload_image($image_url, $product_id, $external_id);
+                    if ( is_wp_error( $uploaded_image ) ) {
                         continue;
                     }
 
-                    $image_ids = array_merge($image_ids, $uploaded_images);
-                    if ($index === 0 && !empty($uploaded_images[0])) {
-                        set_post_thumbnail($product_id, $uploaded_images[0]);
+                    $image_ids[] = $uploaded_image;
+                    if ( $index === 0 && $uploaded_image ) {
+                        set_post_thumbnail($product_id, $uploaded_image);
                     }
                 }
 
-                if (!empty($image_ids)) {
+                if ( ! empty( $image_ids ) ) {
                     update_post_meta($product_id, '_product_image_gallery', implode(',', $image_ids));
                 }
             }
@@ -345,26 +345,24 @@ class Products {
      * @param int $product_id ID del producto de WooCommerce al que se asociará la imagen.
      * @param string|null $external_id ID externo (opcional), para evitar duplicados.
      *
-     * @return WP_Error|array Array de IDs de imágenes que se han agregado a la galería del producto o un objeto WP_Error si ocurre un error.
+     * @return WP_Error|int ID de la imágen agregada a la galería del producto o un objeto WP_Error si ocurre un error.
      */
     public static function upload_image(string $image_url, int $product_id, ?string $external_id = null) {
         $image_id = self::search_image($image_url, $external_id);
-        if ($image_id) {
-            return [ $image_id ];
+        if ( $image_id ) {
+            return $image_id;
         }
 
-        $galeria = [];
         $image_id = media_sideload_image($image_url, $product_id, null, 'id');
         if (is_wp_error($image_id)) {
             return new WP_Error('upload_error', 'Error al subir la imagen: ' . $image_id->get_error_message());
         }
 
-        $galeria[] = $image_id;
         if ($external_id) {
             update_post_meta($image_id, '_external_image_id', $external_id);
         }
 
-        return $galeria;
+        return $image_id;
     }
 
     /**
@@ -377,6 +375,7 @@ class Products {
      */
     public static function search_image(string $image_url, ?string $external_id = null): ?int {
         $image_id = attachment_url_to_postid($image_url);
+
         if (!$image_id && $external_id) {
             $image_id = self::search_image_by_external_id($external_id);
         }
@@ -399,11 +398,11 @@ class Products {
             'posts_per_page' => 1,
         );
 
-        $query = new WP_Query($args);
-        if ($query->have_posts()) {
-            return $query->posts[0]->ID;
+        $images = get_posts($args);
+        if ( ! empty( $images ) ) {
+            return $images[0]->ID;
         }
 
-        return null; // No se encontró ninguna imagen con el ID externo
+        return null;
     }
 }

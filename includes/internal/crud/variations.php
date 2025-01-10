@@ -83,7 +83,8 @@ class Variations {
         }
 
         if ( ! empty( $data['image'] ) ) {
-            $image_result = self::search_image($data['image']['src'], $data['image']['id']);
+            $external_id = $data['image']['id'];
+            $image_result = self::search_image($data['image']['src'], $external_id);
             if ( $image_result ) {
                 $variation->set_image_id($image_result);
             }
@@ -346,43 +347,16 @@ class Variations {
     }
 
     /**
-     * Subir una imagen a la biblioteca de medios de WordPress y asociarla a un producto de WooCommerce.
+     * Buscar una imagen en la biblioteca de medios de WordPress por su URL o por un ID externo.
      *
-     * @param string $image_url URL de la imagen a subir.
-     * @param int $product_id ID del producto de WooCommerce al que se asociará la imagen.
-     * @param string|null $external_id ID externo para evitar duplicados.
-     *
-     * @return WP_Error|array Array con el ID de la imagen o un WP_Error en caso de error.
-     */
-    public static function upload_image(string $image_url, int $product_id, ?string $external_id = null): WP_Error|array {
-        $image_id = self::search_image($image_url, $external_id);
-        if ($image_id) {
-            return [$image_id];
-        }
-
-        $image_id = media_sideload_image($image_url, $product_id, null, 'id');
-        if (is_wp_error($image_id)) {
-            return new WP_Error('upload_error', 'Error al subir la imagen: ' . $image_id->get_error_message());
-        }
-
-        if ($external_id) {
-            update_post_meta($image_id, '_external_image_id', $external_id);
-        }
-
-        return [$image_id];
-    }
-
-    /**
-     * Buscar una imagen en la biblioteca de medios de WordPress por su URL o ID externo.
-     *
-     * @param string $image_url URL de la imagen.
+     * @param string $image_url URL de la imagen a buscar.
      * @param string|null $external_id ID externo opcional.
      *
      * @return int|null El ID de la imagen si existe, o null si no se encuentra.
      */
     public static function search_image(string $image_url, ?string $external_id = null): ?int {
         $image_id = attachment_url_to_postid($image_url);
-        if ( ! $image_id && $external_id ) {
+        if (!$image_id && $external_id) {
             $image_id = self::search_image_by_external_id($external_id);
         }
 
@@ -392,21 +366,21 @@ class Variations {
     /**
      * Buscar una imagen en la biblioteca de medios por su ID externo.
      *
-     * @param string $external_id ID externo.
+     * @param string $external_id ID externo
      *
      * @return int|null El ID de la imagen si existe, o null si no se encuentra.
      */
     private static function search_image_by_external_id(string $external_id): ?int {
-        $args = [
-            'post_type' => 'attachment',
-            'meta_key' => '_external_image_id',
+        $args = array(
+            'post_type'  => 'attachment',
+            'meta_key'   => '_external_image_id',
             'meta_value' => $external_id,
             'posts_per_page' => 1,
-        ];
+        );
 
-        $query = new WP_Query( $args );
-        if ($query->have_posts()) {
-            return $query->posts[0]->ID;
+        $images = get_posts($args);
+        if ( ! empty( $images ) ) {
+            return $images[0]->ID;
         }
 
         return null;
