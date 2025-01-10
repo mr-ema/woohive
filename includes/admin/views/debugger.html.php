@@ -1,7 +1,9 @@
-<?php use WooHive\Config\Constants; ?>
+<?php
+
+use WooHive\Config\Constants; ?>
 
 <div id="wmss-debug-window" style="margin: 2rem 0;">
-    <h2 style="margin-bottom: 2rem;"><?php esc_html_e( 'Ventana de Depuración', Constants::TEXT_DOMAIN ); ?></h2>
+    <h2 style="margin-bottom: 2rem;"><?php esc_html_e('Ventana de Depuración', Constants::TEXT_DOMAIN); ?></h2>
     <div>
         <div id="wmss-debug-messages" class="wmss-debug-messages"></div>
         <button id="wmss-clear-debug" class="wmss-clear-debug button button-primary">Clear Debug</button>
@@ -58,13 +60,30 @@
                     break;
             }
 
-            const messageElement = document.createElement('p');
+            const messageElement = document.createElement('pre'); // Change to pre-formatted text element
             messageElement.classList.add(messageClass);
-            messageElement.textContent = message;
+
+            // Check if the message is an object or JSON and format it
+            if (typeof message === 'object') {
+                messageElement.textContent = this.formatJSON(message);
+            } else {
+                messageElement.textContent = message;
+            }
+
             this.messagesContainer.appendChild(messageElement);
 
             // Scroll to the bottom of the messages container
             this.debugWindow.scrollTop = this.debugWindow.scrollHeight;
+        }
+
+        static formatJSON(data) {
+            try {
+                // Format the JSON with indentation and line breaks for readability
+                return JSON.stringify(data, null, 2);
+            } catch (e) {
+                // In case there's an error (e.g. circular references), return the error message
+                return `Error formatting JSON: ${e.message}`;
+            }
         }
 
         static appendHeader(headerText) {
