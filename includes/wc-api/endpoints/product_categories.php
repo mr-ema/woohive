@@ -3,6 +3,7 @@
 namespace WooHive\WCApi\Endpoints;
 
 use WooHive\WCApi\Response;
+use WooHive\WCApi\Client;
 
 
 /** Evitar el acceso directo */
@@ -12,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Product_Categories {
 
-    private $client;
+    private Client $client;
 
     /**
      * Constructor para la clase de categorías de productos.
