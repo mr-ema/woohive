@@ -3,7 +3,6 @@
 namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
-use WooHive\Internal\Crud\Attributes;
 
 use \WP_Error;
 use \WC_Product_Variation;
@@ -30,6 +29,7 @@ class Variations {
             'id',
             'date_created',
             'date_modified',
+            'date_created_gmt',
             'permalink',
             'average_rating',
             'rating_count',
@@ -46,6 +46,57 @@ class Variations {
     }
 
     /**
+     * Configura múltiples propiedades para una variación de producto.
+     *
+     * Este método permite establecer diversas propiedades de un producto
+     * de variación en función de los datos proporcionados. Es útil para
+     * actualizar múltiples atributos de forma eficiente.
+     *
+     * @param WC_Product_Variation $variation La instancia de la variación del producto.
+     * @param array $data Un array asociativo con las propiedades a configurar.
+     *
+     * @return void
+     */
+    public static function set_props(WC_Product_Variation $variation, $data) {
+        $valid_set_props = [ 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight', 'sku' ];
+        $filtered_data = array_intersect_key($data, array_flip($valid_set_props));
+        $variation->set_props( $filtered_data );
+
+        if ( ! empty( $data['dimensions'] ) ) {
+            $variation->set_length( $data['dimensions']['length'] ?? 0 );
+            $variation->set_width(  $data['dimensions']['width']  ?? 0 );
+            $variation->set_height( $data['dimensions']['height'] ?? 0 );
+        }
+
+        // FIXME: La descripcion contiene html y el set description lo esta pasando como plain text
+        if ( ! empty( $data['description'] ) ) {
+            $variation->set_description( $data['description'] );
+        }
+
+        if ( ! empty( $data['attributes'] ) ) {
+            $attributes_map = array_reduce($data['attributes'], function($carry, $attribute) {
+                $carry[$attribute['name']] = $attribute['option'];
+                return $carry;
+            }, []);
+
+            $variation->set_attributes( $attributes_map );
+        }
+
+        if ( ! empty( $data['image'] ) ) {
+            $image_result = self::search_image($data['image']['src'], $data['image']['id']);
+            if ( $image_result ) {
+                $variation->set_image_id($image_result);
+            }
+        }
+
+        if ( ! empty( $data['meta_data'] ) ) {
+            foreach( $data['meta_data'] as $meta_data => $meta_key ) {
+                $variation->add_meta_data( $meta_key, $meta_data, true );
+            }
+        }
+    }
+
+    /**
      * Crea una nueva variación para un producto.
      *
      * @param WC_Product $wc_product Objeto del producto al que pertenece la variación.
@@ -53,39 +104,17 @@ class Variations {
      *
      * @return int|WP_Error Retorna el ID de la variación creada o un error en caso de fallo.
      */
-    public static function create(WC_Product $wc_product, array $data): int|WP_Error {
+    public static function create(WC_Product $wc_product, array $filtered_data): int|WP_Error {
         if ( ! $wc_product ) {
             return new WP_Error('invalid_product', __( 'El producto no existe o es inválido.', Constants::TEXT_DOMAIN ));
         }
 
         try {
-            $data = self::clean_data($data);
+            $filtered_data = self::clean_data($filtered_data);
             $variation = new WC_Product_Variation();
             $variation->set_parent_id( $wc_product->get_id() );
 
-            //if ( ! empty( $data['sku'] ) )            $variation->set_sku($data['sku']);
-            if ( ! empty( $data['regular_price'] ) )  $variation->set_regular_price($data['regular_price']);
-            if ( ! empty( $data['sale_price'] ) )     $variation->set_sale_price($data['sale_price']);
-            if ( ! empty( $data['stock_quantity'] ) ) $variation->set_stock_quantity($data['stock_quantity']);
-            if ( ! empty( $data['manage_stock'] ) )   $variation->set_manage_stock($data['manage_stock']);
-            if ( ! empty( $data['status'] ) )         $variation->set_status($data['status']);
-
-            if ( ! empty( $data['attributes'] ) ) {
-                $attributes_map = array_reduce($data['attributes'], function($carry, $attribute) {
-                    $carry[$attribute['name']] = $attribute['option'];
-                    return $carry;
-                }, []);
-
-                $variation->set_attributes( $attributes_map );
-            }
-
-            if ( ! empty( $data['image'] ) ) {
-                $image_result = self::search_image($data['image']['src'], $data['image']['id']);
-                if ( $image_result ) {
-                    $variation->set_image_id($image_result);
-                }
-            }
-
+            self::set_props( $variation, $filtered_data );
             $variation->save();
 
             return $variation->get_id();
@@ -102,37 +131,15 @@ class Variations {
      *
      * @return int|WP_Error Retorna el ID de la variación actualizada o un error en caso de fallo.
      */
-    public static function update(WC_Product_Variation $variation, array $data): int|WP_Error {
+    public static function update(WC_Product_Variation $variation, array $filtered_data): int|WP_Error {
         if ( ! $variation || $variation->get_type() !== 'variation' ) {
             return new WP_Error('invalid_variation', __('La variación no existe o es inválida.', Constants::TEXT_DOMAIN));
         }
 
         try {
-            $data = self::clean_data($data);
+            $filtered_data = self::clean_data($filtered_data);
 
-//            if ( ! empty( $data['sku'] ) )            $variation->set_sku($data['sku']);
-            if ( ! empty( $data['regular_price'] ) )  $variation->set_regular_price($data['regular_price']);
-            if ( ! empty( $data['sale_price'] ) )     $variation->set_sale_price($data['sale_price']);
-            if ( ! empty( $data['stock_quantity'] ) ) $variation->set_stock_quantity($data['stock_quantity']);
-            if ( ! empty( $data['manage_stock'] ) )   $variation->set_manage_stock($data['manage_stock']);
-            if ( ! empty( $data['status'] ) )         $variation->set_status($data['status']);
-
-            if ( ! empty( $data['attributes'] ) ) {
-                $attributes_map = array_reduce($data['attributes'], function($carry, $attribute) {
-                    $carry[$attribute['name']] = $attribute['option'];
-                    return $carry;
-                }, []);
-
-                $variation->set_attributes( $attributes_map );
-            }
-
-            if ( ! empty( $data['image'] ) ) {
-                $image_result = self::search_image($data['image']['src'], $data['image']['id']);
-                if ( $image_result ) {
-                    $variation->set_image_id($image_result);
-                }
-            }
-
+            self::set_props( $variation, $filtered_data );
             $variation->save();
 
             return $variation->get_id();
@@ -149,8 +156,8 @@ class Variations {
      * @return int|WP_Error El ID de la variación creada o actualizada o un WP_Error en caso de error.
      */
     public static function create_or_update(WC_Product $wc_product, array $data): int|WP_Error {
-        $variation = self::get_existing_variation($wc_product, $data);
-        if ($variation) {
+        $variation = self::get_existing_variation( $wc_product, $data );
+        if ( $variation ) {
             return self::update($variation, $data);
         }
 
@@ -209,18 +216,18 @@ class Variations {
         }
 
         $sku = $data['sku'] ?? null;
+        $parent_sku = $wc_product->get_sku();
         $attributes = $data['attributes'] ?? [];
 
         $variations = $wc_product->get_children();
         foreach ($variations as $variation_id) {
             $variation = wc_get_product($variation_id);
-
-            if ($sku && $variation->get_sku() === $sku) {
+            if ( $sku && $variation->get_sku() === $sku ) {
                 return $variation;
             }
 
             $existing_attributes = $variation->get_attributes();
-            if (self::match_attributes($existing_attributes, $attributes)) {
+            if ( self::match_attributes($existing_attributes, $attributes) ) {
                 return $variation;
             }
         }

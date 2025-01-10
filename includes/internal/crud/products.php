@@ -58,8 +58,8 @@ class Products {
      * @return bool|WP_Error Devuelve true si la actualización fue exitosa o un WP_Error en caso de fallo.
      */
     public static function update( int $product_id, array $data ): WP_Error|true {
-        $product = wc_get_product( $product_id );
-        if ( ! $product ) {
+        $wc_product = wc_get_product( $product_id );
+        if ( ! $wc_product ) {
             return new WP_Error( 'product_not_found', __( "El producto con ID $product_id no existe.", Constants::TEXT_DOMAIN ) );
         }
 
@@ -69,11 +69,11 @@ class Products {
         }
 
         try {
-            $product->set_props( $filtered_data );
-            $product->save();
+            $wc_product->set_props( $filtered_data );
+            $wc_product->save();
 
-            $unused = Attributes::create_or_update_batch( $product, $filtered_data['attributes'] );
-            $unused = Categories::assign_categories( $product, $filtered_data['categories'] );
+            $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
+            $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
 
             // Manejo de imágenes si están presentes en los datos
             if ( isset( $filtered_data['images'] ) && is_array( $filtered_data['images'] ) ) {
@@ -96,6 +96,12 @@ class Products {
 
                 if ( ! empty( $image_ids ) ) {
                     update_post_meta( $product_id, '_product_image_gallery', implode( ',', $image_ids ) );
+                }
+            }
+
+            if ( $filtered_data['meta_data'] ) {
+                foreach( $filtered_data['meta_data'] as $meta_data => $meta_key ) {
+                    $wc_product->update_meta_data( $meta_key, $meta_data );
                 }
             }
 
@@ -176,15 +182,15 @@ class Products {
             unset($filtered_data['type']);
 
             $product_class = WC_Product_Factory::get_product_classname(0, $product_type);
-            $product = new $product_class();
+            $wc_product = new $product_class();
 
-            $product->set_props($filtered_data);
-            $product->save();
+            $wc_product->set_props($filtered_data);
+            $wc_product->save();
 
-            $unused = Attributes::create_or_update_batch( $product, $filtered_data['attributes'] );
-            $unused = Categories::assign_categories( $product, $filtered_data['categories'] );
+            $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
+            $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
 
-            $product_id = $product->get_id();
+            $product_id = $wc_product->get_id();
             if (!empty($filtered_data['images'])) {
                 $image_ids = [];
 
@@ -205,6 +211,12 @@ class Products {
 
                 if (!empty($image_ids)) {
                     update_post_meta($product_id, '_product_image_gallery', implode(',', $image_ids));
+                }
+            }
+
+            if ( $filtered_data['meta_data'] ) {
+                foreach( $filtered_data['meta_data'] as $meta_data => $meta_key ) {
+                    $wc_product->add_meta_data( $meta_key, $meta_data, true );
                 }
             }
 
