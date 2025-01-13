@@ -291,6 +291,21 @@ class Admin_Page {
             ], 422);
         }
 
+        foreach ( $filtered_products as $product ) {
+            if ( $product && ! empty( $product['variations'] ) ) {
+                $ids = $product['variations'];
+                $product_id = wc_get_product_id_by_sku($product['sku']);
+
+                if ( ! $product_id || empty( $ids ) ) continue;
+
+                $variations_res = $client->product_variations->pull_all( $product['id'], [ 'include' => implode( ',', $ids ) ] );
+                if ( ! $variations_res->has_error() ) {
+                    $variations = $variations_res->body();
+                    $unused = Crud\Variations::create_or_update_batch( $product_id, $variations );
+                }
+            }
+        }
+
         wp_send_json([
             'status'    => 'processed',
             'total'     => $total,
