@@ -380,7 +380,11 @@ class Variations {
 
         $images = get_posts($args);
         if ( ! empty( $images ) ) {
-            return $images[0]->ID;
+            $image_id = $images[0]->ID;
+            $file_path = get_attached_file($image_id);
+            if ( file_exists($file_path) ) {
+                return $image_id;
+            }
         }
 
         return null;
