@@ -8,7 +8,6 @@ use WooHive\Internal\Crud\Categories;
 
 use \WC_Product_Factory;
 use \WP_Error;
-use \WP_Query;
 
 
 /** Prevenir el acceso directo al script. */

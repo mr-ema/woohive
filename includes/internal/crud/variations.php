@@ -6,7 +6,6 @@ use WooHive\Config\Constants;
 
 use \WP_Error;
 use \WC_Product_Variation;
-use \WP_Query;
 use \WC_Product;
 
 
@@ -68,7 +67,6 @@ class Variations {
             $variation->set_height( $data['dimensions']['height'] ?? 0 );
         }
 
-        // FIXME: La descripcion contiene html y el set description lo esta pasando como plain text
         if ( ! empty( $data['description'] ) ) {
             $variation->set_description( $data['description'] );
         }
