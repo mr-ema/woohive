@@ -10,5 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class Tools {
 
-    public static function import_products() {}
+    public static function import_product(array $product_data) {
+    }
+
+    public static function massive_product_import(array $product_data) {
+    }
 }

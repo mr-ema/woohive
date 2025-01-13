@@ -39,8 +39,8 @@ class Ui_Page {
         $action = isset( $_GET['action'] ) ? $_GET['action'] : '';
 
         switch ( $action ) {
-            case 'update_all':
-                return self::update_all_page();
+            case 'massive_import':
+                return self::massive_import_page();
             case 'push_all':
                 return self::push_all_page();
             case 'tools':
@@ -59,10 +59,10 @@ class Ui_Page {
      */
     private static function urls(): array {
         return array(
-            'update_all'   => add_query_arg(
+            'massive_import'   => add_query_arg(
                 array(
                     'page'   => Constants::PLUGIN_URL_SLUG . '-report',
-                    'action' => 'update_all',
+                    'action' => 'massive_import',
                 ),
                 admin_url( 'admin.php' )
             ),
@@ -123,12 +123,12 @@ class Ui_Page {
         return $tabs;
     }
 
-    public static function update_all_page(): void {
+    public static function massive_import_page(): void {
         $tabs                    = self::tabs();
         $urls                    = self::urls();
         $tabs['tools']['active'] = true;
 
-        include __DIR__ . '/views/update-all.html.php';
+        include __DIR__ . '/views/massive-import.html.php';
     }
 
     public static function push_all_page(): void {

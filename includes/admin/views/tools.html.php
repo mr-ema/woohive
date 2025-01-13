@@ -25,16 +25,14 @@
                     </div>
                 </div>
                 <div class="tool">
-                    <div class="title"><?php _e( 'Actualizar inventario principal', Constants::TEXT_DOMAIN ); ?></div>
-                    <div class="desc"><?php _e( 'Actualiza el inventario principal, sincronizando desde los inventarios segundarios.', Constants::TEXT_DOMAIN ); ?></div>
+                    <div class="title"><?php _e( 'Importacion masiva de productos', Constants::TEXT_DOMAIN ); ?></div>
+                    <div class="desc"><?php _e( 'Importa productos masivamente, importando desde los inventarios segundarios.', Constants::TEXT_DOMAIN ); ?></div>
                     <div class="action">
-                        <a href="<?php echo $urls['update_all']; ?>" class="button button-primary"><?php _e( 'Actualizar', Constants::TEXT_DOMAIN ); ?></a>
+                        <a href="<?php echo $urls['massive_import']; ?>" class="button button-primary"><?php _e( 'Importar', Constants::TEXT_DOMAIN ); ?></a>
                     </div>
                 </div>
             </div>
         </div>
-
-        <?php require 'debugger.html.php'; ?>
 
     <?php } else { ?>
         <p><?php printf( __( 'Please view report in <a href="%s" target="_blank">the Primary Inventory site.</a>', ), Helpers::primary_report_url() ); ?></p>
