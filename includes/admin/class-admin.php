@@ -233,7 +233,6 @@ class Admin_Page {
             if ( ! $variations_res->has_error() ) {
                 $variations = $variations_res->body();
                 $unused = Crud\Variations::create_or_update_batch( $new_product_id, $variations );
-                wp_send_json_error($unused);
             }
         }
 
