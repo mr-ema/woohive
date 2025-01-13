@@ -211,6 +211,10 @@ class Admin_Page {
         }
 
         $product = $res->body();
+        if ( empty( $product['sku'] ) ) {
+            wp_send_json_error( __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN) );
+        }
+
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
 
@@ -272,11 +276,14 @@ class Admin_Page {
             ], 422);
         }
 
-        $results        = $response->body();
+
+        $results            = $response->body();
+        $filtered_products  = array_values(array_filter($results, fn($product) => !empty($product['sku'])));
+
         $total          = $response->headers()['x-wp-total'] ?? 0;
         $total_pages    = $response->headers()['x-wp-totalpages'] ?? 0;
 
-        $imported_products = Crud\Products::create_or_update_batch($results, [ 'skip_ids' => true ]);
+        $imported_products = Crud\Products::create_or_update_batch($filtered_products, [ 'skip_ids' => true ]);
         if ( $imported_products['error_count'] > 0 ) {
             wp_send_json([
                 'status' => 'error',
