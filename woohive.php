@@ -75,10 +75,12 @@ class Init {
         self::load_class( 'includes/wc-api/client.php' );
         self::load_class( 'includes/wc-api/endpoints/products.php' );
         self::load_class( 'includes/wc-api/endpoints/product_categories.php' );
+        self::load_class( 'includes/wc-api/endpoints/product_variations.php' );
 
         self::load_class( 'includes/internal/crud/products.php' );
         self::load_class( 'includes/internal/crud/categories.php' );
         self::load_class( 'includes/internal/crud/attributes.php' );
+        self::load_class( 'includes/internal/crud/variations.php' );
 
         if ( is_admin() ) {
             self::admin_includes();
