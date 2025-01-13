@@ -287,6 +287,8 @@ class Products {
      * @param array $products Lista de productos a procesar. Cada elemento debe ser un array con las claves:
      *                        - 'id' (int|null): El ID del producto a actualizar. Si es null, se creará un nuevo producto.
      *                        - 'data' (array): Los datos del producto a crear o actualizar.
+     * @param array $options Opciones adicionales para el procesamiento de productos:
+     *                        - 'skip_ids' (bool): Si se establece en true, no se requerirá el ID del producto para la actualización. Se asumirá que solo se están pasando los datos para crear nuevos productos. Por defecto es false.
      *
      * @return array Un array asociativo con resultados para cada producto y estadísticas generales:
      *               - 'error_count'        (int)
@@ -294,7 +296,7 @@ class Products {
      *               - 'total_created'      (int)
      *               - 'total_processed'    (int)
      */
-    public static function create_or_update_batch( array $products ): array {
+    public static function create_or_update_batch( array $products, array $options = [ 'skip_ids' => false ] ): array {
         $results = [];
 
         $error_count     = 0;
@@ -306,6 +308,11 @@ class Products {
             $product_id = $product_data['id'] ?? null;
             $data       = $product_data['data'] ?? null;
 
+            if ( $options['skip_ids'] ) {
+                $product_id = null;
+                $data = $product_data;
+            }
+
             if ( ! $data ) {
                 $results[] = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
                 $error_count += 1;
@@ -313,20 +320,20 @@ class Products {
             }
 
             $result = self::create_or_update( $product_id, $data );
-
             if ( is_wp_error( $result ) ) {
                 $results[]    = $result;
                 $error_count += 1;
-            } else {
-                $results[] = $result; // ID del producto creado o actualizado
-                if ( $product_id ) {
-                    $total_updates += 1;
-                } else {
-                    $total_creates   += 1;
-                }
-
-                $total_processed += 1;
+                continue;
             }
+
+            $results[] = $result;
+            if ( $product_id ) {
+                $total_updates += 1;
+            } else {
+                $total_creates   += 1;
+            }
+
+            $total_processed += 1;
         }
 
         $results['error_count']     = $error_count;
