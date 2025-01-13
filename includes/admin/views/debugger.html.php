@@ -60,7 +60,7 @@ use WooHive\Config\Constants; ?>
                     break;
             }
 
-            const messageElement = document.createElement('p');
+            const messageElement = document.createElement('pre'); // Change to pre-formatted text element
             messageElement.classList.add(messageClass);
 
             // Check if the message is an object or JSON and format it

@@ -225,18 +225,18 @@ class Admin_Page {
             }
         }
 
-        $new_product_id = Crud\Products::create_or_update( null, $product );
-        if ( is_wp_error( $new_product_id ) ) {
-            wp_send_json_error( json_encode( $new_product_id ) );
+        $crud_response = Crud\Products::create_or_update( null, $product );
+        if ( is_wp_error( $crud_response ) ) {
+            wp_send_json_error( $crud_response );
         }
 
-        if ( $new_product_id && ! empty( $product['variations'] ) ) {
+        if ( $crud_response && ! empty( $product['variations'] ) ) {
             $ids = $product['variations'];
 
             $variations_res = $client->product_variations->pull_all( $product['id'], [ 'include' => implode( ',', $ids ) ] );
             if ( ! $variations_res->has_error() ) {
                 $variations = $variations_res->body();
-                $unused = Crud\Variations::create_or_update_batch( $new_product_id, $variations );
+                $unused = Crud\Variations::create_or_update_batch( $crud_response, $variations );
             }
         }
 
@@ -272,7 +272,8 @@ class Admin_Page {
         if ( $response->has_error() ) {
             wp_send_json([
                 'status'  => 'error',
-                'message' => __( 'Error mientras se intentaba recuperar productos de la API ' . json_encode( $response ), Constants::TEXT_DOMAIN  ),
+                'message' => __( 'Error mientras se intentaba recuperar productos de la API', Constants::TEXT_DOMAIN  ),
+                'error'   => $response->json_fmt()
             ], 422);
         }
 
@@ -287,7 +288,7 @@ class Admin_Page {
         if ( $imported_products['error_count'] > 0 ) {
             wp_send_json([
                 'status' => 'error',
-                'errors' => json_encode( $imported_products ),
+                'errors' => $imported_products,
             ], 422);
         }
 
