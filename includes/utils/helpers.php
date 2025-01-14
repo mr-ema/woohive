@@ -218,6 +218,21 @@ class Helpers {
         return '';
     }
 
+    /**
+     * Busca el sitio principal en este caso el primer sitio en sites si existe
+     *
+     * @return array|null El sitio encontrado en caso de éxito, o null si no se encuentra el sitio.
+     */
+    public static function primary_site(): ?array {
+        $sites = self::sites();
+        if ( empty( $sites ) ) {
+            return null;
+        }
+
+        $site = reset( $sites );
+        return $site;
+    }
+
     public static function status_filter_options(): array {
         return array(
             'all'      => __( 'Todos los productos', Constants::TEXT_DOMAIN ),
