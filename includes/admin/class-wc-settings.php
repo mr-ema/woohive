@@ -74,6 +74,19 @@ class WC_Setting_Woo_Hive_Page extends WC_Settings_Page {
             'default' => 'yes',
         );
 
+		$settings[$this->id . '_role'] = array(
+            'title'         => __( 'Rol de este sitio', Constants::TEXT_DOMAIN ),
+			'type'          => 'select',
+			'id'            => $this->id . '_role',
+			'default'       => 'primary',
+			'options'       => array(
+				'primary'   => __( 'Inventario Primario', Constants::TEXT_DOMAIN ),
+				'secondary' => __( 'Inventario secundario', Constants::TEXT_DOMAIN ),
+			),
+            'desc'          => __( '<strong>Inventario Primario</strong> es el inventario principal que se utiliza para gestionar las cantidades de stock en los Inventarios Secundarios. Solo puedes tener un Inventario Primario.<br><strong>Los Inventarios Secundarios</strong> envían cambios de stock (edición por administrador, compras y devoluciones) al Inventario Primario, pero no cuentan con capacidades de registro ni herramientas.', Constants::TEXT_DOMAIN),
+		);
+
+
         $settings[ $this->id . '_batch_size' ] = array(
             'title'             => __( 'Tamaño del lote', Constants::TEXT_DOMAIN ),
             'type'              => 'number',
