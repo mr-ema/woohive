@@ -2,7 +2,9 @@
 
 WooHive es un plugin de WordPress para WooCommerce que permite la sincronización de productos y stock entre múltiples tiendas de WooCommerce utilizando la API de WooCommerce. Facilita la gestión de inventarios en entornos multisitio, asegurando que tus tiendas se mantengan actualizadas con la misma información de productos.
 
----
+<br>
+<br>
+
 
 ## Características
 
@@ -12,15 +14,15 @@ WooHive es un plugin de WordPress para WooCommerce que permite la sincronizació
 - **Fácil Instalación**: Instalación simple mediante el panel de administración de WordPress.
 - **API de WooCommerce**: Usa la API de WooCommerce para interactuar con las tiendas de forma eficiente.
 
----
+<br>
 
 ## Requisitos
 
-- **WordPress 6.7+**
-- **WooCommerce 6.0+**
-- **PHP 8.0 o superior**
+- **WordPress >= 6.7**
+- **WooCommerce >= 6.0**
+- **PHP >= 8.0**
 
----
+<br>
 
 ## Instalación
 
@@ -47,7 +49,7 @@ WooHive es un plugin de WordPress para WooCommerce que permite la sincronizació
    - Inicia sesión en el panel de administración de WordPress.
    - Ve a **Plugins > Plugins instalados** y haz clic en **Activar** junto al plugin **WooHive**.
 
----
+<br>
 
 ## Configuración
 
@@ -76,7 +78,7 @@ Para empezar a usar WooHive, primero debes conectar todas las tiendas WooCommerc
 3. **Sincronizar Productos**:
    - Desde el panel de administración de WooHive, podrás editar productos de manera centralizada y sincronizar el stock entre las tiendas de WooCommerce.
 
----
+<br>
 
 ## Uso
 
@@ -89,7 +91,7 @@ Para empezar a usar WooHive, primero debes conectar todas las tiendas WooCommerc
 
 Accede a los reportes de productos para ver detalles sobre el stock, nombre del producto, SKU y el estado de la tienda de cada producto sincronizado.
 
----
+<br>
 
 ## Personalización
 
@@ -98,10 +100,10 @@ Puedes personalizar el comportamiento de WooHive modificando los siguientes par�
 - **Configuración de la API de WooCommerce**: Modifica los detalles de la API para cada tienda desde la sección **WooHive > Configuración**.
 - **Filtros de Productos**: Personaliza los filtros de búsqueda según tus necesidades en la página de reportes.
 
----
+<br>
 
 ## Licencia
 
 WooHive está bajo la **Licencia GPL-2.0**. Puedes usar y distribuir el plugin según los términos de esta licencia.
 
----
+<br>
