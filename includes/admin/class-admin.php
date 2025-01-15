@@ -2,6 +2,7 @@
 
 namespace WooHive\Admin;
 
+use WooHive\Internal\Tools;
 use WooHive\WCApi\Client;
 use WooHive\Config\Constants;
 use WooHive\Internal\Crud;
@@ -22,9 +23,6 @@ class Admin_Page {
         // Comprobación de versión de WooCommerce.
         add_action( 'init', array( $this, 'version_check' ), 10, 0 );
 
-        // Inicializar trabajos en segundo plano
-        add_action( 'admin_init', array( $this, 'start_trackers' ), 10, 0 );
-
         // Agregar la página de configuración a WooCommerce.
         add_filter( 'woocommerce_get_settings_pages', array( $this, 'add_settings_page' ), 10, 1 );
 
@@ -33,15 +31,11 @@ class Admin_Page {
 
         // AJAX
         add_action( 'wp_ajax_' . Constants::PLUGIN_PREFIX . '_api_check', array( $this, 'check_api_access' ) );
-        add_action( 'wp_ajax_' . Constants::PLUGIN_PREFIX . '_push', array( $this, 'push' ) );
+        add_action( 'wp_ajax_' . Constants::PLUGIN_PREFIX . '_export_product', array( $this, 'export_product_ajax' ) );
         add_action( 'wp_ajax_' . Constants::PLUGIN_PREFIX . '_push_all', array( $this, 'push_all' ) );
         add_action( 'wp_ajax_' . Constants::PLUGIN_PREFIX . '_view_last_response', array( $this, 'view_last_response' ) );
         add_action( 'wp_ajax_' . Constants::PLUGIN_PREFIX . '_import_product', array( $this, 'import_product_ajax' ) );
         add_action( 'wp_ajax_' . Constants::PLUGIN_PREFIX . '_massive_import', array( $this, 'massive_import_ajax' ) );
-    }
-
-    public function start_trackers(): void {
-        // new Woo_Multisite_Stock_Sync_Tracker_Primary();
     }
 
     /**
@@ -111,11 +105,11 @@ class Admin_Page {
         }
 
         $nonces = array(
-            'push'              => wp_create_nonce( Constants::PLUGIN_PREFIX . '-push' ),
-            'push_all'          => wp_create_nonce( Constants::PLUGIN_PREFIX . '-push-all' ),
-            'massive_import'        => wp_create_nonce( Constants::PLUGIN_PREFIX . '-massive-import' ),
             'api_check'         => wp_create_nonce( Constants::PLUGIN_PREFIX . '-api-check' ),
+            'export_product'    => wp_create_nonce( Constants::PLUGIN_PREFIX . '-export-product' ),
+            'push_all'          => wp_create_nonce( Constants::PLUGIN_PREFIX . '-push-all' ),
             'import_product'    => wp_create_nonce( Constants::PLUGIN_PREFIX . '-import-product' ),
+            'massive_import'    => wp_create_nonce( Constants::PLUGIN_PREFIX . '-massive-import' ),
         );
 
         wp_localize_script(
@@ -150,7 +144,6 @@ class Admin_Page {
         return $urls;
     }
 
-
     /**
      * Agrega un enlace de configuración al menú de plugins de WordPress.
      *
@@ -183,7 +176,20 @@ class Admin_Page {
         die;
     }
 
-    public function import_product_ajax() {
+    public function export_product_ajax(): void {
+        check_ajax_referer( Constants::PLUGIN_PREFIX . '-export-product', 'security' );
+
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            wp_send_json( array( 'message' => 'Permission denied' ), 403 );
+        }
+
+        $product_id = isset( $_POST['product_id'] ) ? sanitize_text_field( $_POST['product_id'] ) : '';
+        $site_key   = isset( $_POST['site_key'] ) ? sanitize_text_field( $_POST['site_key'] ) : '';
+
+        wp_send_json_success( __( 'El producto fue exportado exitosamente.', Constants::TEXT_DOMAIN ) );
+    }
+
+    public function import_product_ajax(): void {
         check_ajax_referer( Constants::PLUGIN_PREFIX . '-import-product', 'security' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -202,47 +208,14 @@ class Admin_Page {
         }
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-        $res    = $client->products->pull( $product_id );
-        if ( $res->has_error() || empty( $res->body() ) ) {
-            wp_send_json_error( __(
-                'El producto especificado no pudo ser localizado. Por favor verifica el ID del producto e intenta nuevamente.',
-                Constants::TEXT_DOMAIN
-            ) );
-        }
 
-        $product = $res->body();
-        if ( empty( $product['sku'] ) ) {
-            wp_send_json_error( __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN) );
-        }
-
-        if ( ! empty( $product['categories'] ) ) {
-            $ids = array_column( $product['categories'], 'id' );
-
-            $variations_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
-            if ( ! $variations_res->has_error() ) {
-                $variations = $variations_res->body();
-                $unused = Crud\Categories::create_batch( $variations );
-            }
-        }
-
-        $crud_response = Crud\Products::create_or_update( null, $product );
-        if ( is_wp_error( $crud_response ) ) {
-            wp_send_json_error( $crud_response );
-        }
-
-        if ( $crud_response && ! empty( $product['variations'] ) ) {
-            $ids = $product['variations'];
-
-            $variations_res = $client->product_variations->pull_all( $product['id'], [ 'include' => implode( ',', $ids ) ] );
-            if ( ! $variations_res->has_error() ) {
-                $variations = $variations_res->body();
-                $unused = Crud\Variations::create_or_update_batch( $crud_response, $variations );
-            }
+        $res = Tools::import_product( $client, $product_id );
+        if ( is_wp_error( $res ) ) {
+            wp_send_json_error( json_encode( $res ) );
         }
 
         wp_send_json_success( __( 'El producto fue importado exitosamente.', Constants::TEXT_DOMAIN ) );
     }
-
 
     public function massive_import_ajax(): void {
         check_ajax_referer( Constants::PLUGIN_PREFIX . '-massive-import', 'security' );
@@ -276,7 +249,6 @@ class Admin_Page {
                 'error'   => $response->json_fmt()
             ], 422);
         }
-
 
         $results            = $response->body();
         $filtered_products  = array_values(array_filter($results, fn($product) => !empty($product['sku'])));

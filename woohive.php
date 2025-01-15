@@ -85,6 +85,8 @@ class Init {
         self::load_class( 'includes/internal/crud/attributes.php' );
         self::load_class( 'includes/internal/crud/variations.php' );
 
+        self::load_class( 'includes/internal/tools.php' );
+
         self::load_class( 'includes/internal/demons/sync_stock.php' );
 
         if ( is_admin() ) {
