@@ -415,9 +415,10 @@ class Products {
 
         return null;
     }
+}
 
 // Hook para ejecutar la exportación al guardar el producto
-add_action('save_post_product', 'exportar_producto_con_stock', 10, 3);
+//add_action('save_post_product', 'exportar_producto_con_stock', 10, 3);
 
 function exportar_producto_con_stock($post_id, $post, $update) {
     // Evitar bucles infinitos
@@ -465,15 +466,15 @@ function exportar_producto_con_stock($post_id, $post, $update) {
     }
 }
 
-add_action('rest_api_init', function() {
-    register_rest_route('wc/v3', '/products', array(
-        'methods' => 'POST',
-        'callback' => 'crear_producto_con_stock',
-        'permission_callback' => function() {
-            return current_user_can('manage_woocommerce');
-        },
-    ));
-});
+//add_action('rest_api_init', function() {
+//    register_rest_route('wc/v3', '/products', array(
+//        'methods' => 'POST',
+//        'callback' => 'crear_producto_con_stock',
+//        'permission_callback' => function() {
+//            return current_user_can('manage_woocommerce');
+//        },
+//    ));
+//});
 
 function crear_producto_con_stock(WP_REST_Request $request) {
     $data = $request->get_json_params();
@@ -483,7 +484,7 @@ function crear_producto_con_stock(WP_REST_Request $request) {
     $producto->set_name($data['nombre']);
     $producto->set_description($data['descripcion']);
     $producto->set_price($data['precio']);
-    
+
     // Establecer stock
     $producto->set_stock_quantity($data['stock']);
     $producto->set_manage_stock(true);  // Habilitar la gestión de stock
@@ -501,6 +502,4 @@ function crear_producto_con_stock(WP_REST_Request $request) {
 
     // Respuesta a la solicitud
     return new WP_REST_Response('Producto creado con éxito', 201);
-}
-
 }
