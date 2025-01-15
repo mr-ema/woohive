@@ -256,8 +256,12 @@ class Admin_Page {
         $total          = $response->headers()['x-wp-total'] ?? 0;
         $total_pages    = $response->headers()['x-wp-totalpages'] ?? 0;
 
+        $skus = array_column($filtered_products, 'sku');
+        add_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', function() use ( $skus ) { return $skus; });
+
         $imported_products = Crud\Products::create_or_update_batch($filtered_products, [ 'skip_ids' => true ]);
         if ( $imported_products['error_count'] > 0 ) {
+            remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
             wp_send_json([
                 'status' => 'error',
                 'errors' => $imported_products,
@@ -279,6 +283,7 @@ class Admin_Page {
             }
         }
 
+        remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
         wp_send_json([
             'status'    => 'processed',
             'total'     => $total,
