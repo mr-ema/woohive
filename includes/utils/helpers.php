@@ -327,6 +327,11 @@ class Helpers {
             return false;
         }
 
+       $exclude_skus = apply_filters( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', [] );
+        if ( in_array( $product->get_sku(), $exclude_skus ) ) {
+            return false;
+        }
+
         return true;
     }
 
