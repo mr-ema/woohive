@@ -1,7 +1,7 @@
 <?php
 
 namespace WooHive\Internal\Crud;
-
+ 
 use WooHive\Config\Constants;
 use WooHive\Internal\Crud\Attributes;
 use WooHive\Internal\Crud\Categories;
