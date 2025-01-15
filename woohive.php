@@ -23,7 +23,7 @@
 namespace WooHive;
 
 use WooHive\Config\Constants;
-use WooHive\Internal\Demons\Sync_Stock;
+use WooHive\Internal\Demons;
 
 
 /** Prevent Direct Access */
@@ -66,7 +66,7 @@ class Init {
 
         self::includes();
 
-        Sync_Stock::init();
+        Demons\Init::start();
     }
 
     public static function includes(): void {
@@ -88,6 +88,9 @@ class Init {
         self::load_class( 'includes/internal/tools.php' );
 
         self::load_class( 'includes/internal/demons/sync_stock.php' );
+        self::load_class( 'includes/internal/demons/sync_simple_data.php' );
+        self::load_class( 'includes/internal/demons/sync_variations.php' );
+        self::load_class( 'includes/internal/demons/init.php' );
 
         if ( is_admin() ) {
             self::admin_includes();

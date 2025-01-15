@@ -53,8 +53,10 @@ class Tools {
             }
         }
 
+        add_filter( Constants::PLUGIN_SLUG . '_should_sync', '__return_false' );
         $product_id = Crud\Products::create_or_update( null, $product );
         if ( is_wp_error( $product_id ) ) {
+            remove_filter( Constants::PLUGIN_SLUG . '_should_sync', '__return_false' );
             return new WP_Error( 'fail_to_create_or_update_product', __( 'El producto no pudo ser actualizado o creado.', Constants::TEXT_DOMAIN ) );
         }
 
@@ -67,6 +69,8 @@ class Tools {
                 $unused = Crud\Variations::create_or_update_batch( $product_id, $variations );
             }
         }
+
+        remove_filter( Constants::PLUGIN_SLUG . '_should_sync', '__return_false' );
 
         return $product_id;
     }

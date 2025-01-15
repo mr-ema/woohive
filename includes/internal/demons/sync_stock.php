@@ -29,12 +29,14 @@ class Sync_Stock {
      * @return void
      */
     public static function on_stock_update( WC_Product $product ): void {
-        $new_stock = $product->get_stock_quantity();
+        if ( Helpers::should_sync( $product ) ) {
+            $new_stock = $product->get_stock_quantity();
 
-        if ( Helpers::is_primary_site() ) {
-            self::sync_to_secondary_sites( $product, $new_stock );
-        } else if ( Helpers::is_secondary_site() ) {
-            self::sync_to_primary_site( $product, $new_stock );
+            if ( Helpers::is_primary_site() ) {
+                self::sync_to_secondary_sites( $product, $new_stock );
+            } else if ( Helpers::is_secondary_site() ) {
+                self::sync_to_primary_site( $product, $new_stock );
+            }
         }
     }
 
@@ -56,7 +58,7 @@ class Sync_Stock {
             'sku'               => $sku,
             'stock_quantity'    => $stock_quantity,
             'stock_status'      => $product->get_stock_status(),
-            'manage_stock'      => $product->managing_stock(),
+            'manage_stock'      => $product->managing_stock() ? 'true' : 'false',
         ];
 
         $sites = Helpers::sites();
@@ -96,7 +98,7 @@ class Sync_Stock {
             'sku'               => $sku,
             'stock_quantity'    => $stock_quantity,
             'stock_status'      => $product->get_stock_status(),
-            'manage_stock'      => $product->managing_stock(),
+            'manage_stock'      => $product->managing_stock() ? 'true' : 'false',
         ];
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );

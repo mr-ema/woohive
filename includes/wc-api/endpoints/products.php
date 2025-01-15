@@ -86,7 +86,7 @@ class Products {
      * @param string $id El ID del producto.
      * @return Response La respuesta de la API.
      */
-    public function pull( $id ) {
+    public function pull( $id ): Response {
         return $this->client->get( "products/{$id}" );
     }
 
@@ -96,7 +96,7 @@ class Products {
      * @param string $sku El SKU del producto.
      * @return Response La respuesta de la API.
      */
-    public function pull_by_sku( $sku ) {
+    public function pull_by_sku( $sku ): Response {
         if ( empty( $sku ) ) {
             return new Response( 422, null, array(), 'SKU is required' );
         }
@@ -111,7 +111,7 @@ class Products {
      * @param int   $batch_size El tamaño del lote.
      * @return array Un array de respuestas de la API.
      */
-    public function push_batch( $products, $batch_size ) {
+    public function push_batch( $products, $batch_size ): array {
         $max_batch_size = 100;
         if ( $batch_size > $max_batch_size ) {
             $batch_size = $max_batch_size;
@@ -167,7 +167,7 @@ class Products {
      * @param int   $batch_size  El tamaño del lote (máximo permitido: 100).
      * @return respuesta de la API.
      */
-    public function update_batch( $products, $batch_size ) {
+    public function update_batch( $products, $batch_size ): Response {
         $max_batch_size = 100;
         if ( $batch_size > $max_batch_size ) {
             $batch_size = $max_batch_size;
@@ -275,13 +275,20 @@ class Products {
      *                             Si los campos personalizados ya existen, se sobrescribirán los valores predeterminados.
      * @return array Los datos del producto en formato de array.
      */
-    public static function parse_product_to_json( $product, $custom_fields = array() ) {
+    public static function parse_product_to_json( $product, $custom_fields = array() ): array {
         if ( ! is_a( $product, 'WC_Product' ) ) {
             return array(); // No es un objeto de producto válido, retornar un array vacío.
         }
 
         $data = $product->get_data();
         self::clean_data( $data );
+
+        $data['dimensions'] = [
+            'width'  => $data['width']  ?? 0,
+            'length' => $data['length'] ?? 0,
+            'height' => $data['height'] ?? 0,
+        ];
+        unset( $data['width'], $data['length'], $data['height'] );
 
         if ( ! empty( $custom_fields ) ) {
             // Fusionar los campos personalizados en los datos del producto,
@@ -369,7 +376,7 @@ class Products {
      *               Cada elemento es un array asociativo combinado de ambos arrays, con los valores del array `target`
      *               sobrescribiendo los del array `source` en caso de conflicto.
      */
-    public static function merge_arrays_by_sku( $source, $target, $options = array() ) {
+    public static function merge_arrays_by_sku( $source, $target, $options = array() ): array {
         $parse_source = isset( $options['parse_source'] ) ? $options['parse_source'] : false;
         $parse_target = isset( $options['parse_target'] ) ? $options['parse_target'] : false;
 
