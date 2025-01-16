@@ -2,8 +2,6 @@
 
 namespace WooHive\Internal\Demons;
 
-use WPFlashMessages;
-use WooHive\WCApi\Client;
 use WooHive\Utils\Helpers;
 
 use \WC_Product;
@@ -14,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class Sync_Simple_Data {
+class Sync_Request {
 
     public static function init(): void {
         add_action( 'woocommerce_update_product', [ self::class, 'on_product_update' ], 10, 2 );
@@ -49,12 +47,19 @@ class Sync_Simple_Data {
             return; // Si el producto no tiene SKU, no se sincroniza.
         }
 
-        $data = self::wc_product_to_json( $product );
+        $product_id = $product->get_id();
 
         $sites = Helpers::sites();
         foreach ( $sites as $site ) {
-            $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-            $response = $client->products->update( $data );
+            // temporal way of handling endpoints
+            $external_site_url = "{$site['url']}/wp-json/woohive/v1/sync-product";
+
+            $response = wp_remote_post($external_site_url, [
+                'body' => [
+                    'product_id' => $product_id,
+                    'from'       => 'primary',
+                ],
+            ]);
         }
     }
 
@@ -71,15 +76,22 @@ class Sync_Simple_Data {
             return; // Si el producto no tiene SKU, no se sincroniza.
         }
 
-        $site = Helpers::primary_site();
-        if ( empty( $site ) ) {
+        $product_id = $product->get_id();
+
+        $main_site = Helpers::primary_site();
+        if ( empty( $main_site ) ) {
             return; // Si no hay un sitio principal configurado, no se realiza la sincronización.
         }
 
-        $data = self::wc_product_to_json( $product );
+        $sites = Helpers::sites();
+        $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
 
-        $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-        $response = $client->products->update( $data );
+        $response = wp_remote_post($external_site_url, [
+            'body' => [
+                'product_id' => $product_id,
+                'from'       => 'secondary',
+            ],
+        ]);
     }
 
     /**

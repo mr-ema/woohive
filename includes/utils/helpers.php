@@ -328,21 +328,23 @@ class Helpers {
         }
 
         $exclude_skus = apply_filters( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', [] );
-        $should_exclude = (function() use ( $product, $exclude_skus ) {
-            $sku = $product->get_sku();
-            if ( empty( $sku ) ) return true;
-
-            if ( $product instanceof WC_Product_Variation ) {
-                $parent = wc_get_product( $product->get_parent_id() );
-
-                $sku = $parent->get_sku();
+        if ( is_array( $exclude_skus ) ) {
+            $should_exclude = (function() use ( $product, $exclude_skus ) {
+                $sku = $product->get_sku();
                 if ( empty( $sku ) ) return true;
-            }
 
-            return in_array( $sku, $exclude_skus );
-        })();
+                if ( $product instanceof WC_Product_Variation ) {
+                    $parent = wc_get_product( $product->get_parent_id() );
 
-        if ( $should_exclude ) return false;
+                    $sku = $parent->get_sku();
+                    if ( empty( $sku ) ) return true;
+                }
+
+                return in_array( $sku, $exclude_skus );
+            })();
+
+            if ( $should_exclude ) return false;
+        }
 
         return true;
     }

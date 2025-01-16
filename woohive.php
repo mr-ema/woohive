@@ -24,6 +24,7 @@ namespace WooHive;
 
 use WooHive\Config\Constants;
 use WooHive\Internal\Demons;
+use WooHive\Internal\Api;
 
 
 /** Prevent Direct Access */
@@ -67,6 +68,7 @@ class Init {
         self::includes();
 
         Demons\Init::start();
+        Api\Init::init();
     }
 
     public static function includes(): void {
@@ -88,9 +90,11 @@ class Init {
         self::load_class( 'includes/internal/tools.php' );
 
         self::load_class( 'includes/internal/demons/sync_stock.php' );
-        self::load_class( 'includes/internal/demons/sync_simple_data.php' );
-        self::load_class( 'includes/internal/demons/sync_variations.php' );
+        self::load_class( 'includes/internal/demons/sync_request.php' );
         self::load_class( 'includes/internal/demons/init.php' );
+
+        self::load_class( 'includes/internal/api/endpoints/sync_endpoint.php' );
+        self::load_class( 'includes/internal/api/init.php' );
 
         if ( is_admin() ) {
             self::admin_includes();
