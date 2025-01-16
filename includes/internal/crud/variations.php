@@ -105,7 +105,12 @@ class Variations {
      */
     public static function create( WC_Product $wc_product, array $filtered_data): int|WP_Error {
         if ( ! $wc_product ) {
-            return new WP_Error('invalid_product', __( 'El producto no existe o es inválido.', Constants::TEXT_DOMAIN ));
+            return new WP_Error('invalid_product', __( 'El producto padre no existe o es inválido.', Constants::TEXT_DOMAIN ));
+        }
+
+        $parent_sku = $wc_product->get_sku();
+        if ( empty( $filtered_data['sku'] ) || $parent_sku === $filtered_data['sku'] ) {
+            return new WP_Error('create_error', __('Sku de la variacion no existe o es igual al padre.', Constants::TEXT_DOMAIN ) );
         }
 
         try {
@@ -135,6 +140,12 @@ class Variations {
     public static function update(WC_Product_Variation $variation, array $filtered_data): int|WP_Error {
         if ( ! $variation || $variation->get_type() !== 'variation' ) {
             return new WP_Error('invalid_variation', __('La variación no existe o es inválida.', Constants::TEXT_DOMAIN));
+        }
+
+        $wc_product = wc_get_product( $variation->get_parent_id() );
+        $parent_sku = $wc_product->get_sku();
+        if ( empty( $filtered_data['sku'] ) || $parent_sku === $filtered_data['sku'] ) {
+            return new WP_Error('update_error', __('Sku de la variacion no existe o es igual al padre.', Constants::TEXT_DOMAIN ) );
         }
 
         try {
