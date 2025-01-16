@@ -69,10 +69,16 @@ class Sync_Endpoint {
         }
 
         $client = Client::create($site['url'], $site['api_key'], $site['api_secret']);
-
-        $result = Tools::import_product($client, $product_id);
-        if (is_wp_error($result)) {
-            return $result;
+        if ( Helpers::is_primary_site() ) {
+            $result = Tools::import_product($client, $product_id);
+            if (is_wp_error($result)) {
+                return $result;
+            }
+        } else {
+            $result = Tools::update_product($client, $product_id);
+            if (is_wp_error($result)) {
+                return $result;
+            }
         }
 
         return new WP_REST_Response(['product_id' => $result], 200);
