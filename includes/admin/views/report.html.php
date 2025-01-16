@@ -170,21 +170,6 @@
                                     <?php echo esc_html( $product['stock_status'] === 'instock' ? 'In Stock' : 'Out of Stock' ); ?>
                                 </td>
                                 <td>
-                                <a class="button" href="
-                                    <?php
-                                    echo add_query_arg(
-                                        array(
-                                            'page'       => 'woo-multisite-stock-sync-report',
-                                            'action'     => 'edit_product',
-                                            'product_id' => $product['id'],
-                                            'site_key'   => $site['key'],
-                                        ),
-                                        admin_url( 'admin.php' )
-                                    );
-                                    ?>
-                                " class="button button-primary">
-                                    <?php _e( 'Editar', Constants::TEXT_DOMAIN ); ?>
-                                </a>
 
                                 <button
                                     type="button"
