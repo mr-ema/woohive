@@ -53,8 +53,9 @@ class Sync_Endpoint {
     public static function handle_sync_product(WP_REST_Request $request): WP_REST_Response|WP_Error {
         $product_id = (int) $request->get_param('product_id');
         $from = $request->get_param('from');
-        $site = null;
+
         $domain = self::get_request_domain( $request );
+        $site = null;
 
         if ( $from === 'primary' ) {
             $site = Helpers::primary_site();
@@ -87,7 +88,7 @@ class Sync_Endpoint {
     }
 
     private static function get_request_domain(WP_REST_Request $request): string {
-        $scheme = $request->is_ssl() ? 'https' : 'http';
+        $scheme = is_ssl() ? 'https' : 'http';
         $host = $request->get_header('host');
 
         return "{$scheme}://{$host}";

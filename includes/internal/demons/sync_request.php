@@ -5,6 +5,7 @@ namespace WooHive\Internal\Demons;
 use WooHive\Utils\Helpers;
 
 use \WC_Product;
+use \WC_Product_Variation;
 
 
 /** Prevenir el acceso directo al script. */
@@ -16,6 +17,7 @@ class Sync_Request {
 
     public static function init(): void {
         add_action( 'woocommerce_update_product', [ self::class, 'on_product_update' ], 10, 2 );
+        add_action( 'woocommerce_update_product_variation', [ self::class, 'on_product_variation_update' ], 10, 2 );
     }
 
     public static function on_product_update( int $product_id, WC_Product $product ): void {
@@ -25,6 +27,24 @@ class Sync_Request {
 
         set_transient( 'sync_in_progress_' . $product_id, true, 9 );
 
+        if ( Helpers::should_sync( $product ) ) {
+            if ( Helpers::is_primary_site() ) {
+                self::sync_to_secondary_sites_data( $product );
+            } else if ( Helpers::is_secondary_site() ) {
+                self::sync_to_primary_site_data( $product );
+            }
+        }
+    }
+
+    public static function on_product_variation_update( int $product_id, WC_Product_Variation $variation ): void {
+        $product_id = $variation->get_parent_id();
+        if ( get_transient( 'sync_in_progress_' . $product_id ) ) {
+            return; // Prevent firing the function twice
+        }
+
+        set_transient( 'sync_in_progress_' . $product_id, true, 9 );
+
+        $product = wc_get_product( $product_id );
         if ( Helpers::should_sync( $product ) ) {
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $product );
@@ -61,6 +81,7 @@ class Sync_Request {
                 ],
             ]);
         }
+
     }
 
     /**
@@ -92,32 +113,5 @@ class Sync_Request {
                 'from'       => 'secondary',
             ],
         ]);
-    }
-
-    /**
-     * Convierte un producto estándar en un array con los datos esenciales.
-     *
-     * @param WC_Product $product Instancia del producto.
-     *
-     * @return array Datos esenciales del producto.
-     */
-    private static function wc_product_to_json( WC_Product $product ): array {
-        return [
-            'name'             => $product->get_name(),
-            'description'      => $product->get_description(),
-            'short_description'=> $product->get_short_description(),
-            'dimensions'       => [
-                'length' => $product->get_length(),
-                'width'  => $product->get_width(),
-                'height' => $product->get_height(),
-            ],
-            'weight'           => $product->get_weight(),
-            'regular_price'    => $product->get_regular_price(),
-            'sale_price'       => $product->get_sale_price(),
-            'sku'              => $product->get_sku(),
-            'status'           => $product->get_status(),
-            'type'             => $product->get_type(),
-            'manage_stock'     => $product->get_manage_stock() ? 'true' : 'false',
-        ];
     }
 }

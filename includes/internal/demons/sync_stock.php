@@ -29,7 +29,7 @@ class Sync_Stock {
      * @return void
      */
     public static function on_stock_update( WC_Product $product ): void {
-        if ( Helpers::should_sync( $product ) ) {
+        if ( Helpers::should_sync_stock( $product ) ) {
             $new_stock = $product->get_stock_quantity();
 
             if ( Helpers::is_primary_site() ) {
