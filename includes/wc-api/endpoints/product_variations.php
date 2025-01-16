@@ -62,8 +62,8 @@ class Product_Variations {
      * @param array $variation_data Los datos de la variación que se actualizarán.
      * @return Response La respuesta de la API.
      */
-    public function update( $parent_id, $variation_data ) {
-        $response = $this->pull_by_id( $parent_id, $variation_data['id'] );
+    public function update( $parent_id, $variation_data ): Response {
+        $response = $this->pull_by_sku( $parent_id, $variation_data['sku'] );
         if ( $response->has_error() || empty( $response->body() ) ) {
             return $response;
         }
@@ -80,8 +80,8 @@ class Product_Variations {
      * @param array $variation_data Los datos de la variación a enviar o actualizar.
      * @return Response La respuesta de la API.
      */
-    public function push_or_update( $parent_id, $variation_data ) {
-        $response = $this->pull_by_id( $parent_id, $variation_data['id'] );
+    public function push_or_update( $parent_id, $variation_data ): Response {
+        $response = $this->pull_by_sku( $parent_id, $variation_data['sku'] );
         if ( $response->has_error() || empty( $response->body() ) ) {
             return $this->push( $parent_id, $variation_data );
         }
@@ -95,15 +95,15 @@ class Product_Variations {
      * Obtener una variación desde el sitio de WooCommerce para un producto específico por su ID.
      *
      * @param int $parent_id El ID del producto principal.
-     * @param int $variation_id El ID de la variación.
+     * @param int $variation_sku El sku de la variación.
      * @return Response La respuesta de la API.
      */
-    public function pull_by_id( $parent_id, $variation_id ) {
-        if ( empty( $parent_id ) || empty( $variation_id ) ) {
+    public function pull_by_sku( $parent_id, $variation_sku ): Response {
+        if ( empty( $parent_id ) || empty( $variation_sku ) ) {
             return new Response( 422, null, array(), 'ID de producto y variación son requeridos' );
         }
 
-        return $this->client->get( "products/{$parent_id}/variations/{$variation_id}" );
+        return $this->pull_all( $parent_id, [ 'sku' => $variation_sku ] );
     }
 
     /**
@@ -113,7 +113,7 @@ class Product_Variations {
      * @param array $args Argumentos adicionales para la solicitud (opcional), como filtros de paginación, estado de las variaciones, etc.
      * @return Response La respuesta de la API que contiene la lista de variaciones.
      */
-    public function pull_all( $parent_id, $args = array() ) {
+    public function pull_all( $parent_id, $args = array() ): Response {
         return $this->client->get( "products/{$parent_id}/variations", $args );
     }
 

@@ -1,3 +1,6 @@
 *.sh
 *.log
 .phpdoc
+
+composer.phar
+/vendor/

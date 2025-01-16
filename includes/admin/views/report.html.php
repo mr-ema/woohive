@@ -246,8 +246,9 @@ jQuery(document).ready(function($) {
                     Debugger.error(response.data || 'Error desconocido.');
                 }
             },
-            error: function(jqXHR, textStatus, errorThrown) {
-                Debugger.error('Error AJAX: ' + (errorThrown || textStatus));
+            error: function(error) {
+                Debugger.error('Error AJAX: ');
+                Debugger.error(error);
             },
             complete: function() {
                 // Rehabilitar el botón

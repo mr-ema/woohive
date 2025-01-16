@@ -163,11 +163,11 @@ class Products {
     public static function create(array $data): int|WP_Error {
         $filtered_data = self::clean_data($data);
         if (empty($filtered_data)) {
-            return new WP_Error('invalid_data', __('No se proporcionaron campos válidos para crear el producto.', Constants::TEXT_DOMAIN));
+            return new WP_Error( 'invalid_data', __('No se proporcionaron campos válidos para crear el producto.', Constants::TEXT_DOMAIN) );
         }
 
         try {
-            if (!empty($filtered_data['sku'])) {
+            if ( ! empty($filtered_data['sku'] ) ) {
                 $existing_product_id = wc_get_product_id_by_sku($filtered_data['sku']);
                 if ($existing_product_id) {
                     return new WP_Error(
@@ -415,92 +415,4 @@ class Products {
 
         return null;
     }
-
-// Hook para ejecutar la exportación al guardar el producto
-add_action('save_post_product', 'exportar_producto_con_stock', 10, 3);
-
-function exportar_producto_con_stock($post_id, $post, $update) {
-    // Evitar bucles infinitos
-    if ($post->post_type !== 'product') {
-        return;
-    }
-
-    // Obtener los datos del producto
-    $producto = wc_get_product($post_id);
-
-    // Obtener los datos del producto, incluyendo stock
-    $producto_datos = array(
-        'id' => $producto->get_id(),
-        'nombre' => $producto->get_name(),
-        'descripcion' => $producto->get_description(),
-        'precio' => $producto->get_price(),
-        'stock' => $producto->get_stock_quantity(),  // Obtener la cantidad de stock
-        'categoria' => wp_get_post_terms($post_id, 'product_cat', array('fields' => 'names')),
-        // Agrega más datos si es necesario
-    );
-
-    // URL del sitio de destino donde se exportará el producto
-    $url_destino = 'https://otro-sitio.com/wp-json/wc/v3/products';  // Cambiar por la URL de destino de tu sitio
-
-    // Configuración de la solicitud
-    $respuesta = wp_remote_post($url_destino, array(
-        'method'    => 'POST',
-        'body'      => json_encode($producto_datos),
-        'headers'   => array(
-            'Content-Type'  => 'application/json',
-            'Authorization' => 'Bearer TU_TOKEN_DE_AUTORIZACION',  // Usar el token de autenticación adecuado
-        ),
-    ));
-
-    if (is_wp_error($respuesta)) {
-        $error_message = $respuesta->get_error_message();
-        error_log("Error al exportar el producto: $error_message");
-    } else {
-        $status_code = wp_remote_retrieve_response_code($respuesta);
-        if ($status_code == 201) {
-            error_log("Producto exportado con éxito");
-        } else {
-            error_log("Error en la exportación: $status_code");
-        }
-    }
-}
-
-add_action('rest_api_init', function() {
-    register_rest_route('wc/v3', '/products', array(
-        'methods' => 'POST',
-        'callback' => 'crear_producto_con_stock',
-        'permission_callback' => function() {
-            return current_user_can('manage_woocommerce');
-        },
-    ));
-});
-
-function crear_producto_con_stock(WP_REST_Request $request) {
-    $data = $request->get_json_params();
-
-    // Crear el producto
-    $producto = new WC_Product();
-    $producto->set_name($data['nombre']);
-    $producto->set_description($data['descripcion']);
-    $producto->set_price($data['precio']);
-    
-    // Establecer stock
-    $producto->set_stock_quantity($data['stock']);
-    $producto->set_manage_stock(true);  // Habilitar la gestión de stock
-
-    // Asignar categorías
-    if (isset($data['categoria'])) {
-        $categorias = array();
-        foreach ($data['categoria'] as $categoria) {
-            $categorias[] = term_exists($categoria, 'product_cat');
-        }
-        $producto->set_category_ids($categorias);
-    }
-
-    $producto->save();
-
-    // Respuesta a la solicitud
-    return new WP_REST_Response('Producto creado con éxito', 201);
-}
-
 }

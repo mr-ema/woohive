@@ -296,7 +296,7 @@ class Helpers {
      * @param WC_Product $product El objeto del producto de WooCommerce.
      * @return bool Si debe sincronizarse el inventario o no.
      */
-    public static function should_sync( WC_Product $product ): bool {
+    public static function should_sync_stock( WC_Product $product ): bool {
         // Si se está utilizando una versión de WooCommerce no compatible, abortar
         if ( ! self::woocommerce_version_check() ) {
             return false;
@@ -325,6 +325,74 @@ class Helpers {
         // Permitir que los plugins de terceros determinen si deben sincronizarse el stock
         if ( ! apply_filters( Constants::PLUGIN_SLUG . '_should_sync', true, $product, 'stock_qty' ) ) {
             return false;
+        }
+
+        $exclude_skus = apply_filters( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', [] );
+        if ( is_array( $exclude_skus ) ) {
+            $should_exclude = (function() use ( $product, $exclude_skus ) {
+                $sku = $product->get_sku();
+                if ( empty( $sku ) ) return true;
+
+                if ( $product instanceof WC_Product_Variation ) {
+                    $parent = wc_get_product( $product->get_parent_id() );
+
+                    $sku = $parent->get_sku();
+                    if ( empty( $sku ) ) return true;
+                }
+
+                return in_array( $sku, $exclude_skus );
+            })();
+
+            if ( $should_exclude ) return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Verificar si debe proceder con la sincronización de inventario.
+     *
+     * @param WC_Product $product El objeto del producto de WooCommerce.
+     * @return bool Si debe sincronizarse el inventario o no.
+     */
+    public static function should_sync( WC_Product $product ): bool {
+        // Si se está utilizando una versión de WooCommerce no compatible, abortar
+        if ( ! self::woocommerce_version_check() ) {
+            return false;
+        }
+
+        // Si la sincronización de inventario no está habilitada
+        if ( get_option( Constants::PLUGIN_SLUG . '_enabled', 'yes' ) !== 'yes' ) {
+            return false;
+        }
+
+        // Si el cambio de inventario proviene del Inventario Principal, no crear un nuevo trabajo
+        if ( self::request_role() === 'primary' ) {
+            return false;
+        }
+
+        // Si es un Inventario Secundario y el cambio fue desencadenado por una solicitud de Stock Sync, no crear un nuevo trabajo
+        if ( self::is_secondary_site() && self::is_self_request() ) {
+            return false;
+        }
+
+        $exclude_skus = apply_filters( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', [] );
+        if ( is_array( $exclude_skus ) ) {
+            $should_exclude = (function() use ( $product, $exclude_skus ) {
+                $sku = $product->get_sku();
+                if ( empty( $sku ) ) return true;
+
+                if ( $product instanceof WC_Product_Variation ) {
+                    $parent = wc_get_product( $product->get_parent_id() );
+
+                    $sku = $parent->get_sku();
+                    if ( empty( $sku ) ) return true;
+                }
+
+                return in_array( $sku, $exclude_skus );
+            })();
+
+            if ( $should_exclude ) return false;
         }
 
         return true;

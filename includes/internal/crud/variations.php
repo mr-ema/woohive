@@ -56,7 +56,7 @@ class Variations {
      *
      * @return void
      */
-    public static function set_props(WC_Product_Variation $variation, $data) {
+    public static function set_props( WC_Product_Variation $variation, array $data ): void {
         $valid_set_props = [ 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight', 'sku' ];
         $filtered_data = array_intersect_key($data, array_flip($valid_set_props));
         $variation->set_props( $filtered_data );
@@ -103,7 +103,7 @@ class Variations {
      *
      * @return int|WP_Error Retorna el ID de la variación creada o un error en caso de fallo.
      */
-    public static function create(WC_Product $wc_product, array $filtered_data): int|WP_Error {
+    public static function create( WC_Product $wc_product, array $filtered_data): int|WP_Error {
         if ( ! $wc_product ) {
             return new WP_Error('invalid_product', __( 'El producto no existe o es inválido.', Constants::TEXT_DOMAIN ));
         }
@@ -116,9 +116,11 @@ class Variations {
             self::set_props( $variation, $filtered_data );
             $variation->save();
 
-            return $variation->get_id();
+            $id = $variation->get_id();
+
+            return $id;
         } catch (\Exception $e) {
-            return new WP_Error('create_error', __('Error al crear la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN));
+            return new WP_Error('create_error', __('Error al crear la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
         }
     }
 
