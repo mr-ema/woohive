@@ -46,10 +46,10 @@ class Tools {
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
 
-            $variations_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
-            if ( ! $variations_res->has_error() ) {
-                $variations = $variations_res->body();
-                $unused = Crud\Categories::create_batch( $variations );
+            $categories_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
+            if ( ! $categories_res->has_error() ) {
+                $categories = $categories_res->body();
+                $unused = Crud\Categories::create_batch( $categories );
             }
         }
 
@@ -110,10 +110,10 @@ class Tools {
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
 
-            $variations_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
-            if ( ! $variations_res->has_error() ) {
-                $variations = $variations_res->body();
-                $unused = Crud\Categories::create_batch( $variations );
+            $categories_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
+            if ( ! $categories_res->has_error() ) {
+                $categories = $categories_res->body();
+                $unused = Crud\Categories::create_batch( $categories );
             }
         }
 
