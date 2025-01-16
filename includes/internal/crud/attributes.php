@@ -96,64 +96,68 @@ class Attributes {
      *
      * @return bool|WP_Error Devuelve true si la actualización fue exitosa o WP_Error en caso de error.
      */
-    public static function update( WC_Product $product, array $data ): bool|WP_Error {
-        $filtered_data = self::clean_data( $data );
+    public static function update(WC_Product $product, array $data): bool|WP_Error {
+        $filtered_data = self::clean_data($data);
 
-        if ( empty( $filtered_data ) || empty( $filtered_data['name'] ) ) {
-            return new WP_Error( 'invalid_data', __( 'El nombre es obligatorio para actualizar un atributo de producto.', Constants::TEXT_DOMAIN ) );
+        if (empty($filtered_data) || empty($filtered_data['name'])) {
+            return new WP_Error('invalid_data', __('El nombre es obligatorio para actualizar un atributo de producto.', Constants::TEXT_DOMAIN));
         }
 
         $existing_attributes = $product->get_attributes();
+        $attribute_name = wc_sanitize_taxonomy_name($filtered_data['name']);
+        $taxonomy_name = 'pa_' . $attribute_name;
 
-        $attribute_name = wc_sanitize_taxonomy_name( $filtered_data['name'] );
-        $taxonomy_name  = 'pa_' . $attribute_name; // Para taxonomías de WooCommerce.
-
-        if ( taxonomy_exists( $taxonomy_name ) ) {
-            if ( isset( $filtered_data['options'] ) && is_array( $filtered_data['options'] ) ) {
-                foreach ( $filtered_data['options'] as $term ) {
-                    if ( ! term_exists( $term, $taxonomy_name ) ) {
-                        wp_insert_term( $term, $taxonomy_name );
+        if (taxonomy_exists($taxonomy_name)) {
+            // Add new options to the taxonomy if needed
+            if (isset($filtered_data['options']) && is_array($filtered_data['options'])) {
+                foreach ($filtered_data['options'] as $term) {
+                    if (!term_exists($term, $taxonomy_name)) {
+                        wp_insert_term($term, $taxonomy_name);
                     }
                 }
 
-                $existing_attributes[ $taxonomy_name ] = array(
-                    'name'      => $taxonomy_name,
-                    'options'   => $filtered_data['options'],
-                    'visible'   => $filtered_data['visible'] ?? true,
+                // Update or add the attribute to existing attributes
+                $existing_attributes[$taxonomy_name] = [
+                    'name' => $taxonomy_name,
+                    'options' => $filtered_data['options'],
+                    'visible' => $filtered_data['visible'] ?? true,
                     'variation' => $filtered_data['variation'] ?? false,
-                );
+                ];
             }
         } else {
-            foreach ( $existing_attributes as $key => $attribute ) {
-                if ( $attribute instanceof WC_Product_Attribute && $attribute->get_name() === $attribute_name ) {
-                    if ( isset( $filtered_data['options'] ) && is_array( $filtered_data['options'] ) ) {
-                        $attribute->set_options( $filtered_data['options'] );
+            foreach ($existing_attributes as $key => $attribute) {
+                if ($attribute instanceof WC_Product_Attribute && $attribute->get_name() === $attribute_name) {
+                    // Update the existing attribute options
+                    if (isset($filtered_data['options']) && is_array($filtered_data['options'])) {
+                        $attribute->set_options($filtered_data['options']);
                     }
-                    $attribute->set_visible( $filtered_data['visible'] ?? true );
-                    $attribute->set_variation( $filtered_data['variation'] ?? false );
+                    $attribute->set_visible($filtered_data['visible'] ?? true);
+                    $attribute->set_variation($filtered_data['variation'] ?? false);
 
-                    $existing_attributes[ $key ] = $attribute;
-                    $product->set_attributes( $existing_attributes );
-
+                    // Update the attribute in the existing attributes list
+                    $existing_attributes[$key] = $attribute;
+                    $product->set_attributes($existing_attributes);
                     try {
                         $product->save();
-                    } catch ( Exception $e ) {
-                        return new WP_Error( 'save_error', __( 'Error al guardar el producto.', Constants::TEXT_DOMAIN ) );
+                    } catch (Exception $e) {
+                        return new WP_Error('save_error', __('Error al guardar el producto.', Constants::TEXT_DOMAIN));
                     }
 
                     return true;
                 }
             }
 
-            return new WP_Error( 'attribute_not_found', __( 'El atributo no existe para este producto.', Constants::TEXT_DOMAIN ) );
+            // If no match is found, return error
+            return new WP_Error('attribute_not_found', __('El atributo no existe para este producto.', Constants::TEXT_DOMAIN));
         }
 
-        $product->set_attributes( $existing_attributes );
+        // Ensure attributes are set correctly after modification
+        $product->set_attributes($existing_attributes);
 
         try {
             $product->save();
-        } catch ( Exception $e ) {
-            return new WP_Error( 'save_error', __( 'Error al guardar el producto.', Constants::TEXT_DOMAIN ) );
+        } catch (Exception $e) {
+            return new WP_Error('save_error', __('Error al guardar el producto.', Constants::TEXT_DOMAIN));
         }
 
         return true;
@@ -167,11 +171,11 @@ class Attributes {
      *
      * @return bool|WP_Error Devuelve true en caso de éxito o WP_Error en caso de fallo.
      */
-    public static function create( WC_Product $product, array $data ): bool|WP_Error {
-        $filtered_data = self::clean_data( $data );
+    public static function create(WC_Product $product, array $data): bool|WP_Error {
+        $filtered_data = self::clean_data($data);
 
-        if ( empty( $filtered_data ) || empty( $filtered_data['name'] ) ) {
-            return new WP_Error( 'invalid_data', __( 'El nombre es obligatorio para crear un atributo de producto.', Constants::TEXT_DOMAIN ) );
+        if (empty($filtered_data) || empty($filtered_data['name'])) {
+            return new WP_Error('invalid_data', __('El nombre es obligatorio para crear un atributo de producto.', Constants::TEXT_DOMAIN));
         }
 
         // Obtener los atributos existentes del producto.
@@ -179,19 +183,19 @@ class Attributes {
 
         // Crear un nuevo atributo.
         $attribute = new WC_Product_Attribute();
-        $attribute->set_name( $filtered_data['name'] );
+        $attribute->set_name($filtered_data['name']);
 
-        if ( ! empty( $filtered_data['options'] ) ) {
-            $attribute->set_options( $filtered_data['options'] );
+        if (!empty($filtered_data['options'])) {
+            $attribute->set_options($filtered_data['options']);
         }
 
-        $attribute->set_position( count( $existing_attributes ) + 1 );
-        $attribute->set_visible( isset( $filtered_data['visible'] ) ? $filtered_data['visible'] : true );
-        $attribute->set_variation( isset( $filtered_data['variation'] ) ? $filtered_data['variation'] : false );
+        $attribute->set_position(count($existing_attributes) + 1);
+        $attribute->set_visible(isset($filtered_data['visible']) ? $filtered_data['visible'] : true);
+        $attribute->set_variation(isset($filtered_data['variation']) ? $filtered_data['variation'] : false);
 
         // Añadir el nuevo atributo al producto.
-        $existing_attributes[] = $attribute;
-        $product->set_attributes( $existing_attributes );
+        $existing_attributes[] = $attribute;  // Add the new attribute to the existing ones
+        $product->set_attributes($existing_attributes);
         $product->save();
 
         return true;
