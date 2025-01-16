@@ -54,18 +54,18 @@ class Sync_Endpoint {
         $product_id = (int) $request->get_param('product_id');
         $from = $request->get_param('from');
 
-        $domain = self::get_request_domain( $request );
         $site = null;
 
         if ( $from === 'primary' ) {
             $site = Helpers::primary_site();
         } else if ( $from === 'secondary' ) {
             $sites = Helpers::sites();
+            $domain = self::get_request_domain( $request );
             $site = self::find_site_by_domain($sites, $domain);
         }
 
         if ( empty( $site ) ) {
-            return new WP_REST_Response(['message' => 'Can not sync because site does no exist on this page'], 404);
+            return new WP_REST_Response(['message' => 'Can not sync because site does no exist on this page' . $domain], 404);
         }
 
         $client = Client::create($site['url'], $site['api_key'], $site['api_secret']);
@@ -89,7 +89,12 @@ class Sync_Endpoint {
 
     private static function get_request_domain(WP_REST_Request $request): string {
         $scheme = is_ssl() ? 'https' : 'http';
-        $host = $request->get_header('host');
+
+        $host = $request->get_header('X-Source-Server-Host');
+        if (empty($host)) {
+            // Fallback to the normal 'Host' header if no proxy headers are found
+            $host = $request->get_header('host');
+        }
 
         return "{$scheme}://{$host}";
     }

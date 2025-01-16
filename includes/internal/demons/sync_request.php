@@ -107,11 +107,15 @@ class Sync_Request {
         $sites = Helpers::sites();
         $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
 
-        $response = wp_remote_post($external_site_url, [
-            'body' => [
-                'product_id' => $product_id,
-                'from'       => 'secondary',
-            ],
-        ]);
+            $server_host = $_SERVER['HTTP_HOST'];
+            $response = wp_remote_post($external_site_url, [
+                'body' => [
+                    'product_id' => $product_id,
+                    'from'       => 'secondary',
+                ],
+                'headers' => [
+                    'X-Source-Server-Host' => $server_host,
+                ],
+            ]);
     }
 }
