@@ -258,15 +258,20 @@ class Admin_Page {
 
         $skus = array_column($filtered_products, 'sku');
 
-        $all_categories = array_values(array_unique(
-            array_merge(...array_map(fn($product) => array_column($product['categories'] ?? [], null, 'id'), $filtered_products))
-        ));
+        $category_ids = [];
+        foreach ($filtered_products as $product) {
+            if (!empty($product['categories'])) {
+                foreach ($product['categories'] as $category) {
+                    if (isset($category['id'])) {
+                        $category_ids[] = $category['id'];
+                    }
+                }
+            }
+        }
 
-        if (!empty($all_categories)) {
-            $ids = array_column($all_categories, 'id');
-
-            $categories_res = $client->product_categories->pull_all(['include' => implode(',', $ids)]);
-
+        $unique_category_ids = array_unique($category_ids);
+        if (!empty($unique_category_ids)) {
+            $categories_res = $client->product_categories->pull_all(['include' => implode(',', $unique_category_ids)]);
             if (!$categories_res->has_error()) {
                 $categories = $categories_res->body();
                 $unused = Crud\Categories::create_batch($categories);
@@ -275,7 +280,6 @@ class Admin_Page {
 
         add_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', function() use ( $skus ) { return $skus; });
         $imported_products = Crud\Products::create_or_update_batch($filtered_products, [ 'skip_ids' => true ]);
-            wp_send_json( null, 403 );
         if ( $imported_products['error_count'] > 0 ) {
             remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
             wp_send_json([
