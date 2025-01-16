@@ -353,7 +353,7 @@ class Products {
      *
      * @return WP_Error|int ID de la imágen agregada a la galería del producto o un objeto WP_Error si ocurre un error.
      */
-    public static function upload_image(string $image_url, int $product_id, ?string $external_id = null) {
+    public static function upload_image(string $image_url, int $product_id, ?string $external_id = null): WP_Error|int {
         $image_id = self::search_image($image_url, $external_id);
         if ( $image_id ) {
             return $image_id;
