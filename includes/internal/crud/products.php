@@ -54,9 +54,9 @@ class Products {
      * @param int   $product_id El ID del producto que será actualizado.
      * @param array $data       Datos del producto a actualizar.
      *
-     * @return bool|WP_Error Devuelve true si la actualización fue exitosa o un WP_Error en caso de fallo.
+     * @return int|WP_Error Devuelve id si la actualización fue exitosa o un WP_Error en caso de fallo.
      */
-    public static function update( int $product_id, array $data ): WP_Error|true {
+    public static function update( int $product_id, array $data ): WP_Error|int {
         $wc_product = wc_get_product( $product_id );
         if ( ! $wc_product ) {
             return new WP_Error( 'product_not_found', __( "El producto con ID $product_id no existe.", Constants::TEXT_DOMAIN ) );
@@ -104,7 +104,7 @@ class Products {
                 }
             }
 
-            return true;
+            return $wc_product->get_id();
         } catch ( \Exception $e ) {
             return new WP_Error( 'save_error', __( 'Error al guardar el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
         }
