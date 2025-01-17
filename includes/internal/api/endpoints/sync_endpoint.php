@@ -2,6 +2,7 @@
 
 namespace WooHive\Internal\Api\Endpoints;
 
+use WooHive\Config\Constants;
 use WooHive\Internal\Tools;
 use WooHive\Utils\Helpers;
 use WooHive\WCApi\Client;
@@ -55,6 +56,10 @@ class Sync_Endpoint {
      * @return WP_REST_Response|WP_Error
      */
     public static function handle_sync_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
+            return new WP_REST_Response( array( 'message' => 'Can not sync because only stock sync is allowed' ), 404 );
+        }
+
         $product_id = (int) $request->get_param( 'product_id' );
         $from       = $request->get_param( 'from' );
 

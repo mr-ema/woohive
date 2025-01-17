@@ -74,6 +74,15 @@ class WC_Setting_Woo_Hive_Page extends WC_Settings_Page {
             'default' => 'yes',
         );
 
+        if ( ! Helpers::is_primary_site() ) {
+            $settings[ $this->id . '_sync_only_stock' ] = array(
+                'title'   => __( 'Sincronizar solo stock', Constants::TEXT_DOMAIN ),
+                'type'    => 'checkbox',
+                'id'      => $this->id . '_sync_only_stock',
+                'default' => 'no',
+            );
+        }
+
         $settings[ $this->id . '_role' ] = array(
             'title'   => __( 'Rol de este sitio', Constants::TEXT_DOMAIN ),
             'type'    => 'select',

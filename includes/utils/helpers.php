@@ -367,8 +367,13 @@ class Helpers {
             return false;
         }
 
-        // Si la sincronización de inventario no está habilitada
+        // Si la sincronización no está habilitada
         if ( get_option( Constants::PLUGIN_SLUG . '_enabled', 'yes' ) !== 'yes' ) {
+            return false;
+        }
+
+        // Si la sincronización de solo inventario está habilitada
+        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
             return false;
         }
 
