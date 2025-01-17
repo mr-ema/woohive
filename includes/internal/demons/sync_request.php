@@ -2,6 +2,7 @@
 
 namespace WooHive\Internal\Demons;
 
+use WooHive\Config\Constants;
 use WooHive\Utils\Helpers;
 
 use WC_Product;
