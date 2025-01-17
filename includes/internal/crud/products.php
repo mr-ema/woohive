@@ -359,6 +359,13 @@ class Products {
             return $image_id;
         }
 
+        // Sin esto media_sideload_image no functiona cuando se usa la api interna
+        if ( ! function_exists( 'media_sideload_image' ) ) {
+            require_once(ABSPATH . 'wp-admin/includes/media.php');
+            require_once(ABSPATH . 'wp-admin/includes/file.php');
+            require_once(ABSPATH . 'wp-admin/includes/image.php');
+        }
+
         $image_id = media_sideload_image($image_url, $product_id, null, 'id');
         if (is_wp_error($image_id)) {
             return new WP_Error('upload_error', 'Error al subir la imagen: ' . $image_id->get_error_message());
