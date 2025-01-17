@@ -20,17 +20,17 @@ class Tools {
      * Importa un producto desde un cliente remoto y lo crea o actualiza en el sistema local.
      *
      * @param Client $client     Instancia del cliente remoto utilizado para la comunicación con la API.
-     * @param int    $product_id ID del producto que se desea importar desde la API remota.
+     * @param int    $external_product_id ID del producto que se desea importar desde la API remota.
      *
      * @return int|WP_Error Retorna el ID del producto creado o actualizado en caso de éxito,
      *                      o un objeto WP_Error si ocurre algún problema durante el proceso.
      */
-    public static function import_product( Client &$client, int $product_id ): int|WP_Error {
-        if ( ! isset( $product_id ) ) {
+    public static function import_product( Client &$client, int $external_product_id ): int|WP_Error {
+        if ( ! isset( $external_product_id ) ) {
             return new WP_Error( 'invalid_id', __( 'El ID del producto es invalido', Constants::TEXT_DOMAIN ) );
         }
 
-        $res = $client->products->pull( $product_id );
+        $res = $client->products->pull( $external_product_id );
         if ( $res->has_error() || empty( $res->body() ) ) {
             return new WP_Error(
                 'product_not_found',
@@ -59,42 +59,44 @@ class Tools {
                 return array( $product['sku'] );
             }
         );
-        $product_id = Crud\Products::create_or_update( null, $product );
-        if ( is_wp_error( $product_id ) ) {
+
+        $internal_res = Crud\Products::create_or_update( null, $product );
+        if ( is_wp_error( $internal_res ) ) {
             remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
-            return $product_id;
+            return $internal_res;
         }
 
-        if ( $product_id && ! empty( $product['variations'] ) ) {
+        $internal_product_id = $internal_res;
+        if ( $internal_product_id && ! empty( $product['variations'] ) ) {
             $ids = $product['variations'];
 
             $variations_res = $client->product_variations->pull_all( $product['id'], array( 'include' => implode( ',', $ids ) ) );
             if ( ! $variations_res->has_error() ) {
                 $variations = $variations_res->body();
-                $unused     = Crud\Variations::create_or_update_batch( $product_id, $variations );
+                $unused     = Crud\Variations::create_or_update_batch( $internal_product_id, $variations );
             }
         }
 
         remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
 
-        return $product_id;
+        return $internal_product_id;
     }
 
     /**
      * Actualiza un producto desde un cliente remoto en el sistema local.
      *
      * @param Client $client     Instancia del cliente remoto utilizado para la comunicación con la API.
-     * @param int    $product_id ID del producto que se desea importar desde la API remota.
+     * @param int    $external_product_id ID del producto que se desea importar desde la API remota.
      *
      * @return int|WP_Error Retorna el ID del producto actualizado en caso de éxito,
      *                      o un objeto WP_Error si ocurre algún problema durante el proceso.
      */
-    public static function update_product( Client &$client, int $product_id ): int|WP_Error {
-        if ( ! isset( $product_id ) ) {
+    public static function update_product( Client &$client, int $external_product_id ): int|WP_Error {
+        if ( ! isset( $external_product_id ) ) {
             return new WP_Error( 'invalid_id', __( 'El ID del producto es invalido', Constants::TEXT_DOMAIN ) );
         }
 
-        $res = $client->products->pull( $product_id );
+        $res = $client->products->pull( $external_product_id );
         if ( $res->has_error() || empty( $res->body() ) ) {
             return new WP_Error(
                 'product_not_found',
@@ -105,11 +107,6 @@ class Tools {
         $product = $res->body();
         if ( empty( $product['sku'] ) ) {
             return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN ) );
-        }
-
-        $wc_product_id = wc_get_product_id_by_sku( $product['sku'] );
-        if ( empty( $wc_product_id ) ) {
-            return new WP_Error( 'update_product_error', __( 'El producto no existe por lo que no se puede actualizar.', Constants::TEXT_DOMAIN ) );
         }
 
         if ( ! empty( $product['categories'] ) ) {
@@ -128,25 +125,31 @@ class Tools {
                 return array( $product['sku'] );
             }
         );
-        $product_id = Crud\Products::update( $wc_product_id, $product );
-        if ( is_wp_error( $product_id ) ) {
-            remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
-            return $product_id;
+
+        $internal_product_id = wc_get_product_id_by_sku( $product['sku'] );
+        if ( ! $internal_product_id ) {
+            return new WP_Error( 'product_does_not_exists', __( 'El producto no puede ser actualizado dado que no existe en esta pagina.', Constants::TEXT_DOMAIN ) );
         }
 
-        if ( $product_id && ! empty( $product['variations'] ) ) {
+        $internal_res = Crud\Products::update( $internal_product_id, $product );
+        if ( is_wp_error( $internal_res ) ) {
+            remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
+            return $internal_res;
+        }
+
+        if ( $internal_product_id && ! empty( $product['variations'] ) ) {
             $ids = $product['variations'];
 
             $variations_res = $client->product_variations->pull_all( $product['id'], array( 'include' => implode( ',', $ids ) ) );
             if ( ! $variations_res->has_error() ) {
                 $variations = $variations_res->body();
-                $unused     = Crud\Variations::create_or_update_batch( $product_id, $variations );
+                $unused     = Crud\Variations::create_or_update_batch( $internal_product_id, $variations );
             }
         }
 
         remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
 
-        return $product_id;
+        return $internal_product_id;
     }
 
     public static function export_product() {}
