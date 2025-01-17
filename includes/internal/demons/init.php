@@ -2,7 +2,6 @@
 
 namespace WooHive\Internal\Demons;
 
-
 /** Prevenir el acceso directo al script. */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;

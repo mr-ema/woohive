@@ -4,8 +4,8 @@ namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
 
-use \WP_Error;
-use \WC_Product;
+use WP_Error;
+use WC_Product;
 
 
 /** Prevenir el acceso directo al script. */
@@ -20,10 +20,10 @@ class Categories {
      *
      * @var array
      */
-    private static array $invalid_props = [
+    private static array $invalid_props = array(
         'id',              // No permitimos actualizar el ID directamente.
         'count',           // Propiedad de solo lectura.
-    ];
+    );
 
     /**
      * Limpia los datos para eliminar propiedades inválidas.
@@ -44,7 +44,7 @@ class Categories {
      * Asocia categorías existentes a un producto usando nombre o slug (sin crear nuevas categorías).
      *
      * @param WC_Product $product El objeto del producto.
-     * @param array $categories Datos de las categorías a asociar (pueden ser nombres o slugs).
+     * @param array      $categories Datos de las categorías a asociar (pueden ser nombres o slugs).
      *
      * @return bool|WP_Error Devuelve true en caso de éxito o WP_Error en caso de fallo.
      */
@@ -55,17 +55,17 @@ class Categories {
 
         $filtered_categories = array_map( 'sanitize_text_field', $categories );
 
-        $category_ids = [];
+        $category_ids = array();
         foreach ( $categories as $category ) {
-            $category_name = (function() use ( $category) {
+            $category_name = ( function () use ( $category ) {
                 if ( isset( $category['name'] ) ) {
                     return sanitize_text_field( $category['name'] );
-                } else if ( isset( $category['slug'] ) ) {
+                } elseif ( isset( $category['slug'] ) ) {
                     return sanitize_text_field( $category['slug'] );
                 }
 
-                return  '';
-            })();
+                return '';
+            } )();
 
             if ( $category_name ) {
                 $term = term_exists( $category_name, 'product_cat' );
@@ -165,28 +165,28 @@ class Categories {
      *               - 'total_processed'    (int)
      */
     public static function create_batch( array $categories ): array {
-        $results = array();
-        $error_count = 0;
+        $results         = array();
+        $error_count     = 0;
         $total_processed = 0;
-        $total_created = 0;
+        $total_created   = 0;
 
         foreach ( $categories as $data ) {
             $result = self::create( $data );
 
             if ( is_wp_error( $result ) ) {
-                $results[] = $result;
+                $results[]    = $result;
                 $error_count += 1;
             } else {
-                $results[] = $result;
+                $results[]        = $result;
                 $total_processed += 1;
-                $total_created += 1;
+                $total_created   += 1;
             }
         }
 
         // Resumen de las estadísticas
-        $results['error_count'] = $error_count;
+        $results['error_count']     = $error_count;
         $results['total_processed'] = $total_processed;
-        $results['total_created'] = $total_created;
+        $results['total_created']   = $total_created;
 
         return $results;
     }
@@ -203,20 +203,20 @@ class Categories {
      *               - 'total_processed'    (int)
      */
     public static function create_or_update_batch( array $categories ): array {
-        $results          = array();
-        $error_count      = 0;
-        $total_processed  = 0;
-        $total_created    = 0;
-        $total_updated    = 0;
+        $results         = array();
+        $error_count     = 0;
+        $total_processed = 0;
+        $total_created   = 0;
+        $total_updated   = 0;
 
         foreach ( $categories as $data ) {
             $result = self::create_or_update( $data );
 
             if ( is_wp_error( $result ) ) {
-                $results[] = $result;
+                $results[]    = $result;
                 $error_count += 1;
             } else {
-                $results[] = $result;
+                $results[]        = $result;
                 $total_processed += 1;
 
                 // Si la categoría fue creada, incrementar 'total_created'.
@@ -230,10 +230,10 @@ class Categories {
         }
 
         // Resumen
-        $results['error_count']      = $error_count;
-        $results['total_processed']  = $total_processed;
-        $results['total_created']    = $total_created;
-        $results['total_updated']    = $total_updated;
+        $results['error_count']     = $error_count;
+        $results['total_processed'] = $total_processed;
+        $results['total_created']   = $total_created;
+        $results['total_updated']   = $total_updated;
 
         return $results;
     }

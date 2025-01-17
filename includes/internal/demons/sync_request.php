@@ -4,8 +4,8 @@ namespace WooHive\Internal\Demons;
 
 use WooHive\Utils\Helpers;
 
-use \WC_Product;
-use \WC_Product_Variation;
+use WC_Product;
+use WC_Product_Variation;
 
 
 /** Prevenir el acceso directo al script. */
@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Request {
 
     public static function init(): void {
-        add_action( 'woocommerce_update_product', [ self::class, 'on_product_update' ], 10, 2 );
-        add_action( 'woocommerce_update_product_variation', [ self::class, 'on_product_variation_update' ], 10, 2 );
+        add_action( 'woocommerce_update_product', array( self::class, 'on_product_update' ), 10, 2 );
+        add_action( 'woocommerce_update_product_variation', array( self::class, 'on_product_variation_update' ), 10, 2 );
     }
 
     public static function on_product_update( int $product_id, WC_Product $product ): void {
@@ -30,7 +30,7 @@ class Sync_Request {
         if ( Helpers::should_sync( $product ) ) {
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $product );
-            } else if ( Helpers::is_secondary_site() ) {
+            } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site_data( $product );
             }
         }
@@ -48,7 +48,7 @@ class Sync_Request {
         if ( Helpers::should_sync( $product ) ) {
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $product );
-            } else if ( Helpers::is_secondary_site() ) {
+            } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site_data( $product );
             }
         }
@@ -74,14 +74,16 @@ class Sync_Request {
             // temporal way of handling endpoints
             $external_site_url = "{$site['url']}/wp-json/woohive/v1/sync-product";
 
-            $response = wp_remote_post($external_site_url, [
-                'body' => [
-                    'product_id' => $product_id,
-                    'from'       => 'primary',
-                ],
-            ]);
+            $response = wp_remote_post(
+                $external_site_url,
+                array(
+                    'body' => array(
+                        'product_id' => $product_id,
+                        'from'       => 'primary',
+                    ),
+                )
+            );
         }
-
     }
 
     /**
@@ -104,18 +106,21 @@ class Sync_Request {
             return; // Si no hay un sitio principal configurado, no se realiza la sincronización.
         }
 
-        $sites = Helpers::sites();
+        $sites             = Helpers::sites();
         $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
 
             $server_host = $_SERVER['HTTP_HOST'];
-            $response = wp_remote_post($external_site_url, [
-                'body' => [
-                    'product_id' => $product_id,
-                    'from'       => 'secondary',
-                ],
-                'headers' => [
-                    'X-Source-Server-Host' => $server_host,
-                ],
-            ]);
+            $response    = wp_remote_post(
+                $external_site_url,
+                array(
+                    'body'    => array(
+                        'product_id' => $product_id,
+                        'from'       => 'secondary',
+                    ),
+                    'headers' => array(
+                        'X-Source-Server-Host' => $server_host,
+                    ),
+                )
+            );
     }
 }

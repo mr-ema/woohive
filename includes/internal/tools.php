@@ -6,7 +6,7 @@ use WooHive\Config\Constants;
 use WooHive\WCApi\Client;
 use WooHive\Internal\Crud;
 
-use \WP_Error;
+use WP_Error;
 
 
 /** Prevenir el acceso directo al script. */
@@ -40,20 +40,25 @@ class Tools {
 
         $product = $res->body();
         if ( empty( $product['sku'] ) ) {
-            return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN) );
+            return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN ) );
         }
 
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
 
-            $categories_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
+            $categories_res = $client->product_categories->pull_all( array( 'include' => implode( ',', $ids ) ) );
             if ( ! $categories_res->has_error() ) {
                 $categories = $categories_res->body();
-                $unused = Crud\Categories::create_batch( $categories );
+                $unused     = Crud\Categories::create_batch( $categories );
             }
         }
 
-        add_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', function() use ( $product ) { return [ $product['sku'] ]; });
+        add_filter(
+            Constants::PLUGIN_SLUG . '_exclude_skus_from_sync',
+            function () use ( $product ) {
+                return array( $product['sku'] );
+            }
+        );
         $product_id = Crud\Products::create_or_update( null, $product );
         if ( is_wp_error( $product_id ) ) {
             remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
@@ -63,10 +68,10 @@ class Tools {
         if ( $product_id && ! empty( $product['variations'] ) ) {
             $ids = $product['variations'];
 
-            $variations_res = $client->product_variations->pull_all( $product['id'], [ 'include' => implode( ',', $ids ) ] );
+            $variations_res = $client->product_variations->pull_all( $product['id'], array( 'include' => implode( ',', $ids ) ) );
             if ( ! $variations_res->has_error() ) {
                 $variations = $variations_res->body();
-                $unused = Crud\Variations::create_or_update_batch( $product_id, $variations );
+                $unused     = Crud\Variations::create_or_update_batch( $product_id, $variations );
             }
         }
 
@@ -99,25 +104,30 @@ class Tools {
 
         $product = $res->body();
         if ( empty( $product['sku'] ) ) {
-            return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN) );
+            return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN ) );
         }
 
         $wc_product_id = wc_get_product_id_by_sku( $product['sku'] );
         if ( empty( $wc_product_id ) ) {
-            return new WP_Error('update_product_error', __('El producto no existe por lo que no se puede actualizar.', Constants::TEXT_DOMAIN));
+            return new WP_Error( 'update_product_error', __( 'El producto no existe por lo que no se puede actualizar.', Constants::TEXT_DOMAIN ) );
         }
 
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
 
-            $categories_res = $client->product_categories->pull_all( [ 'include' => implode( ',', $ids ) ] );
+            $categories_res = $client->product_categories->pull_all( array( 'include' => implode( ',', $ids ) ) );
             if ( ! $categories_res->has_error() ) {
                 $categories = $categories_res->body();
-                $unused = Crud\Categories::create_batch( $categories );
+                $unused     = Crud\Categories::create_batch( $categories );
             }
         }
 
-        add_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', function() use ( $product ) { return [ $product['sku'] ]; });
+        add_filter(
+            Constants::PLUGIN_SLUG . '_exclude_skus_from_sync',
+            function () use ( $product ) {
+                return array( $product['sku'] );
+            }
+        );
         $product_id = Crud\Products::update( $wc_product_id, $product );
         if ( is_wp_error( $product_id ) ) {
             remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
@@ -127,10 +137,10 @@ class Tools {
         if ( $product_id && ! empty( $product['variations'] ) ) {
             $ids = $product['variations'];
 
-            $variations_res = $client->product_variations->pull_all( $product['id'], [ 'include' => implode( ',', $ids ) ] );
+            $variations_res = $client->product_variations->pull_all( $product['id'], array( 'include' => implode( ',', $ids ) ) );
             if ( ! $variations_res->has_error() ) {
                 $variations = $variations_res->body();
-                $unused = Crud\Variations::create_or_update_batch( $product_id, $variations );
+                $unused     = Crud\Variations::create_or_update_batch( $product_id, $variations );
             }
         }
 
@@ -141,6 +151,6 @@ class Tools {
 
     public static function export_product() {}
 
-    public static function massive_product_import(array $product_data) {}
-    public static function massive_product_export(array $product_data) {}
+    public static function massive_product_import( array $product_data ) {}
+    public static function massive_product_export( array $product_data ) {}
 }

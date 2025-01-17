@@ -9,8 +9,8 @@ class Constants {
     public const DB_VERSION     = '1.0.0';
     public const MIN_WC_VERSION = '6.0';
 
-    public const API_BASE_NAME  = 'woohive';
-    public const API_VERSION    = 'v1';
+    public const API_BASE_NAME = 'woohive';
+    public const API_VERSION   = 'v1';
 
     public const MAX_SITES = 50;
 

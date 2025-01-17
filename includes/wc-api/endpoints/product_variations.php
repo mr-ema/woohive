@@ -103,7 +103,7 @@ class Product_Variations {
             return new Response( 422, null, array(), 'ID de producto y variación son requeridos' );
         }
 
-        return $this->pull_all( $parent_id, [ 'sku' => $variation_sku ] );
+        return $this->pull_all( $parent_id, array( 'sku' => $variation_sku ) );
     }
 
     /**

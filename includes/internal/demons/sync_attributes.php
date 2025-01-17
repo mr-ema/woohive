@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Attributes {
 
     public static function init(): void {
-        add_action( 'save_post', [ __CLASS__, 'on_product_attribute_update'], 10, 3 );
+        add_action( 'save_post', array( __CLASS__, 'on_product_attribute_update' ), 10, 3 );
     }
 
     /**
@@ -22,9 +22,9 @@ class Sync_Attributes {
      *
      * Este método se llama cuando un producto se guarda y sus atributos son modificados.
      *
-     * @param int    $post_id ID del producto.
+     * @param int     $post_id ID del producto.
      * @param WP_Post $post   Instancia del post (producto).
-     * @param bool   $update  Indica si es una actualización.
+     * @param bool    $update  Indica si es una actualización.
      *
      * @return void
      */
@@ -39,7 +39,7 @@ class Sync_Attributes {
         }
 
         $product = wc_get_product( $post_id );
-        if ( !$product ) {
+        if ( ! $product ) {
             return;
         }
 
@@ -51,7 +51,7 @@ class Sync_Attributes {
         if ( self::attributes_changed( $old_attributes, $new_attributes ) ) {
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_attributes( $post_id, $new_attributes );
-            } else if ( Helpers::is_secondary_site() ) {
+            } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site_attributes( $post_id, $new_attributes );
             }
         }
@@ -66,8 +66,8 @@ class Sync_Attributes {
      */
     private static function get_old_attributes( int $post_id ): array {
         $product = wc_get_product( $post_id );
-        if ( !$product ) {
-            return [];
+        if ( ! $product ) {
+            return array();
         }
 
         return $product->get_attributes();
@@ -105,16 +105,16 @@ class Sync_Attributes {
      */
     private static function sync_to_secondary_sites_attributes( int $post_id, array $new_attributes ): void {
         $product = wc_get_product( $post_id );
-        $sku = $product->get_sku();
+        $sku     = $product->get_sku();
 
         if ( empty( $sku ) ) {
             return;
         }
 
-        $data = [
+        $data = array(
             'sku'        => $sku,
             'attributes' => self::format_attributes( $new_attributes ),
-        ];
+        );
 
         $sites = Helpers::sites();
 
@@ -135,23 +135,23 @@ class Sync_Attributes {
      */
     private static function sync_to_primary_site_attributes( int $post_id, array $new_attributes ): void {
         $product = wc_get_product( $post_id );
-        $sku = $product->get_sku();
+        $sku     = $product->get_sku();
 
         if ( empty( $sku ) ) {
             return;
         }
 
-        $data = [
+        $data = array(
             'sku'        => $sku,
             'attributes' => self::format_attributes( $new_attributes ),
-        ];
+        );
 
         $site = Helpers::primary_site();
         if ( empty( $site ) ) {
             return;
         }
 
-        $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+        $client   = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
         $response = $client->products->push_or_update( $data );
     }
 
@@ -163,15 +163,15 @@ class Sync_Attributes {
      * @return array Atributos formateados para la sincronización.
      */
     private static function format_attributes( array $attributes ): array {
-        $formatted = [];
+        $formatted = array();
 
         foreach ( $attributes as $attribute ) {
-            $formatted[] = [
-                'name'   => $attribute->get_name(),
-                'value'  => implode( ', ', $attribute->get_options() ),
-                'visible' => $attribute->get_visible(),
+            $formatted[] = array(
+                'name'      => $attribute->get_name(),
+                'value'     => implode( ', ', $attribute->get_options() ),
+                'visible'   => $attribute->get_visible(),
                 'variation' => $attribute->get_variation(),
-            ];
+            );
         }
 
         return $formatted;

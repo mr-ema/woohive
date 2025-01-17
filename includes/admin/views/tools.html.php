@@ -17,7 +17,7 @@
             <h2 style="margin-bottom: 2rem;"><?php esc_html_e( 'Herramientas', Constants::TEXT_DOMAIN ); ?></h2>
 
             <div class="tools">
-                <?php if (false): ?>
+                <?php if ( false ) : ?>
                     <div class="tool">
                         <div class="title"><?php _e( 'Sincronizar Todo', Constants::TEXT_DOMAIN ); ?></div>
                         <div class="desc"><?php _e( 'Actualiza los inventarios segundarios, sincronizando desde el inventario principal.', Constants::TEXT_DOMAIN ); ?></div>

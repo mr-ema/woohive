@@ -5,7 +5,7 @@ namespace WooHive\Internal\Demons;
 use WooHive\WCApi\Client;
 use WooHive\Utils\Helpers;
 
-use \WC_Product;
+use WC_Product;
 
 
 /** Prevenir el acceso directo al script. */
@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Stock {
 
     public static function init(): void {
-        add_action( 'woocommerce_product_set_stock',   [ __CLASS__, 'on_stock_update' ], 10, 2 );
-        add_action( 'woocommerce_variation_set_stock', [ __CLASS__, 'on_stock_update' ], 10, 2 );
+        add_action( 'woocommerce_product_set_stock', array( __CLASS__, 'on_stock_update' ), 10, 2 );
+        add_action( 'woocommerce_variation_set_stock', array( __CLASS__, 'on_stock_update' ), 10, 2 );
     }
 
     /**
@@ -34,7 +34,7 @@ class Sync_Stock {
 
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites( $product, $new_stock );
-            } else if ( Helpers::is_secondary_site() ) {
+            } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site( $product, $new_stock );
             }
         }
@@ -44,7 +44,7 @@ class Sync_Stock {
      * Sincroniza el stock del producto con los sitios secundarios configurados.
      *
      * @param WC_Product $product Instancia del producto.
-     * @param int $stock_quantity Nueva cantidad de stock del producto.
+     * @param int        $stock_quantity Nueva cantidad de stock del producto.
      *
      * @return void
      */
@@ -54,12 +54,12 @@ class Sync_Stock {
             return;
         }
 
-        $data = [
-            'sku'               => $sku,
-            'stock_quantity'    => $stock_quantity,
-            'stock_status'      => $product->get_stock_status(),
-            'manage_stock'      => $product->managing_stock() ? 'true' : 'false',
-        ];
+        $data = array(
+            'sku'            => $sku,
+            'stock_quantity' => $stock_quantity,
+            'stock_status'   => $product->get_stock_status(),
+            'manage_stock'   => $product->managing_stock() ? 'true' : 'false',
+        );
 
         $sites = Helpers::sites();
 
@@ -79,7 +79,7 @@ class Sync_Stock {
      * Sincroniza el stock del producto al sitio principal.
      *
      * @param WC_Product $product Instancia del producto.
-     * @param int $stock_quantity Nueva cantidad de stock del producto.
+     * @param int        $stock_quantity Nueva cantidad de stock del producto.
      *
      * @return void
      */
@@ -94,14 +94,14 @@ class Sync_Stock {
             return;
         }
 
-        $data = [
-            'sku'               => $sku,
-            'stock_quantity'    => $stock_quantity,
-            'stock_status'      => $product->get_stock_status(),
-            'manage_stock'      => $product->managing_stock() ? 'true' : 'false',
-        ];
+        $data = array(
+            'sku'            => $sku,
+            'stock_quantity' => $stock_quantity,
+            'stock_status'   => $product->get_stock_status(),
+            'manage_stock'   => $product->managing_stock() ? 'true' : 'false',
+        );
 
-        $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+        $client   = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
         $response = $client->products->push_or_update( $data );
     }
 }

@@ -283,11 +283,11 @@ class Products {
         $data = $product->get_data();
         self::clean_data( $data );
 
-        $data['dimensions'] = [
-            'width'  => $data['width']  ?? 0,
+        $data['dimensions'] = array(
+            'width'  => $data['width'] ?? 0,
             'length' => $data['length'] ?? 0,
             'height' => $data['height'] ?? 0,
-        ];
+        );
         unset( $data['width'], $data['length'], $data['height'] );
 
         if ( ! empty( $custom_fields ) ) {

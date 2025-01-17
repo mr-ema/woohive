@@ -105,11 +105,11 @@ class Admin_Page {
         }
 
         $nonces = array(
-            'api_check'         => wp_create_nonce( Constants::PLUGIN_PREFIX . '-api-check' ),
-            'export_product'    => wp_create_nonce( Constants::PLUGIN_PREFIX . '-export-product' ),
-            'push_all'          => wp_create_nonce( Constants::PLUGIN_PREFIX . '-push-all' ),
-            'import_product'    => wp_create_nonce( Constants::PLUGIN_PREFIX . '-import-product' ),
-            'massive_import'    => wp_create_nonce( Constants::PLUGIN_PREFIX . '-massive-import' ),
+            'api_check'      => wp_create_nonce( Constants::PLUGIN_PREFIX . '-api-check' ),
+            'export_product' => wp_create_nonce( Constants::PLUGIN_PREFIX . '-export-product' ),
+            'push_all'       => wp_create_nonce( Constants::PLUGIN_PREFIX . '-push-all' ),
+            'import_product' => wp_create_nonce( Constants::PLUGIN_PREFIX . '-import-product' ),
+            'massive_import' => wp_create_nonce( Constants::PLUGIN_PREFIX . '-massive-import' ),
         );
 
         wp_localize_script(
@@ -201,10 +201,12 @@ class Admin_Page {
 
         $site = Helpers::site_by_key( $site_key );
         if ( empty( $site ) ) {
-            wp_send_json_error( __(
-                'El sitio especificado no pudo ser localizado. Por favor verifica la clave del sitio e intenta nuevamente.',
-                Constants::TEXT_DOMAIN
-            ) );
+            wp_send_json_error(
+                __(
+                    'El sitio especificado no pudo ser localizado. Por favor verifica la clave del sitio e intenta nuevamente.',
+                    Constants::TEXT_DOMAIN
+                )
+            );
         }
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
@@ -221,7 +223,7 @@ class Admin_Page {
         check_ajax_referer( Constants::PLUGIN_PREFIX . '-massive-import', 'security' );
 
         if ( ! current_user_can( 'manage_woocommerce' ) ) {
-            wp_send_json( ['message' => 'Permission denied'], 403 );
+            wp_send_json( array( 'message' => 'Permission denied' ), 403 );
         }
 
         // If we are completing whole update (all sites has been processed),
@@ -236,81 +238,103 @@ class Admin_Page {
 
         $site = Helpers::site_by_key( $_POST['site_key'] );
         if ( empty( $site ) ) {
-            wp_send_json( ['message' => 'Sitio no encontrado'], 404 );
+            wp_send_json( array( 'message' => 'Sitio no encontrado' ), 404 );
         }
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 
-        $response = $client->products->pull_all( [ 'per_page' => $limit, 'page' => $page, 'context'  => 'edit' ] );
+        $response = $client->products->pull_all(
+            array(
+                'per_page' => $limit,
+                'page'     => $page,
+                'context'  => 'edit',
+            )
+        );
         if ( $response->has_error() ) {
-            wp_send_json([
-                'status'  => 'error',
-                'message' => __( 'Error mientras se intentaba recuperar productos de la API', Constants::TEXT_DOMAIN  ),
-                'error'   => $response->json_fmt()
-            ], 422);
+            wp_send_json(
+                array(
+                    'status'  => 'error',
+                    'message' => __( 'Error mientras se intentaba recuperar productos de la API', Constants::TEXT_DOMAIN ),
+                    'error'   => $response->json_fmt(),
+                ),
+                422
+            );
         }
 
-        $results            = $response->body();
-        $filtered_products  = array_values(array_filter($results, fn($product) => !empty($product['sku'])));
+        $results           = $response->body();
+        $filtered_products = array_values( array_filter( $results, fn( $product ) => ! empty( $product['sku'] ) ) );
 
-        $total          = $response->headers()['x-wp-total'] ?? 0;
-        $total_pages    = $response->headers()['x-wp-totalpages'] ?? 0;
+        $total       = $response->headers()['x-wp-total'] ?? 0;
+        $total_pages = $response->headers()['x-wp-totalpages'] ?? 0;
 
-        $skus = array_column($filtered_products, 'sku');
+        $skus = array_column( $filtered_products, 'sku' );
 
-        $category_ids = [];
-        foreach ($filtered_products as $product) {
-            if (!empty($product['categories'])) {
-                foreach ($product['categories'] as $category) {
-                    if (isset($category['id'])) {
+        $category_ids = array();
+        foreach ( $filtered_products as $product ) {
+            if ( ! empty( $product['categories'] ) ) {
+                foreach ( $product['categories'] as $category ) {
+                    if ( isset( $category['id'] ) ) {
                         $category_ids[] = $category['id'];
                     }
                 }
             }
         }
 
-        $unique_category_ids = array_unique($category_ids);
-        if (!empty($unique_category_ids)) {
-            $categories_res = $client->product_categories->pull_all(['include' => implode(',', $unique_category_ids)]);
-            if (!$categories_res->has_error()) {
+        $unique_category_ids = array_unique( $category_ids );
+        if ( ! empty( $unique_category_ids ) ) {
+            $categories_res = $client->product_categories->pull_all( array( 'include' => implode( ',', $unique_category_ids ) ) );
+            if ( ! $categories_res->has_error() ) {
                 $categories = $categories_res->body();
-                $unused = Crud\Categories::create_batch($categories);
+                $unused     = Crud\Categories::create_batch( $categories );
             }
         }
 
-        add_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', function() use ( $skus ) { return $skus; });
-        $imported_products = Crud\Products::create_or_update_batch($filtered_products, [ 'skip_ids' => true ]);
+        add_filter(
+            Constants::PLUGIN_SLUG . '_exclude_skus_from_sync',
+            function () use ( $skus ) {
+                return $skus;
+            }
+        );
+        $imported_products = Crud\Products::create_or_update_batch( $filtered_products, array( 'skip_ids' => true ) );
         if ( $imported_products['error_count'] > 0 ) {
             remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
-            wp_send_json([
-                'status' => 'error',
-                'errors' => $imported_products,
-            ], 422);
+            wp_send_json(
+                array(
+                    'status' => 'error',
+                    'errors' => $imported_products,
+                ),
+                422
+            );
         }
 
         foreach ( $filtered_products as $product ) {
             if ( $product && ! empty( $product['variations'] ) ) {
-                $ids = $product['variations'];
-                $product_id = wc_get_product_id_by_sku($product['sku']);
+                $ids        = $product['variations'];
+                $product_id = wc_get_product_id_by_sku( $product['sku'] );
 
-                if ( ! $product_id || empty( $ids ) ) continue;
+                if ( ! $product_id || empty( $ids ) ) {
+                    continue;
+                }
 
-                $variations_res = $client->product_variations->pull_all( $product['id'], [ 'include' => implode( ',', $ids ) ] );
+                $variations_res = $client->product_variations->pull_all( $product['id'], array( 'include' => implode( ',', $ids ) ) );
                 if ( ! $variations_res->has_error() ) {
                     $variations = $variations_res->body();
-                    $unused = Crud\Variations::create_or_update_batch( $product_id, $variations );
+                    $unused     = Crud\Variations::create_or_update_batch( $product_id, $variations );
                 }
             }
         }
 
         remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
-        wp_send_json([
-            'status'    => 'processed',
-            'total'     => $total,
-            'pages'     => $total_pages,
-            'page'      => $page,
-            'last_page' => $total_pages == $page,
-            'count'     => count( $results ),
-        ], 200);
+        wp_send_json(
+            array(
+                'status'    => 'processed',
+                'total'     => $total,
+                'pages'     => $total_pages,
+                'page'      => $page,
+                'last_page' => $total_pages == $page,
+                'count'     => count( $results ),
+            ),
+            200
+        );
     }
 }

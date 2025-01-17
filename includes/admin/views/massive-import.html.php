@@ -84,7 +84,7 @@ var app = new Vue({
     el: '#wmss-massive-import-app',
     data: {
         status: 'pending',
-        sites: <?php echo json_encode(array_values(Helpers::sites())); ?>,
+        sites: <?php echo json_encode( array_values( Helpers::sites() ) ); ?>,
     },
     methods: {
         startImport: function(site) {
@@ -130,7 +130,7 @@ var app = new Vue({
                 site.processStarted = new Date();
             }
 
-            var limit = <?php echo Helpers::get_batch_size('massive_import'); ?>;
+            var limit = <?php echo Helpers::get_batch_size( 'massive_import' ); ?>;
             var data = {
                 page: page,
                 site_key: site.key,

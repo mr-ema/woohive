@@ -5,7 +5,7 @@ namespace WooHive\Internal\Demons;
 use WooHive\WCApi\Client;
 use WooHive\Utils\Helpers;
 
-use \WC_Product_Variation;
+use WC_Product_Variation;
 
 
 /** Prevenir el acceso directo al script. */
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Variations {
 
     public static function init(): void {
-        add_action( 'woocommerce_update_product_variation', [ __CLASS__, 'on_product_variation_update' ], 10, 2 );
+        add_action( 'woocommerce_update_product_variation', array( __CLASS__, 'on_product_variation_update' ), 10, 2 );
     }
 
     /**
@@ -31,7 +31,7 @@ class Sync_Variations {
         if ( Helpers::should_sync( $variation ) ) {
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $variation );
-            } else if ( Helpers::is_secondary_site() ) {
+            } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site_data( $variation );
             }
         }
@@ -56,11 +56,11 @@ class Sync_Variations {
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 
-            $parent     = wc_get_product( $variation->get_parent_id() );
-            $response   = $client->products->pull_by_sku( $parent->get_sku() );
+            $parent   = wc_get_product( $variation->get_parent_id() );
+            $response = $client->products->pull_by_sku( $parent->get_sku() );
             if ( ! $response->has_error() ) {
-                $parent_id  = $response->body()[0]['id'];
-                $response   = $client->product_variations->update( $parent_id, $data );
+                $parent_id = $response->body()[0]['id'];
+                $response  = $client->product_variations->update( $parent_id, $data );
             }
         }
     }
@@ -87,11 +87,11 @@ class Sync_Variations {
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 
-        $parent     = wc_get_product( $variation->get_parent_id() );
-        $response   = $client->products->pull_by_sku( $parent->get_sku() );
+        $parent   = wc_get_product( $variation->get_parent_id() );
+        $response = $client->products->pull_by_sku( $parent->get_sku() );
         if ( ! $response->has_error() ) {
-            $parent_id  = $response->body()[0]['id'];
-            $response   = $client->product_variations->update( $parent_id, $data );
+            $parent_id = $response->body()[0]['id'];
+            $response  = $client->product_variations->update( $parent_id, $data );
         }
     }
 
@@ -103,20 +103,20 @@ class Sync_Variations {
      * @return array Datos esenciales de la variación.
      */
     private static function wc_product_to_json( WC_Product_Variation $variation ): array {
-        return [
-            'name'             => $variation->get_name(),
-            'description'      => $variation->get_description(),
-            'dimensions'       => [
+        return array(
+            'name'          => $variation->get_name(),
+            'description'   => $variation->get_description(),
+            'dimensions'    => array(
                 'length' => $variation->get_length(),
                 'width'  => $variation->get_width(),
                 'height' => $variation->get_height(),
-            ],
-            'weight'           => $variation->get_weight(),
-            'regular_price'    => $variation->get_regular_price(),
-            'sale_price'       => $variation->get_sale_price(),
-            'sku'              => $variation->get_sku(),
-            'status'           => $variation->get_status(),
-            'virtual'          => $variation->get_virtual(),
-        ];
+            ),
+            'weight'        => $variation->get_weight(),
+            'regular_price' => $variation->get_regular_price(),
+            'sale_price'    => $variation->get_sale_price(),
+            'sku'           => $variation->get_sku(),
+            'status'        => $variation->get_status(),
+            'virtual'       => $variation->get_virtual(),
+        );
     }
 }

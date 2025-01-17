@@ -59,28 +59,28 @@ class Ui_Page {
      */
     private static function urls(): array {
         return array(
-            'massive_import'   => add_query_arg(
+            'massive_import' => add_query_arg(
                 array(
                     'page'   => Constants::PLUGIN_URL_SLUG . '-report',
                     'action' => 'massive_import',
                 ),
                 admin_url( 'admin.php' )
             ),
-            'push_all'     => add_query_arg(
+            'push_all'       => add_query_arg(
                 array(
                     'page'   => Constants::PLUGIN_URL_SLUG . '-report',
                     'action' => 'push_all',
                 ),
                 admin_url( 'admin.php' )
             ),
-            'report'       => add_query_arg(
+            'report'         => add_query_arg(
                 array(
                     'page'   => Constants::PLUGIN_URL_SLUG . '-report',
                     'action' => '',
                 ),
                 admin_url( 'admin.php' )
             ),
-            'edit_product' => admin_url( 'admin.php?page=' . Constants::PLUGIN_URL_SLUG . '-report&action=edit_product' ),
+            'edit_product'   => admin_url( 'admin.php?page=' . Constants::PLUGIN_URL_SLUG . '-report&action=edit_product' ),
         );
     }
 

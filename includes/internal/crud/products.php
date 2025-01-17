@@ -6,8 +6,8 @@ use WooHive\Config\Constants;
 use WooHive\Internal\Crud\Attributes;
 use WooHive\Internal\Crud\Categories;
 
-use \WC_Product_Factory;
-use \WP_Error;
+use WC_Product_Factory;
+use WP_Error;
 
 
 /** Prevenir el acceso directo al script. */
@@ -22,7 +22,7 @@ class Products {
      *
      * @var array
      */
-    private static array $invalid_props = [
+    private static array $invalid_props = array(
         'id',              // No permitimos actualizar el ID del producto.
         'date_created',    // Propiedades relacionadas con la creación.
         'date_modified',   // Propiedades relacionadas con la modificación.
@@ -31,7 +31,7 @@ class Products {
         'rating_count',    // Calculada automáticamente.
         'review_count',    // Calculada automáticamente.
         'downloads',       // Si no corresponde a un producto descargable.
-    ];
+    );
 
     /**
      * Limpia los datos para eliminar propiedades inválidas.
@@ -76,20 +76,20 @@ class Products {
 
             // Manejo de imágenes si están presentes en los datos
             if ( isset( $filtered_data['images'] ) && is_array( $filtered_data['images'] ) ) {
-                $image_ids = [];
+                $image_ids = array();
 
-                foreach ($filtered_data['images'] as $index => $image_data) {
-                    $image_url = $image_data['src'];
+                foreach ( $filtered_data['images'] as $index => $image_data ) {
+                    $image_url   = $image_data['src'];
                     $external_id = $image_data['id'];
 
-                    $uploaded_image = self::upload_image($image_url, $product_id, $external_id);
+                    $uploaded_image = self::upload_image( $image_url, $product_id, $external_id );
                     if ( is_wp_error( $uploaded_image ) ) {
                         continue;
                     }
 
                     $image_ids[] = $uploaded_image;
                     if ( $index === 0 && $uploaded_image ) {
-                        set_post_thumbnail($product_id, $uploaded_image);
+                        set_post_thumbnail( $product_id, $uploaded_image );
                     }
                 }
 
@@ -99,7 +99,7 @@ class Products {
             }
 
             if ( $filtered_data['meta_data'] ) {
-                foreach( $filtered_data['meta_data'] as $meta_data => $meta_key ) {
+                foreach ( $filtered_data['meta_data'] as $meta_data => $meta_key ) {
                     $wc_product->update_meta_data( $meta_key, $meta_data );
                 }
             }
@@ -126,7 +126,7 @@ class Products {
 
         foreach ( $products as $product_data ) {
             if ( ! isset( $product_data['id'] ) || ! isset( $product_data['data'] ) ) {
-                $results[] = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
+                $results[]    = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
                 $error_count += 1;
                 continue;
             }
@@ -138,16 +138,16 @@ class Products {
 
             if ( is_wp_error( $result ) ) {
                 $results[ $product_id ] = $result;
-                $error_count += 1;
+                $error_count           += 1;
             } else {
                 $results[ $product_id ] = true;
-                $total_updates += 1;
+                $total_updates         += 1;
             }
         }
 
         // Sumary
-        $results['error_count']    = $error_count;
-        $results['total_updates']  = $total_updates;
+        $results['error_count']   = $error_count;
+        $results['total_updates'] = $total_updates;
 
         return $results;
     }
@@ -160,68 +160,68 @@ class Products {
      *
      * @return int|WP_Error El ID del producto creado o un WP_Error en caso de fallo.
      */
-    public static function create(array $data): int|WP_Error {
-        $filtered_data = self::clean_data($data);
-        if (empty($filtered_data)) {
-            return new WP_Error( 'invalid_data', __('No se proporcionaron campos válidos para crear el producto.', Constants::TEXT_DOMAIN) );
+    public static function create( array $data ): int|WP_Error {
+        $filtered_data = self::clean_data( $data );
+        if ( empty( $filtered_data ) ) {
+            return new WP_Error( 'invalid_data', __( 'No se proporcionaron campos válidos para crear el producto.', Constants::TEXT_DOMAIN ) );
         }
 
         try {
-            if ( ! empty($filtered_data['sku'] ) ) {
-                $existing_product_id = wc_get_product_id_by_sku($filtered_data['sku']);
-                if ($existing_product_id) {
+            if ( ! empty( $filtered_data['sku'] ) ) {
+                $existing_product_id = wc_get_product_id_by_sku( $filtered_data['sku'] );
+                if ( $existing_product_id ) {
                     return new WP_Error(
                         'product_exists',
-                        sprintf(__('El producto con SKU "%s" ya existe.', Constants::TEXT_DOMAIN), $filtered_data['sku'])
+                        sprintf( __( 'El producto con SKU "%s" ya existe.', Constants::TEXT_DOMAIN ), $filtered_data['sku'] )
                     );
                 }
             }
 
             $product_type = $filtered_data['type'] ?? 'simple';
-            unset($filtered_data['type']);
+            unset( $filtered_data['type'] );
 
-            $product_class = WC_Product_Factory::get_product_classname(0, $product_type);
-            $wc_product = new $product_class();
+            $product_class = WC_Product_Factory::get_product_classname( 0, $product_type );
+            $wc_product    = new $product_class();
 
-            $wc_product->set_props($filtered_data);
+            $wc_product->set_props( $filtered_data );
             $wc_product->save();
 
             $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
             $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
 
             $product_id = $wc_product->get_id();
-            if (!empty($filtered_data['images'])) {
-                $image_ids = [];
+            if ( ! empty( $filtered_data['images'] ) ) {
+                $image_ids = array();
 
-                foreach ($filtered_data['images'] as $index => $image_data) {
-                    $image_url = $image_data['src'];
+                foreach ( $filtered_data['images'] as $index => $image_data ) {
+                    $image_url   = $image_data['src'];
                     $external_id = $image_data['id'];
 
-                    $uploaded_image = self::upload_image($image_url, $product_id, $external_id);
+                    $uploaded_image = self::upload_image( $image_url, $product_id, $external_id );
                     if ( is_wp_error( $uploaded_image ) ) {
                         continue;
                     }
 
                     $image_ids[] = $uploaded_image;
                     if ( $index === 0 && $uploaded_image ) {
-                        set_post_thumbnail($product_id, $uploaded_image);
+                        set_post_thumbnail( $product_id, $uploaded_image );
                     }
                 }
 
                 if ( ! empty( $image_ids ) ) {
-                    update_post_meta($product_id, '_product_image_gallery', implode(',', $image_ids));
+                    update_post_meta( $product_id, '_product_image_gallery', implode( ',', $image_ids ) );
                 }
             }
 
             if ( $filtered_data['meta_data'] ) {
-                foreach( $filtered_data['meta_data'] as $meta_data => $meta_key ) {
+                foreach ( $filtered_data['meta_data'] as $meta_data => $meta_key ) {
                     $wc_product->add_meta_data( $meta_key, $meta_data, true );
                 }
             }
 
             return $product_id;
-        } catch (\Exception $e) {
-            return new WP_Error('create_error', __('Error al crear el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN));
+        } catch ( \Exception $e ) {
+            return new WP_Error( 'create_error', __( 'Error al crear el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
         }
     }
 
@@ -241,10 +241,10 @@ class Products {
             $result = self::create( $data );
 
             if ( is_wp_error( $result ) ) {
-                $results[] = $result;
+                $results[]    = $result;
                 $error_count += 1;
             } else {
-                $results[] = $result; // El ID del producto creado.
+                $results[]      = $result; // El ID del producto creado.
                 $total_creates += 1;
             }
         }
@@ -296,8 +296,8 @@ class Products {
      *               - 'total_created'      (int)
      *               - 'total_processed'    (int)
      */
-    public static function create_or_update_batch( array $products, array $options = [ 'skip_ids' => false ] ): array {
-        $results = [];
+    public static function create_or_update_batch( array $products, array $options = array( 'skip_ids' => false ) ): array {
+        $results = array();
 
         $error_count     = 0;
         $total_creates   = 0;
@@ -310,11 +310,11 @@ class Products {
 
             if ( $options['skip_ids'] ) {
                 $product_id = null;
-                $data = $product_data;
+                $data       = $product_data;
             }
 
             if ( ! $data ) {
-                $results[] = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
+                $results[]    = new WP_Error( 'invalid_data', __( 'El formato del producto no es válido.', Constants::TEXT_DOMAIN ) );
                 $error_count += 1;
                 continue;
             }
@@ -330,7 +330,7 @@ class Products {
             if ( $product_id ) {
                 $total_updates += 1;
             } else {
-                $total_creates   += 1;
+                $total_creates += 1;
             }
 
             $total_processed += 1;
@@ -347,32 +347,32 @@ class Products {
     /**
      * Subir una imagen a la biblioteca de medios de WordPress y asociarla a un producto de WooCommerce.
      *
-     * @param string $image_url URL de la imagen a subir.
-     * @param int $product_id ID del producto de WooCommerce al que se asociará la imagen.
+     * @param string      $image_url URL de la imagen a subir.
+     * @param int         $product_id ID del producto de WooCommerce al que se asociará la imagen.
      * @param string|null $external_id ID externo (opcional), para evitar duplicados.
      *
      * @return WP_Error|int ID de la imágen agregada a la galería del producto o un objeto WP_Error si ocurre un error.
      */
-    public static function upload_image(string $image_url, int $product_id, ?string $external_id = null): WP_Error|int {
-        $image_id = self::search_image($image_url, $external_id);
+    public static function upload_image( string $image_url, int $product_id, ?string $external_id = null ): WP_Error|int {
+        $image_id = self::search_image( $image_url, $external_id );
         if ( $image_id ) {
             return $image_id;
         }
 
         // Sin esto media_sideload_image no functiona cuando se usa la api interna
         if ( ! function_exists( 'media_sideload_image' ) ) {
-            require_once(ABSPATH . 'wp-admin/includes/media.php');
-            require_once(ABSPATH . 'wp-admin/includes/file.php');
-            require_once(ABSPATH . 'wp-admin/includes/image.php');
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
         }
 
-        $image_id = media_sideload_image($image_url, $product_id, null, 'id');
-        if (is_wp_error($image_id)) {
-            return new WP_Error('upload_error', 'Error al subir la imagen: ' . $image_id->get_error_message());
+        $image_id = media_sideload_image( $image_url, $product_id, null, 'id' );
+        if ( is_wp_error( $image_id ) ) {
+            return new WP_Error( 'upload_error', 'Error al subir la imagen: ' . $image_id->get_error_message() );
         }
 
-        if ($external_id) {
-            update_post_meta($image_id, '_external_image_id', $external_id);
+        if ( $external_id ) {
+            update_post_meta( $image_id, '_external_image_id', $external_id );
         }
 
         return $image_id;
@@ -381,16 +381,16 @@ class Products {
     /**
      * Buscar una imagen en la biblioteca de medios de WordPress por su URL o por un ID externo.
      *
-     * @param string $image_url URL de la imagen a buscar.
+     * @param string      $image_url URL de la imagen a buscar.
      * @param string|null $external_id ID externo (opcional)
      *
      * @return int|null El ID de la imagen si existe, o null si no se encuentra.
      */
-    public static function search_image(string $image_url, ?string $external_id = null): ?int {
-        $image_id = attachment_url_to_postid($image_url);
+    public static function search_image( string $image_url, ?string $external_id = null ): ?int {
+        $image_id = attachment_url_to_postid( $image_url );
 
-        if (!$image_id && $external_id) {
-            $image_id = self::search_image_by_external_id($external_id);
+        if ( ! $image_id && $external_id ) {
+            $image_id = self::search_image_by_external_id( $external_id );
         }
 
         return $image_id;
@@ -403,19 +403,19 @@ class Products {
      *
      * @return int|null El ID de la imagen si existe, o null si no se encuentra.
      */
-    private static function search_image_by_external_id(string $external_id): ?int {
+    private static function search_image_by_external_id( string $external_id ): ?int {
         $args = array(
-            'post_type'  => 'attachment',
-            'meta_key'   => '_external_image_id',
-            'meta_value' => $external_id,
+            'post_type'      => 'attachment',
+            'meta_key'       => '_external_image_id',
+            'meta_value'     => $external_id,
             'posts_per_page' => 1,
         );
 
-        $images = get_posts($args);
+        $images = get_posts( $args );
         if ( ! empty( $images ) ) {
-            $image_id = $images[0]->ID;
-            $file_path = get_attached_file($image_id);
-            if ( file_exists($file_path) ) {
+            $image_id  = $images[0]->ID;
+            $file_path = get_attached_file( $image_id );
+            if ( file_exists( $file_path ) ) {
                 return $image_id;
             }
         }

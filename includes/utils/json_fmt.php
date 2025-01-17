@@ -2,7 +2,7 @@
 
 namespace WooHive\Utils;
 
-use \WC_Product;
+use WC_Product;
 
 
 /** Prevenir el acceso directo al script. */
@@ -34,7 +34,7 @@ class Json_Fmt {
      *                             Si los campos personalizados ya existen, se sobrescribirán los valores predeterminados.
      * @return array Los datos del producto en formato de array.
      */
-    public static function wc_product_to_json( WC_Product $product, array $custom_fields = [] ): array {
+    public static function wc_product_to_json( WC_Product $product, array $custom_fields = array() ): array {
         if ( ! is_a( $product, 'WC_Product' ) ) {
             return array(); // No es un objeto de producto válido, retornar un array vacío.
         }
@@ -42,11 +42,11 @@ class Json_Fmt {
         $data = $product->get_data();
         self::clean_data( $data );
 
-        $data['dimensions'] = [
-            'width'  => $data['width']  ?? 0,
+        $data['dimensions'] = array(
+            'width'  => $data['width'] ?? 0,
             'length' => $data['length'] ?? 0,
             'height' => $data['height'] ?? 0,
-        ];
+        );
         unset( $data['width'], $data['length'], $data['height'] );
 
         // FIXME: attributos no estan siendo pasados como un array

@@ -29,7 +29,7 @@ class Client {
     public Product_Variations $product_variations;
 
     /** @var Client_Products_Attributes */
-    //public $products_attributes;
+    // public $products_attributes;
 
     /**
      * Constructor para inicializar el cliente de la API.
@@ -45,9 +45,9 @@ class Client {
             'Content-Type'  => 'application/json',
         );
 
-        $this->products            = new Products( $this );
-        $this->product_categories  = new Product_Categories( $this );
-        $this->product_variations  = new Product_Variations( $this );
+        $this->products           = new Products( $this );
+        $this->product_categories = new Product_Categories( $this );
+        $this->product_variations = new Product_Variations( $this );
         // $this->products_attributes = new Client_Products_Attributes( $this );
     }
 

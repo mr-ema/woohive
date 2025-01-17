@@ -3,7 +3,7 @@
 use WooHive\Config\Constants; ?>
 
 <div id="wmss-debug-window" style="margin: 2rem 0;">
-    <h2 style="margin-bottom: 2rem;"><?php esc_html_e('Ventana de Depuración', Constants::TEXT_DOMAIN); ?></h2>
+    <h2 style="margin-bottom: 2rem;"><?php esc_html_e( 'Ventana de Depuración', Constants::TEXT_DOMAIN ); ?></h2>
     <div>
         <div id="wmss-debug-messages" class="wmss-debug-messages"></div>
         <button id="wmss-clear-debug" class="wmss-clear-debug button button-primary">Clear Debug</button>
