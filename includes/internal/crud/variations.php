@@ -57,7 +57,7 @@ class Variations {
      * @return void
      */
     public static function set_props( WC_Product_Variation $variation, array $data ): void {
-        $valid_set_props = array( 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight', 'sku' );
+        $valid_set_props = array( 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight' );
         $filtered_data   = array_intersect_key( $data, array_flip( $valid_set_props ) );
         $variation->set_props( $filtered_data );
 
@@ -94,7 +94,7 @@ class Variations {
 
         if ( ! empty( $data['meta_data'] ) ) {
             foreach ( $data['meta_data'] as $meta_data => $meta_key ) {
-                $variation->add_meta_data( $meta_key, $meta_data, true );
+                $variation->update_meta_data($meta_key, $meta_data);
             }
         }
     }
@@ -120,7 +120,9 @@ class Variations {
         try {
             $filtered_data = self::clean_data( $filtered_data );
             $variation     = new WC_Product_Variation();
+
             $variation->set_parent_id( $wc_product->get_id() );
+            $variation->set_sku( $filtered_data['sku'] );
 
             self::set_props( $variation, $filtered_data );
             $variation->save();
@@ -158,7 +160,10 @@ class Variations {
             self::set_props( $variation, $filtered_data );
             $variation->save();
 
-            return $variation->get_id();
+            $variation_id = $variation->get_id();
+            wc_delete_product_transients($variation_id);
+
+            return $variation_id;
         } catch ( \Exception $e ) {
             return new WP_Error( 'update_error', __( 'Error al actualizar la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
         }
