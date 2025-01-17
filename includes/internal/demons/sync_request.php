@@ -26,6 +26,10 @@ class Sync_Request {
             return; // Prevent firing the function twice
         }
 
+        if ( $product->get_type() === 'variation' ) {
+            return;
+        }
+
         set_transient( 'sync_in_progress_' . $product_id, true, 9 );
 
         if ( Helpers::should_sync( $product ) ) {
@@ -39,6 +43,10 @@ class Sync_Request {
 
     public static function on_product_variation_update( int $product_id, WC_Product_Variation $variation ): void {
         $product_id = $variation->get_parent_id();
+        if ( ! $product_id ) {
+            return;
+        }
+
         if ( get_transient( 'sync_in_progress_' . $product_id ) ) {
             return; // Prevent firing the function twice
         }
