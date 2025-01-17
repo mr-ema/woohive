@@ -3,6 +3,7 @@
 namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
+
 use WP_Error;
 use WC_Product;
 use WC_Product_Attribute;
