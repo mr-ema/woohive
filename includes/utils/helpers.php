@@ -425,4 +425,45 @@ class Helpers {
 
         return apply_filters( Constants::PLUGIN_SLUG . '_batch_size', $size, $operation );
     }
+
+    /**
+     * Cambiar el tipo de producto si es diferente al tipo actual.
+     *
+     * @param WC_Product $product El objeto del producto.
+     * @param string     $type El tipo de producto deseado (por ejemplo, 'simple', 'variable').
+     * @return WC_Product El objeto del producto actualizado.
+     */
+    public static function update_product_type( $product, $type ) {
+        if ( $product->get_type() === $type ) {
+            return $product;
+        }
+
+        $valid_types = array( 'simple', 'grouped', 'external', 'variable' );
+        if ( ! in_array( $type, $valid_types, true ) ) {
+            return $product;
+        }
+
+        $product_id = $product->get_id();
+        if ( ! $product_id ) {
+            return $product;
+        }
+
+        wp_set_object_terms( $product_id, $type, 'product_type' );
+        switch ( $type ) {
+            case 'simple':
+                $product = new WC_Product_Simple( $product_id );
+                break;
+            case 'grouped':
+                $product = new WC_Product_Grouped( $product_id );
+                break;
+            case 'external':
+                $product = new WC_Product_External( $product_id );
+                break;
+            case 'variable':
+                $product = new WC_Product_Variable( $product_id );
+                break;
+        }
+
+        return $product;
+    }
 }

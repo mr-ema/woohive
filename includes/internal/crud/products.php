@@ -5,6 +5,7 @@ namespace WooHive\Internal\Crud;
 use WooHive\Config\Constants;
 use WooHive\Internal\Crud\Attributes;
 use WooHive\Internal\Crud\Categories;
+use WooHive\Utils\Helpers;
 
 use WC_Product_Factory;
 use WP_Error;
@@ -68,6 +69,10 @@ class Products {
         }
 
         try {
+            if ( ! $wc_product->is_type( $filtered_data['type'] ) ) {
+                Helpers::update_product_type( $wc_product, $filtered_data['type'] );
+            }
+
             $wc_product->set_props( $filtered_data );
             $wc_product->save();
 
