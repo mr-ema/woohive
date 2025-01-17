@@ -57,7 +57,7 @@ class Variations {
      * @return void
      */
     public static function set_props( WC_Product_Variation $variation, array $data ): void {
-        $valid_set_props = array( 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight' );
+        $valid_set_props = array( 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight', 'sku' );
         $filtered_data   = array_intersect_key( $data, array_flip( $valid_set_props ) );
         $variation->set_props( $filtered_data );
 
@@ -75,7 +75,8 @@ class Variations {
             $attributes_map = array_reduce(
                 $data['attributes'],
                 function ( $carry, $attribute ) {
-                    $carry[ $attribute['name'] ] = $attribute['option'];
+                    $slug = sanitize_title( $attribute['name'] );
+                    $carry[ $slug ] = $attribute['option'];
                     return $carry;
                 },
                 array()
@@ -122,9 +123,8 @@ class Variations {
             $variation     = new WC_Product_Variation();
 
             $variation->set_parent_id( $wc_product->get_id() );
-            $variation->set_sku( $filtered_data['sku'] );
-
             self::set_props( $variation, $filtered_data );
+
             $variation->save();
 
             $id = $variation->get_id();
