@@ -109,18 +109,24 @@ class Sync_Request {
         $sites             = Helpers::sites();
         $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
 
-            $server_host = $_SERVER['HTTP_HOST'];
-            $response    = wp_remote_post(
-                $external_site_url,
-                array(
-                    'body'    => array(
-                        'product_id' => $product_id,
-                        'from'       => 'secondary',
-                    ),
-                    'headers' => array(
-                        'X-Source-Server-Host' => $server_host,
-                    ),
-                )
-            );
+        $should_sync_only_stock = false;
+        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
+            $should_sync_only_stock = true;
+        }
+
+        $server_host = $_SERVER['HTTP_HOST'];
+        $response    = wp_remote_post(
+            $external_site_url,
+            array(
+                'body'    => array(
+                    'product_id' => $product_id,
+                    'from'       => 'secondary',
+                    'should_sync_only_stock' => $should_sync_only_stock
+                ),
+                'headers' => array(
+                    'X-Source-Server-Host' => $server_host,
+                ),
+            )
+        );
     }
 }

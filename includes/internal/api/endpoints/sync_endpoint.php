@@ -38,10 +38,22 @@ class Sync_Endpoint {
                             return is_numeric( $param );
                         },
                     ),
+
                     'from'       => array(
                         'required'          => true,
                         'validate_callback' => function ( $param ) {
                             return in_array( $param, array( 'primary', 'secondary' ), true );
+                        },
+                    ),
+
+                    'should_sync_only_stock' => array(
+                        'required'          => false, // Optional parameter
+                        'validate_callback' => function ( $param ) {
+                            return is_bool( filter_var( $param, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) );
+                        },
+                        'sanitize_callback' => function ( $param ) {
+                            // Sanitize to ensure it's either true or false
+                            return filter_var( $param, FILTER_VALIDATE_BOOLEAN );
                         },
                     ),
                 ),
@@ -56,7 +68,8 @@ class Sync_Endpoint {
      * @return WP_REST_Response|WP_Error
      */
     public static function handle_sync_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
+        $should_sync_only_stock = $request->get_param( 'should_sync_only_stock' );
+        if ( $should_sync_only_stock || get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
             return new WP_REST_Response( array( 'message' => 'Can not sync because only stock sync is allowed' ), 404 );
         }
 
