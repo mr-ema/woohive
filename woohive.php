@@ -84,6 +84,7 @@ class Init {
 
         self::load_class( 'includes/internal/crud/products.php' );
         self::load_class( 'includes/internal/crud/categories.php' );
+        self::load_class( 'includes/internal/crud/global_attributes.php' );
         self::load_class( 'includes/internal/crud/attributes.php' );
         self::load_class( 'includes/internal/crud/variations.php' );
 
