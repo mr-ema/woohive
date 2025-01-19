@@ -6,7 +6,6 @@ use WooHive\Config\Constants;
 use WooHive\Utils\Helpers;
 
 use WC_Product;
-use WC_Product_Variation;
 
 
 /** Prevenir el acceso directo al script. */
@@ -17,22 +16,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Request {
 
     public static function init(): void {
-        add_action( 'woocommerce_update_product', array( self::class, 'on_product_update' ), 10, 2 );
-        add_action( 'woocommerce_update_product_variation', array( self::class, 'on_product_variation_update' ), 10, 2 );
+        add_action( 'save_post_product', array( self::class, 'on_product_save' ), 10, 3 );
+        add_action( 'save_post_product_variation', array( self::class, 'on_product_variation_save' ), 10, 3 );
     }
 
     public static function on_product_update( int $product_id, WC_Product $product ): void {
-        if ( get_transient( 'sync_in_progress_' . $product_id ) ) {
-            return; // Prevent firing the function twice
-        }
-
-        if ( $product->get_type() === 'variation' ) {
+        if ( $product->is_type( 'variation' ) || get_transient( 'sync_in_progress_' . $product_id ) ) {
             return;
         }
 
-        set_transient( 'sync_in_progress_' . $product_id, true, 9 );
-
         if ( Helpers::should_sync( $product ) ) {
+            set_transient( 'sync_in_progress_' . $product_id, true, 9 );
+
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $product );
             } elseif ( Helpers::is_secondary_site() ) {
@@ -47,14 +42,51 @@ class Sync_Request {
             return;
         }
 
-        if ( get_transient( 'sync_in_progress_' . $product_id ) ) {
-            return; // Prevent firing the function twice
-        }
-
-        set_transient( 'sync_in_progress_' . $product_id, true, 9 );
+        if ( get_transient( 'sync_in_progress_' . $product_id ) ) return;
 
         $product = wc_get_product( $product_id );
         if ( Helpers::should_sync( $product ) ) {
+            set_transient( 'sync_in_progress_' . $product_id, true, 9 );
+
+            if ( Helpers::is_primary_site() ) {
+                self::sync_to_secondary_sites_data( $product );
+            } elseif ( Helpers::is_secondary_site() ) {
+                self::sync_to_primary_site_data( $product );
+            }
+        }
+    }
+
+    public static function on_product_save( int $post_id, \WP_Post $post, bool $update ): void {
+        if ( 'product' !== $post->post_type || 'publish' !== $post->post_status ) {
+            return;
+        }
+
+        if ( get_transient( 'sync_in_progress_' . $post_id ) ) return;
+
+        $product = wc_get_product( $post_id );
+        if ( $product && Helpers::should_sync( $product ) ) {
+            set_transient( 'sync_in_progress_' . $post_id, true, 9 );
+
+            if ( Helpers::is_primary_site() ) {
+                self::sync_to_secondary_sites_data( $product );
+            } elseif ( Helpers::is_secondary_site() ) {
+                self::sync_to_primary_site_data( $product );
+            }
+        }
+    }
+
+    public static function on_product_variation_save( int $post_id, \WP_Post $post, bool $update ): void {
+        $product_id = get_post_field( 'post_parent', $post_id );
+        if ( ! $product_id ) {
+            return;
+        }
+
+        if ( get_transient( 'sync_in_progress_' . $product_id ) ) return;
+
+        $product = wc_get_product( $product_id );
+        if ( $product && Helpers::should_sync( $product ) ) {
+            set_transient( 'sync_in_progress_' . $product_id, true, 9 );
+
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $product );
             } elseif ( Helpers::is_secondary_site() ) {
