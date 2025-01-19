@@ -91,7 +91,7 @@ class Sync_Endpoint {
         }
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-        if ( Helpers::is_primary_site() ) {
+        if ( false && Helpers::is_primary_site() ) {
             $result = Tools::import_product( $client, $product_id );
             if ( is_wp_error( $result ) ) {
                 return $result;
