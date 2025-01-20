@@ -20,48 +20,10 @@ class Sync_Request {
         add_action( 'save_post_product_variation', array( self::class, 'on_product_variation_save' ), 10, 3 );
     }
 
-    public static function on_product_update( int $product_id, WC_Product $product ): void {
-        if ( $product->is_type( 'variation' ) || get_transient( 'sync_in_progress_' . $product_id ) ) {
-            return;
-        }
-
-        if ( Helpers::should_sync( $product ) ) {
-            set_transient( 'sync_in_progress_' . $product_id, true, 9 );
-
-            if ( Helpers::is_primary_site() ) {
-                self::sync_to_secondary_sites_data( $product );
-            } elseif ( Helpers::is_secondary_site() ) {
-                self::sync_to_primary_site_data( $product );
-            }
-        }
-    }
-
-    public static function on_product_variation_update( int $product_id, WC_Product_Variation $variation ): void {
-        $product_id = $variation->get_parent_id();
-        if ( ! $product_id ) {
-            return;
-        }
-
-        if ( get_transient( 'sync_in_progress_' . $product_id ) ) return;
-
-        $product = wc_get_product( $product_id );
-        if ( Helpers::should_sync( $product ) ) {
-            set_transient( 'sync_in_progress_' . $product_id, true, 9 );
-
-            if ( Helpers::is_primary_site() ) {
-                self::sync_to_secondary_sites_data( $product );
-            } elseif ( Helpers::is_secondary_site() ) {
-                self::sync_to_primary_site_data( $product );
-            }
-        }
-    }
-
     public static function on_product_save( int $post_id, \WP_Post $post, bool $update ): void {
-        if ( 'product' !== $post->post_type || 'publish' !== $post->post_status ) {
+        if ( 'product' !== $post->post_type || 'publish' !== $post->post_status || get_transient( 'sync_in_progress_' . $post_id ) ) {
             return;
         }
-
-        if ( get_transient( 'sync_in_progress_' . $post_id ) ) return;
 
         $product = wc_get_product( $post_id );
         if ( $product && Helpers::should_sync( $product ) ) {
@@ -77,11 +39,9 @@ class Sync_Request {
 
     public static function on_product_variation_save( int $post_id, \WP_Post $post, bool $update ): void {
         $product_id = get_post_field( 'post_parent', $post_id );
-        if ( ! $product_id ) {
+        if ( ! $product_id || get_transient( 'sync_in_progress_' . $product_id ) ) {
             return;
         }
-
-        if ( get_transient( 'sync_in_progress_' . $product_id ) ) return;
 
         $product = wc_get_product( $product_id );
         if ( $product && Helpers::should_sync( $product ) ) {
