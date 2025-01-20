@@ -143,19 +143,19 @@ class Variations {
      *
      * @return int|WP_Error Retorna el ID de la variación actualizada o un error en caso de fallo.
      */
-    public static function update( WC_Product_Variation $variation, array $filtered_data ): int|WP_Error {
+    public static function update( WC_Product_Variation $variation, array $data ): int|WP_Error {
         if ( ! $variation || $variation->get_type() !== 'variation' ) {
             return new WP_Error( 'invalid_variation', __( 'La variación no existe o es inválida.', Constants::TEXT_DOMAIN ) );
         }
 
         $wc_product = wc_get_product( $variation->get_parent_id() );
         $parent_sku = $wc_product->get_sku();
-        if ( empty( $filtered_data['sku'] ) || $parent_sku === $filtered_data['sku'] ) {
+        if ( empty( $data['sku'] ) || $parent_sku === $data['sku'] ) {
             return new WP_Error( 'update_error', __( 'Sku de la variacion no existe o es igual al padre.', Constants::TEXT_DOMAIN ) );
         }
 
         try {
-            $filtered_data = self::clean_data( $filtered_data );
+            $filtered_data = self::clean_data( $data );
 
             self::set_props( $variation, $filtered_data );
             $variation->save();
@@ -236,9 +236,9 @@ class Variations {
             return null;
         }
 
-        $sku        = $data['sku'] ?? null;
         $parent_sku = $wc_product->get_sku();
-        $attributes = $data['attributes'] ?? array();
+        $sku        = $data['sku'] ?? null;
+        $attributes = $data['attributes'] ?? [];
 
         $variations = $wc_product->get_children();
         foreach ( $variations as $variation_id ) {
@@ -264,6 +264,12 @@ class Variations {
      * @return bool True si los atributos coinciden, false si no.
      */
     public static function match_attributes( array $existing_attributes, array $new_attributes ): bool {
+        if ( empty( $existing_attributes ) && empty( $new_attributes) ) {
+            return true;
+        } else if ( empty( $existing_attributes ) || empty( $new_attributes) ) {
+            return false;
+        }
+
         // Check if attributes match (e.g., size, color)
         foreach ( $new_attributes as $attribute_name => $attribute_value ) {
             if ( ! isset( $existing_attributes[ $attribute_name ] ) || $existing_attributes[ $attribute_name ] !== $attribute_value ) {
@@ -276,48 +282,42 @@ class Variations {
     /**
      * Actualiza múltiples variaciones existentes en WooCommerce.
      *
-     * @param array $variations Lista de datos para actualizar las variaciones.
+     * @param int   $product_id ID del producto variable al que pertenecen las variaciones.
+     * @param array $variations Lista de datos para procesar las variaciones.
      *                          Cada elemento debe incluir:
-     *                          - 'id' (int): El ID de la variación a actualizar.
+     *                          - 'id' (int|null): El ID de la variación a actualizar. Si es null, se creará una nueva variación.
      *                          - 'data' (array): Los datos de la variación.
      *
      * @return array Resultado para cada variación y estadísticas generales.
      *               - 'error_count'        (int)
-     *               - 'total_updated'      (int)
      *               - 'total_processed'    (int)
      */
-    public static function update_batch( array $variations ): array {
-        $results         = array();
+    public static function update_batch( int $product_id, array $variations ): array {
+        $results = array();
+
         $error_count     = 0;
         $total_processed = 0;
-        $total_updated   = 0;
 
+        $wc_product = wc_get_product( $product_id );
         foreach ( $variations as $variation_data ) {
-            $variation_id = $variation_data['id'] ?? null;
-            $data         = $variation_data['data'] ?? null;
+            $variation = self::get_existing_variation( $wc_product, $variation_data );
+            if ( ! $variation ) {
+                continue;
+            }
 
-            if ( ! $variation_id || ! $data ) {
-                $results[]    = new WP_Error( 'invalid_data', __( 'El formato de la variación no es válido.', Constants::TEXT_DOMAIN ) );
+            $result = self::update( $variation, $variation_data );
+            if ( is_wp_error( $result ) ) {
+                $results[]    = $result;
                 $error_count += 1;
                 continue;
             }
 
-            $result = self::update( $variation_id, $data );
-
-            if ( is_wp_error( $result ) ) {
-                $results[]    = $result;
-                $error_count += 1;
-            } else {
-                $results[]        = $result; // ID de la variación actualizada
-                $total_processed += 1;
-                $total_updated   += 1;
-            }
+            $total_processed += 1;
         }
 
         // Resumen de las estadísticas
         $results['error_count']     = $error_count;
         $results['total_processed'] = $total_processed;
-        $results['total_updated']   = $total_updated;
 
         return $results;
     }

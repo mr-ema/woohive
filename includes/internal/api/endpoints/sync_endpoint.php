@@ -39,6 +39,13 @@ class Sync_Endpoint {
                         },
                     ),
 
+                    'product_id' => array(
+                        'required'          => false,
+                        'validate_callback' => function ( $param ) {
+                            return is_numeric( $param );
+                        },
+                    ),
+
                     'from'       => array(
                         'required'          => true,
                         'validate_callback' => function ( $param ) {
@@ -68,13 +75,8 @@ class Sync_Endpoint {
      * @return WP_REST_Response|WP_Error
      */
     public static function handle_sync_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        $should_sync_only_stock = $request->get_param( 'should_sync_only_stock' );
-        if ( $should_sync_only_stock || get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
-            return new WP_REST_Response( array( 'message' => 'Can not sync because only stock sync is allowed' ), 404 );
-        }
-
-        $product_id = (int) $request->get_param( 'product_id' );
-        $from       = $request->get_param( 'from' );
+        $product_id     = (int) $request->get_param( 'product_id' );
+        $from           = $request->get_param( 'from' );
 
         $site = null;
 
@@ -91,6 +93,18 @@ class Sync_Endpoint {
         }
 
         $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+
+        $should_sync_only_stock = $request->get_param( 'should_sync_only_stock' );
+        if ( $should_sync_only_stock || get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
+            $variation_id   = (int) $request->get_param( 'variation_id' ) ?? null;
+            $result = Tools::sync_stock( $client, $product_id, $variation_id );
+            if ( is_wp_error( $result ) ) {
+                return $result;
+            }
+
+            return new WP_REST_Response( array( 'message' => 'Stock synced completed.' ), 200 );
+        }
+
         if ( false && Helpers::is_primary_site() ) {
             $result = Tools::import_product( $client, $product_id );
             if ( is_wp_error( $result ) ) {

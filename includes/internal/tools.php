@@ -152,6 +152,50 @@ class Tools {
         return $internal_product_id;
     }
 
+    public static function sync_stock( Client &$client, int $external_product_id, ?int $external_variation_id ): int|WP_Error {
+        if ( ! isset( $external_product_id ) ) {
+            return new WP_Error( 'invalid_id', __( 'El ID del producto es invalido', Constants::TEXT_DOMAIN ) );
+        }
+
+        $res = $client->products->pull( $external_product_id );
+        if ( $res->has_error() || empty( $res->body() ) ) {
+            return new WP_Error(
+                'product_not_found',
+                __( 'El producto especificado no pudo ser localizado. Por favor verifica el ID del producto e intenta nuevamente.', Constants::TEXT_DOMAIN )
+            );
+        }
+
+        $product = $res->body();
+        if ( empty( $product['sku'] ) ) {
+            return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN ) );
+        }
+
+        $internal_product_id = wc_get_product_id_by_sku( $product['sku'] );
+        if ( ! $internal_product_id ) {
+            return new WP_Error( 'product_does_not_exists', __( 'El producto no puede ser actualizado dado que no existe en esta pagina.', Constants::TEXT_DOMAIN ) );
+        }
+
+        $internal_product = wc_get_product( $internal_product_id );
+        if ( ! $external_variation_id && $internal_product->managing_stock() ) {
+            $internal_product->set_stock( $product['stock_quantity'] );
+        }
+
+        if ( $external_variation_id && $internal_product && ! empty( $product['variations'] ) ) {
+            $variations_res = $client->product_variations->pull_all( $product['id'], array( 'include' => $external_variation_id ) );
+            if ( ! $variations_res->has_error() ) {
+                $variation = $variations_res->body()[0];
+                $variation_only_stock = array_intersect_key( $variation, [ 'sku' => null, 'stock_quantity' => null ] );
+
+                $variation_res = Crud\Variations::update_batch( $internal_product_id, [ $variation_only_stock ] );
+                if ( $variation_res['error_count'] > 0 ) {
+                    return new WP_Error( 'sync_with_variations_errors', $variation_res );
+                }
+            }
+        }
+
+        return $internal_product_id;
+    }
+
     public static function export_product() {}
 
     public static function massive_product_import( array $product_data ) {}
