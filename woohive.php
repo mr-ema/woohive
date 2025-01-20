@@ -67,6 +67,11 @@ class Init {
 
         self::includes();
 
+        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+            self::load_class( 'includes/utils/debugger.php' );
+            \WooHive\Utils\Debugger::init();
+        }
+
         Demons\Init::start();
         Api\Init::init();
     }
