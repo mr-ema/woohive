@@ -107,14 +107,12 @@ class Sync_Request {
             return; // Si no hay un sitio principal configurado, no se realiza la sincronización.
         }
 
-        $sites             = Helpers::sites();
-        $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
-
         $should_sync_only_stock = false;
         if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
             $should_sync_only_stock = true;
         }
 
+        $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
         $server_host = $_SERVER['HTTP_HOST'];
         $response    = wp_remote_post(
             $external_site_url,
