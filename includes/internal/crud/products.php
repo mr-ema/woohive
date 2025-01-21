@@ -5,6 +5,7 @@ namespace WooHive\Internal\Crud;
 use WooHive\Config\Constants;
 use WooHive\Internal\Crud\Attributes;
 use WooHive\Internal\Crud\Categories;
+use WooHive\Utils\Debugger;
 use WooHive\Utils\Helpers;
 
 use WC_Product_Factory;
@@ -109,9 +110,13 @@ class Products {
                 }
             }
 
+            Debugger::ok( __( 'Producto actualizado correctamente', Constants::TEXT_DOMAIN ) );
             return $wc_product->get_id();
         } catch ( \Exception $e ) {
-            return new WP_Error( 'save_error', __( 'Error al guardar el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
+            $message = __( 'Error al guardar el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
+
+            Debugger::error( $message );
+            return new WP_Error( 'save_error',  $message);
         }
     }
 
@@ -224,9 +229,13 @@ class Products {
                 }
             }
 
+            Debugger::ok( __( 'Producto creado correctamente', Constants::TEXT_DOMAIN ) );
             return $product_id;
         } catch ( \Exception $e ) {
-            return new WP_Error( 'create_error', __( 'Error al crear el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
+            $message = __( 'Error al crear el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
+
+            Debugger::error( $message );
+            return new WP_Error( 'create_error',  $message );
         }
     }
 

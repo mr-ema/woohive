@@ -3,6 +3,7 @@
 namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
 
 use WP_Error;
 use WC_Product;
@@ -82,10 +83,14 @@ class Categories {
         $product->set_category_ids( $category_ids );
         try {
             $product->save();
-        } catch ( Exception $e ) {
-            return new WP_Error( 'category_error', __( 'Error al guardar las categorías en el producto.', Constants::TEXT_DOMAIN ) );
+        } catch ( \Exception $e ) {
+            $message = sprintf( __( 'Error al guardar el producto: %s', Constants::TEXT_DOMAIN ), $e->getMessage() );
+
+            Debugger::error( $message );
+            return new WP_Error( 'category_error', $message );
         }
 
+        Debugger::ok( __( 'Se Asignaron las categorias correctamente', Constants::TEXT_DOMAIN ) );
         return true;
     }
 

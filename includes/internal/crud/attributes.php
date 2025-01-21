@@ -3,6 +3,7 @@
 namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
 use WooHive\Internal\Crud\Global_Attributes;
 
 use WP_Error;
@@ -56,10 +57,8 @@ class Attributes {
      * @return int|WP_Error Devuelve el ID del atributo actualizado o WP_Error en caso de fallo.
      */
     public static function update( WC_Product $product, array $data ): int|WP_Error {
-        // Clean the data, including name (human-readable) and slug
         $filtered_data = self::clean_data( $data );
 
-        // Ensure there's a valid name
         if ( empty( $filtered_data['name'] ) ) {
             return new WP_Error(
                 'invalid_data',
@@ -67,21 +66,16 @@ class Attributes {
             );
         }
 
-        // Get the existing attributes
         $existing_attributes = $product->get_attributes();
         $attribute_name = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
 
-        // Check if it's a global attribute
         if ( Global_Attributes::is_global( $attribute_name ) ) {
-            // Handle global attribute creation or update
             $taxonomy_name = Global_Attributes::get_taxonomy_name( $attribute_name );
-            // Create or update global attribute
             $result = Global_Attributes::create_or_update( $attribute_name, $filtered_data['options'] );
             if ( is_wp_error( $result ) ) {
                 return $result;
             }
 
-            // Add the human-readable name to the attribute (for display purposes)
             $attribute = new WC_Product_Attribute();
             $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
             $attribute->set_options( $filtered_data['options'] );
@@ -90,7 +84,6 @@ class Attributes {
 
             $existing_attributes[ $taxonomy_name ] = $attribute;
         } else {
-            // Handle product-specific attribute
             $attribute = new WC_Product_Attribute();
             $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
             $attribute->set_options( $filtered_data['options'] );
@@ -100,16 +93,18 @@ class Attributes {
             $existing_attributes[ $attribute_name ] = $attribute;
         }
 
-        // Save updated attributes to the product
         $product->set_attributes( $existing_attributes );
+
         try {
             $product->save();
-            return $attribute->get_id(); // Return the attribute ID
+
+            Debugger::ok( __( 'Atributos actualizados correctamente', Constants::TEXT_DOMAIN ) );
+            return $attribute->get_id();
         } catch ( \Exception $e ) {
-            return new WP_Error(
-                'save_error',
-                sprintf( __( 'Error al guardar el producto: %s', Constants::TEXT_DOMAIN ), $e->getMessage() )
-            );
+            $message = sprintf( __( 'Error al guardar el producto: %s', Constants::TEXT_DOMAIN ), $e->getMessage() );
+
+            Debugger::error( $message );
+            return new WP_Error( 'save_error', $message);
         }
     }
 
@@ -121,13 +116,11 @@ class Attributes {
      * @return int|WP_Error Devuelve el ID del atributo creado o actualizado, o WP_Error en caso de fallo.
      */
     public static function create_or_update( WC_Product $product, array $data ): int|WP_Error {
-        // Try updating first
         $update_result = self::update( $product, $data );
         if ( ! is_wp_error( $update_result ) ) {
-            return $update_result; // Successfully updated, return the attribute ID
+            return $update_result;
         }
 
-        // If update failed, create the attribute
         return self::create( $product, $data );
     }
 
@@ -139,7 +132,6 @@ class Attributes {
      * @return int|WP_Error Devuelve el ID del atributo creado o WP_Error en caso de fallo.
      */
     public static function create( WC_Product $product, array $data ): int|WP_Error {
-        // Clean the data, including name (human-readable) and slug
         $filtered_data = self::clean_data( $data );
 
         if ( empty( $filtered_data ) || empty( $filtered_data['name'] ) ) {
@@ -149,21 +141,16 @@ class Attributes {
             );
         }
 
-        // Get the existing attributes
         $existing_attributes = $product->get_attributes();
         $attribute_name = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
 
-        // Check if it's a global attribute
         if ( Global_Attributes::is_global( $attribute_name ) ) {
-            // Handle global attribute creation or update
             $taxonomy_name = Global_Attributes::get_taxonomy_name( $attribute_name );
-            // Create the global term
             $result = Global_Attributes::create( $attribute_name, $filtered_data['options'] ?? array() );
             if ( is_wp_error( $result ) ) {
                 return $result;
             }
 
-            // Add the human-readable name to the attribute (for display purposes)
             $attribute = new WC_Product_Attribute();
             $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
             $attribute->set_options( $filtered_data['options'] ?? array() );
@@ -172,7 +159,6 @@ class Attributes {
 
             $existing_attributes[ $taxonomy_name ] = $attribute;
         } else {
-            // Handle product-specific attribute
             $attribute = new WC_Product_Attribute();
             $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
             $attribute->set_options( $filtered_data['options'] ?? array() );
@@ -182,17 +168,18 @@ class Attributes {
             $existing_attributes[ $attribute_name ] = $attribute;
         }
 
-        // Save updated attributes to the product
         $product->set_attributes( $existing_attributes );
 
         try {
             $product->save();
-            return $attribute->get_id(); // Return the created attribute ID
+
+            Debugger::ok( __( 'Atributos creados correctamente', Constants::TEXT_DOMAIN ) );
+            return $attribute->get_id();
         } catch ( \Exception $e ) {
-            return new WP_Error(
-                'save_error',
-                sprintf( __( 'Error al guardar el producto: %s', Constants::TEXT_DOMAIN ), $e->getMessage() )
-            );
+            $message = sprintf( __( 'Error al guardar el producto: %s', Constants::TEXT_DOMAIN ), $e->getMessage() );
+
+            Debugger::error( $message );
+            return new WP_Error( 'save_error', $message );
         }
     }
 

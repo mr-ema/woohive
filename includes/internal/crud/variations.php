@@ -3,6 +3,7 @@
 namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
 
 use WP_Error;
 use WC_Product_Variation;
@@ -129,9 +130,13 @@ class Variations {
 
             $id = $variation->get_id();
 
+            Debugger::ok( __( 'Variacion creada correctamente', Constants::TEXT_DOMAIN ) );
             return $id;
         } catch ( \Exception $e ) {
-            return new WP_Error( 'create_error', __( 'Error al crear la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
+            $message = __( 'Error al crear la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
+
+            Debugger::error( $message );
+            return new WP_Error( 'create_error', $message );
         }
     }
 
@@ -163,9 +168,13 @@ class Variations {
             $variation_id = $variation->get_id();
             wc_delete_product_transients($variation_id);
 
+            Debugger::ok( __( 'Variacion actualizada correctamente', Constants::TEXT_DOMAIN ) );
             return $variation_id;
         } catch ( \Exception $e ) {
-            return new WP_Error( 'update_error', __( 'Error al actualizar la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN ) );
+            $message = __( 'Error al actualizar la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
+
+            Debugger::error( $message );
+            return new WP_Error( 'update_error', $message );
         }
     }
 

@@ -3,6 +3,7 @@
 namespace WooHive\Internal;
 
 use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
 use WooHive\WCApi\Client;
 use WooHive\Internal\Crud;
 
@@ -42,6 +43,8 @@ class Tools {
         if ( empty( $product['sku'] ) ) {
             return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN ) );
         }
+
+        Debugger::debug( '[IMPORT] Data del producto:' . $res->json_fmt() );
 
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
@@ -108,6 +111,8 @@ class Tools {
         if ( empty( $product['sku'] ) ) {
             return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN ) );
         }
+
+        Debugger::debug( '[UPDATE] Data del producto:' . $res->json_fmt() );
 
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
