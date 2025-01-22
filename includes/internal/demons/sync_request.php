@@ -26,6 +26,13 @@ class Sync_Request {
         add_action( Constants::PLUGIN_SLUG . '_sync_product',  [ self::class, 'on_sync_product' ] );
     }
 
+    /**
+     * Maneja la sincronización de un producto específico.
+     *
+     * @param WC_Product $product Instancia del producto.
+     *
+     * @return void
+     */
     public static function on_sync_product( WC_Product $product ): void {
         if ( $product && Helpers::should_sync( $product ) ) {
             self::set_sync_in_progress( $product->get_id(), true );
@@ -38,6 +45,16 @@ class Sync_Request {
         }
     }
 
+
+    /**
+     * Maneja la sincronización cuando se guarda un producto.
+     *
+     * @param int     $post_id ID del post.
+     * @param WP_Post $post    Objeto del post.
+     * @param bool    $update  Indica si es una actualización.
+     *
+     * @return void
+     */
     public static function on_product_save( int $post_id, WP_Post $post, bool $update ): void {
         $sync_in_process = self::is_sync_in_progress( $post_id ) || self::is_importing_in_progress( $post_id );
         if ( $sync_in_process || 'product' !== $post->post_type || 'publish' !== $post->post_status ) {
@@ -56,6 +73,15 @@ class Sync_Request {
         }
     }
 
+    /**
+     * Maneja la sincronización cuando se guarda una variación de producto.
+     *
+     * @param int     $post_id ID del post.
+     * @param WP_Post $post    Objeto del post.
+     * @param bool    $update  Indica si es una actualización.
+     *
+     * @return void
+     */
     public static function on_product_variation_save( int $post_id, WP_Post $post, bool $update ): void {
         $product_id = get_post_field( 'post_parent', $post_id );
         $sync_in_process = self::is_sync_in_progress( $post_id ) || self::is_importing_in_progress( $post_id );
@@ -75,6 +101,14 @@ class Sync_Request {
         }
     }
 
+    /**
+     * Marca el inicio del proceso de importación de un producto.
+     *
+     * @param WC_Product $product Instancia del producto.
+     * @param array      $_data   Datos del producto.
+     *
+     * @return void
+     */
     public static function on_import_start( WC_Product $product, array $_data ): void {
         $post_id = $product->get_id();
         $unused = $_data;
@@ -82,12 +116,20 @@ class Sync_Request {
         self::set_importing_in_progress( $post_id, true );
     }
 
+    /**
+     * Marca el fin del proceso de importación de un producto.
+     *
+     * @param WC_Product $product Instancia del producto.
+     * @param array      $_data   Datos del producto.
+     *
+     * @return void
+     */
     public static function on_import_finished( WC_Product $product, array $_data ): void {
         $post_id = $product->get_id();
         $unused = $_data;
 
         self::set_importing_in_progress( $post_id, false );
-        do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
+        self::on_sync_product($product);
     }
 
     /**
@@ -164,14 +206,36 @@ class Sync_Request {
         );
     }
 
+    /**
+     * Verifica si la importación está en progreso para un producto.
+     *
+     * @param int $post_id ID del producto.
+     *
+     * @return bool
+     */
     public static function is_importing_in_progress( int $post_id ): bool {
         return get_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id);
     }
 
+    /**
+     * Verifica si la sincronización está en progreso para un producto.
+     *
+     * @param int $post_id ID del producto.
+     *
+     * @return bool
+     */
     public static function is_sync_in_progress( int $post_id ): bool {
         return get_transient( Constants::PLUGIN_SLUG . '_sync_in_progress_' . $post_id );
     }
 
+    /**
+     * Establece el estado de sincronización en progreso para un producto.
+     *
+     * @param int  $post_id  ID del producto.
+     * @param bool $finished Indica si la sincronización ha finalizado.
+     *
+     * @return void
+     */
     public  static function set_sync_in_progress( int $post_id, bool $finished ): void {
         if ( $finished ) {
             delete_transient( Constants::PLUGIN_SLUG . '_sync_in_progress_' . $post_id );
@@ -180,6 +244,14 @@ class Sync_Request {
         set_transient( Constants::PLUGIN_SLUG . '_sync_in_progress_' . $post_id, true, 9 );
     }
 
+    /**
+     * Establece el estado de importación en progreso para un producto.
+     *
+     * @param int  $post_id  ID del producto.
+     * @param bool $finished Indica si la importación ha finalizado.
+     *
+     * @return void
+     */
     public static function set_importing_in_progress( int $post_id, bool $finished ): void {
         if ( $finished ) {
             delete_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id );
