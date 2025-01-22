@@ -68,7 +68,6 @@ class Init {
         self::includes();
 
         if ( defined('WP_DEBUG') && WP_DEBUG ) {
-            self::load_class( 'includes/utils/debugger.php' );
             \WooHive\Utils\Debugger::init();
         }
 
@@ -80,6 +79,7 @@ class Init {
         // self::load_class('includes/utils/logger.php');
         self::load_class( 'includes/utils/helpers.php' );
         self::load_class( 'includes/utils/json_fmt.php' );
+        self::load_class( 'includes/utils/debugger.php' );
 
         self::load_class( 'includes/wc-api/check-api.php' );
         self::load_class( 'includes/wc-api/client.php' );
