@@ -39,7 +39,7 @@ class Sync_Endpoint {
                         },
                     ),
 
-                    'product_id' => array(
+                    'variation_id' => array(
                         'required'          => false,
                         'validate_callback' => function ( $param ) {
                             return is_numeric( $param );
