@@ -105,7 +105,7 @@ class Sync_Endpoint {
             return new WP_REST_Response( array( 'message' => 'Stock synced completed.' ), 200 );
         }
 
-        if ( false && Helpers::is_primary_site() ) {
+        if ( Helpers::is_primary_site() ) {
             $result = Tools::import_product( $client, $product_id );
             if ( is_wp_error( $result ) ) {
                 return $result;
