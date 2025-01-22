@@ -20,7 +20,7 @@ class Sync_Request {
         add_action( 'save_post_product', [ self::class, 'on_product_save' ], 10, 3 );
         add_action( 'save_post_product_variation', [ self::class, 'on_product_variation_save' ], 10, 3 );
 
-        add_action( 'woocommerce_product_import_pre_insert_product_object', [ self::class, 'on_import_start' ], 10, 2);
+        add_filter( 'woocommerce_product_import_get_product_object', [ self::class, 'on_import_start' ], 10, 2);
         add_action( 'woocommerce_product_import_inserted_product_object', [ self::class, 'on_import_finished' ], 10, 2 );
 
         add_action( Constants::PLUGIN_SLUG . '_sync_product',  [ self::class, 'on_sync_product' ] );
@@ -42,9 +42,12 @@ class Sync_Request {
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site_data( $product );
             }
+
+            $post_id = $product->get_id();
+            self::set_sync_in_progress( $post_id, false );
+            self::set_importing_in_progress( $post_id, false );
         }
     }
-
 
     /**
      * Maneja la sincronización cuando se guarda un producto.
@@ -105,31 +108,31 @@ class Sync_Request {
      * Marca el inicio del proceso de importación de un producto.
      *
      * @param WC_Product $product Instancia del producto.
-     * @param array      $_data   Datos del producto.
+     * @param array      $data   Raw CSV data.
      *
-     * @return void
+     * @return WC_Product
      */
-    public static function on_import_start( WC_Product $product, array $_data ): void {
+    public static function on_import_start( WC_Product $product, array $data = [] ): WC_Product {
         $post_id = $product->get_id();
-        $unused = $_data;
-
         self::set_importing_in_progress( $post_id, true );
+
+        return $product;
     }
 
     /**
      * Marca el fin del proceso de importación de un producto.
      *
      * @param WC_Product $product Instancia del producto.
-     * @param array      $_data   Datos del producto.
+     * @param array      $data   Raw CSV data.
      *
      * @return void
      */
-    public static function on_import_finished( WC_Product $product, array $_data ): void {
+    public static function on_import_finished( WC_Product $product, array $data = [] ): void {
         $post_id = $product->get_id();
-        $unused = $_data;
 
+        self::set_sync_in_progress( $post_id, false );
         self::set_importing_in_progress( $post_id, false );
-        self::on_sync_product($product);
+        self::on_sync_product( $product );
     }
 
     /**
@@ -232,32 +235,32 @@ class Sync_Request {
      * Establece el estado de sincronización en progreso para un producto.
      *
      * @param int  $post_id  ID del producto.
-     * @param bool $finished Indica si la sincronización ha finalizado.
+     * @param bool $in_progress Indica si la sincronización esta en progreso.
      *
      * @return void
      */
-    public  static function set_sync_in_progress( int $post_id, bool $finished ): void {
-        if ( $finished ) {
+    public  static function set_sync_in_progress( int $post_id, bool $in_progress ): void {
+        if ( $in_progress ) {
+            set_transient( Constants::PLUGIN_SLUG . '_sync_in_progress_' . $post_id, true, 9 );
+        } else {
             delete_transient( Constants::PLUGIN_SLUG . '_sync_in_progress_' . $post_id );
         }
-
-        set_transient( Constants::PLUGIN_SLUG . '_sync_in_progress_' . $post_id, true, 9 );
     }
 
     /**
      * Establece el estado de importación en progreso para un producto.
      *
      * @param int  $post_id  ID del producto.
-     * @param bool $finished Indica si la importación ha finalizado.
+     * @param bool $in_progress Indica si la importación esta en proceso.
      *
      * @return void
      */
-    public static function set_importing_in_progress( int $post_id, bool $finished ): void {
-        if ( $finished ) {
+    public static function set_importing_in_progress( int $post_id, bool $in_progress ): void {
+        if ( $in_progress ) {
+            set_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id, true, 9 );
+        } else {
             delete_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id );
         }
-
-        set_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id, true, 9 );
     }
 
 }
