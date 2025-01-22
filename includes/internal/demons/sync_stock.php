@@ -2,6 +2,9 @@
 
 namespace WooHive\Internal\Demons;
 
+use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
+use WooHive\WCApi\Client;
 use WooHive\Utils\Helpers;
 
 use WC_Product;
@@ -91,20 +94,15 @@ class Sync_Stock {
         $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
 
         foreach ( $sites as $site ) {
-            // temporal way of handling endpoints
-            $external_site_url = "{$site['url']}/wp-json/woohive/v1/sync-product";
+            $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+            $data = [
+                'product_id'    => $product_id,
+                'variation_id'  => $variation_id,
+                'from'          => 'primary',
+            ];
 
-            $response = wp_remote_post(
-                $external_site_url,
-                array(
-                    'body' => array(
-                        'product_id' => $product_id,
-                        'variation_id' => $variation_id,
-                        'from'       => 'primary',
-                        'should_sync_only_stock' => $should_sync_only_stock
-                    ),
-                )
-            );
+            $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data );
+            Debugger::debug( 'sync stock from primary: ', $response );
         }
     }
 
@@ -126,25 +124,20 @@ class Sync_Stock {
             return;
         }
 
-        $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
-        $should_sync_only_stock = true;
         $product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
         $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
 
+        $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+
         $server_host = $_SERVER['HTTP_HOST'];
-        $response    = wp_remote_post(
-            $external_site_url,
-            array(
-                'body'    => array(
-                    'product_id' => $product_id,
-                    'variation_id' => $variation_id,
-                    'from'       => 'secondary',
-                    'should_sync_only_stock' => $should_sync_only_stock
-                ),
-                'headers' => array(
-                    'X-Source-Server-Host' => $server_host,
-                ),
-            )
-        );
+        $headers = [ 'X-Source-Server-Host' => $server_host ];
+        $data = [
+            'product_id'    => $product_id,
+            'variation_id'  => $variation_id,
+            'from'          => 'secondary',
+        ];
+
+        $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data, [], $headers );
+        Debugger::debug( 'sync stock from secondary: ', $response );
     }
 }

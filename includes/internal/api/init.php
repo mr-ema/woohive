@@ -3,7 +3,8 @@
 namespace WooHive\Internal\Api;
 
 use WooHive\Config\Constants;
-use WooHive\Internal\Api\Endpoints\Sync_Endpoint;
+use WooHive\Internal\Api\Endpoints\Sync_Product_Endpoint;
+use WooHive\Internal\Api\Endpoints\Sync_Stock_Endpoint;
 
 
 /** Prevenir el acceso directo al script. */
@@ -21,8 +22,9 @@ class Init {
      * Register REST API routes.
      */
     public static function register_routes(): void {
-        $namespace = Constants::API_BASE_NAME . '/' . Constants::API_VERSION;
+        $namespace = Constants::WC_API_BASE_NAME . '/' . Constants::WC_API_VERSION . '/' . Constants::INTERNAL_API_BASE_NAME;
 
-        Sync_Endpoint::register_routes( $namespace );
+        Sync_Product_Endpoint::register_routes( $namespace );
+        Sync_Stock_Endpoint::register_routes( $namespace );
     }
 }
