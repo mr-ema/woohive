@@ -3,7 +3,9 @@
 namespace WooHive\Internal\Demons;
 
 use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
 use WooHive\Utils\Helpers;
+use WooHive\WCApi\Client;
 
 use WC_Product;
 use WP_Post;
@@ -152,18 +154,11 @@ class Sync_Request {
 
         $sites = Helpers::sites();
         foreach ( $sites as $site ) {
-            // temporal way of handling endpoints
-            $external_site_url = "{$site['url']}/wp-json/woohive/v1/sync-product";
+            $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+            $data = [ 'product_id' => $product_id, 'from' => 'primary' ];
 
-            $response = wp_remote_post(
-                $external_site_url,
-                array(
-                    'body' => array(
-                        'product_id' => $product_id,
-                        'from'       => 'primary',
-                    ),
-                )
-            );
+            $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data );
+            Debugger::debug( 'sync product from primary: ', $response );
         }
     }
 
@@ -187,26 +182,18 @@ class Sync_Request {
             return; // Si no hay un sitio principal configurado, no se realiza la sincronización.
         }
 
-        $should_sync_only_stock = false;
         if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
-            $should_sync_only_stock = true;
+            return;
         }
 
-        $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
+        $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+
         $server_host = $_SERVER['HTTP_HOST'];
-        $response    = wp_remote_post(
-            $external_site_url,
-            array(
-                'body'    => array(
-                    'product_id' => $product_id,
-                    'from'       => 'secondary',
-                    'should_sync_only_stock' => $should_sync_only_stock
-                ),
-                'headers' => array(
-                    'X-Source-Server-Host' => $server_host,
-                ),
-            )
-        );
+        $headers = [ 'X-Source-Server-Host' => $server_host ];
+        $data = [ 'product_id' => $product_id, 'from' => 'secondary' ];
+
+        $response = $client->post( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data, [], $headers );
+        Debugger::debug( 'sync product from secondary: ', $response );
     }
 
     /**
@@ -262,5 +249,4 @@ class Sync_Request {
             delete_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id );
         }
     }
-
 }

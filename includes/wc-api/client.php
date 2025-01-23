@@ -2,6 +2,7 @@
 
 namespace WooHive\WCApi;
 
+use WooHive\Config\Constants;
 use WooHive\WCApi\Endpoints\Product_Categories;
 use WooHive\WCApi\Endpoints\Product_Variations;
 use WooHive\WCApi\Endpoints\Products;
@@ -28,9 +29,6 @@ class Client {
     /** @var Product_Variations */
     public Product_Variations $product_variations;
 
-    /** @var Client_Products_Attributes */
-    // public $products_attributes;
-
     /**
      * Constructor para inicializar el cliente de la API.
      *
@@ -39,7 +37,7 @@ class Client {
      * @param string $api_secret El secreto de consumidor de la API de WooCommerce.
      */
     public function __construct( string $site_url, string $api_key, string $api_secret ) {
-        $this->site_url    = trailingslashit( $site_url ) . 'wp-json/wc/v3/';
+        $this->site_url    = trailingslashit( $site_url ) . 'wp-json/' . Constants::WC_API_BASE_NAME . '/' . Constants::WC_API_VERSION . '/';
         $this->auth_header = array(
             'Authorization' => 'Basic ' . base64_encode( $api_key . ':' . $api_secret ),
             'Content-Type'  => 'application/json',
@@ -48,7 +46,6 @@ class Client {
         $this->products           = new Products( $this );
         $this->product_categories = new Product_Categories( $this );
         $this->product_variations = new Product_Variations( $this );
-        // $this->products_attributes = new Client_Products_Attributes( $this );
     }
 
     /**
@@ -68,20 +65,23 @@ class Client {
      *
      * @param string     $method   El método HTTP (GET, POST, PUT).
      * @param string     $endpoint El endpoint de la API.
-     * @param array|null $data Los datos que se enviarán en el cuerpo de la solicitud (si corresponde).
-     * @param array|null $args Los argumentos adicionales que se agregarán a la solicitud (query params, headers, etc.).
+     * @param array|null $data     Los datos que se enviarán en el cuerpo de la solicitud (si corresponde).
+     * @param array|null $args     Los argumentos adicionales que se agregarán a la solicitud (query params).
+     * @param array      $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function request( string $method, string $endpoint, ?array $data = null, ?array $args = null ): Response {
+    public function request( string $method, string $endpoint, ?array $data = null, ?array $args = null, array $headers = [] ): Response {
         $url = $this->site_url . $endpoint;
 
         if ( ! empty( $args ) ) {
             $url = add_query_arg( $args, $url );
         }
 
+        $final_headers = array_merge($this->auth_header, $headers);
+
         $request_args = array(
             'method'  => $method,
-            'headers' => $this->auth_header,
+            'headers' => $final_headers,
         );
 
         if ( $data ) {
@@ -93,7 +93,7 @@ class Client {
         if ( is_wp_error( $response ) ) {
             $error_message = $response->get_error_message();
             if ( empty( $error_message ) ) {
-                $error_message = __( 'Un error desconocido ha ocurrido.', 'woo-multisite-stock-sync' );
+                $error_message = __( 'Un error desconocido ha ocurrido.', Constants::TEXT_DOMAIN );
             }
 
             return new Response( 0, null, array(), $error_message );
@@ -110,11 +110,12 @@ class Client {
      * Realizar una solicitud GET a la API.
      *
      * @param string $endpoint El endpoint de la API.
-     * @param array  $args Argumentos adicionales (query params).
+     * @param array  $args     Argumentos adicionales (query params).
+     * @param array  $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function get( string $endpoint, array $args = array() ): Response {
-        return $this->request( 'GET', $endpoint, null, $args );
+    public function get( string $endpoint, array $args = [], array $headers = [] ): Response {
+        return $this->request( 'GET', $endpoint, null, $args, $headers );
     }
 
     /**
@@ -123,10 +124,11 @@ class Client {
      * @param string $endpoint El endpoint de la API.
      * @param array  $data     Los datos que se enviarán en el cuerpo de la solicitud.
      * @param array  $args     Argumentos adicionales.
+     * @param array  $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function post( string $endpoint, array $data, array $args = array() ): Response {
-        return $this->request( 'POST', $endpoint, $data, $args );
+    public function post( string $endpoint, array $data, array $args = [], array $headers = [] ): Response {
+        return $this->request( 'POST', $endpoint, $data, $args, $headers );
     }
 
     /**
@@ -135,10 +137,11 @@ class Client {
      * @param string $endpoint El endpoint de la API.
      * @param array  $data     Los datos que se enviarán en el cuerpo de la solicitud.
      * @param array  $args     Argumentos adicionales.
+     * @param array  $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function put( string $endpoint, array $data, array $args = array() ): Response {
-        return $this->request( 'PUT', $endpoint, $data, $args );
+    public function put( string $endpoint, array $data, array $args = [], array $headers = [] ): Response {
+        return $this->request( 'PUT', $endpoint, $data, $args, $headers );
     }
 }
 

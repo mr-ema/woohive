@@ -190,14 +190,9 @@ class Check_Api {
      * Verificar si el plugin está instalado y es funcional.
      */
     public function check_plugin_installed(): void {
-        // bypass por ahora
-        return;
-
-        // Usando un cliente personalizado para verificar si Stock Sync está instalado.
         $client   = Client::create( $this->url, $this->key, $this->secret );
-        $response = $client->get( 'multisite-stock-sync-exists' );
+        $response = $client->get( Constants::INTERNAL_API_BASE_NAME );
 
-        // Si hay un error, añadirlo a la lista.
         if ( $response->has_error() ) {
             $this->errors[] = $response->error_msg();
         }

@@ -99,7 +99,8 @@ class Init {
         self::load_class( 'includes/internal/demons/sync_request.php' );
         self::load_class( 'includes/internal/demons/init.php' );
 
-        self::load_class( 'includes/internal/api/endpoints/sync_endpoint.php' );
+        self::load_class( 'includes/internal/api/endpoints/sync_product_endpoint.php' );
+        self::load_class( 'includes/internal/api/endpoints/sync_stock_endpoint.php' );
         self::load_class( 'includes/internal/api/init.php' );
 
         if ( is_admin() ) {

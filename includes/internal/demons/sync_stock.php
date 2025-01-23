@@ -2,6 +2,9 @@
 
 namespace WooHive\Internal\Demons;
 
+use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
+use WooHive\WCApi\Client;
 use WooHive\Utils\Helpers;
 
 use WC_Product;
@@ -29,12 +32,12 @@ class Sync_Stock {
      */
     public static function on_stock_update( WC_Product $product ): void {
         $product_id = $product->get_id();
-        if ( get_transient( 'stock_sync_in_progress_' .  $product_id ) ) {
+        if ( self::is_sync_stock_in_progress( $product_id ) ) {
             return;
         }
 
         if ( Helpers::should_sync_stock( $product ) ) {
-            set_transient( 'stock_sync_in_progress_' . $product_id, true, 6 );
+            self::set_sync_stock_in_progress( $product_id, true );
 
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites( $product );
@@ -53,12 +56,12 @@ class Sync_Stock {
      */
     public static function on_variation_stock_update( WC_Product_Variation $variation ): void {
         $variation_id = $variation->get_id();
-        if ( get_transient( 'stock_sync_in_progress_' .  $variation_id ) ) {
+        if ( self::is_sync_stock_in_progress( $variation_id ) ) {
             return;
         }
 
         if ( Helpers::should_sync_stock( $variation ) ) {
-            set_transient( 'stock_sync_in_progress_' . $variation_id, true, 6 );
+            self::set_sync_stock_in_progress( $variation_id, true );
 
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites( $variation);
@@ -86,25 +89,19 @@ class Sync_Stock {
             return;
         }
 
-        $should_sync_only_stock = true;
         $product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
         $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
 
         foreach ( $sites as $site ) {
-            // temporal way of handling endpoints
-            $external_site_url = "{$site['url']}/wp-json/woohive/v1/sync-product";
+            $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+            $data = [
+                'product_id'    => $product_id,
+                'variation_id'  => $variation_id,
+                'from'          => 'primary',
+            ];
 
-            $response = wp_remote_post(
-                $external_site_url,
-                array(
-                    'body' => array(
-                        'product_id' => $product_id,
-                        'variation_id' => $variation_id,
-                        'from'       => 'primary',
-                        'should_sync_only_stock' => $should_sync_only_stock
-                    ),
-                )
-            );
+            $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data );
+            Debugger::debug( 'sync stock from primary: ', $response );
         }
     }
 
@@ -126,25 +123,47 @@ class Sync_Stock {
             return;
         }
 
-        $external_site_url = "{$main_site['url']}/wp-json/woohive/v1/sync-product";
-        $should_sync_only_stock = true;
         $product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
         $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
 
+        $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+
         $server_host = $_SERVER['HTTP_HOST'];
-        $response    = wp_remote_post(
-            $external_site_url,
-            array(
-                'body'    => array(
-                    'product_id' => $product_id,
-                    'variation_id' => $variation_id,
-                    'from'       => 'secondary',
-                    'should_sync_only_stock' => $should_sync_only_stock
-                ),
-                'headers' => array(
-                    'X-Source-Server-Host' => $server_host,
-                ),
-            )
-        );
+        $headers = [ 'X-Source-Server-Host' => $server_host ];
+        $data = [
+            'product_id'    => $product_id,
+            'variation_id'  => $variation_id,
+            'from'          => 'secondary',
+        ];
+
+        $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data, [], $headers );
+        Debugger::debug( 'sync stock from secondary: ', $response );
+    }
+
+    /**
+     * Verifica si la sincronización de stock está en progreso para un producto.
+     *
+     * @param int $post_id ID del producto.
+     *
+     * @return bool
+     */
+    public static function is_sync_stock_in_progress( int $post_id ): bool {
+        return get_transient( Constants::PLUGIN_SLUG . '_sync_stock_in_progress_' . $post_id );
+    }
+
+    /**
+     * Establece el estado de sincronización en progreso para un producto.
+     *
+     * @param int  $post_id  ID del producto.
+     * @param bool $in_progress Indica si la sincronización esta en progreso.
+     *
+     * @return void
+     */
+    public  static function set_sync_stock_in_progress( int $post_id, bool $in_progress ): void {
+        if ( $in_progress ) {
+            set_transient( Constants::PLUGIN_SLUG . '_sync_stock_in_progress_' . $post_id, true, 3 );
+        } else {
+            delete_transient( Constants::PLUGIN_SLUG . '_sync_stock_in_progress_' . $post_id );
+        }
     }
 }
