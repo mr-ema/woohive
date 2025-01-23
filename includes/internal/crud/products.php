@@ -116,7 +116,7 @@ class Products {
             $message = __( 'Error al guardar el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
 
             Debugger::error( $message );
-            return new WP_Error( 'save_error',  $message);
+            return new WP_Error( 'save_error', $message );
         }
     }
 
@@ -235,7 +235,7 @@ class Products {
             $message = __( 'Error al crear el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
 
             Debugger::error( $message );
-            return new WP_Error( 'create_error',  $message );
+            return new WP_Error( 'create_error', $message );
         }
     }
 

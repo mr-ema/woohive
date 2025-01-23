@@ -67,7 +67,7 @@ class Init {
 
         self::includes();
 
-        if ( defined('WP_DEBUG') && WP_DEBUG ) {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             \WooHive\Utils\Debugger::init();
         }
 

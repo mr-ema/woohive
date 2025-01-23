@@ -76,7 +76,7 @@ class Variations {
             $attributes_map = array_reduce(
                 $data['attributes'],
                 function ( $carry, $attribute ) {
-                    $slug = sanitize_title( $attribute['name'] );
+                    $slug           = sanitize_title( $attribute['name'] );
                     $carry[ $slug ] = $attribute['option'];
                     return $carry;
                 },
@@ -96,7 +96,7 @@ class Variations {
 
         if ( ! empty( $data['meta_data'] ) ) {
             foreach ( $data['meta_data'] as $meta_data => $meta_key ) {
-                $variation->update_meta_data($meta_key, $meta_data);
+                $variation->update_meta_data( $meta_key, $meta_data );
             }
         }
     }
@@ -105,7 +105,7 @@ class Variations {
      * Crea una nueva variación para un producto.
      *
      * @param WC_Product $wc_product Objeto del producto al que pertenece la variación.
-     * @param array      $data Datos de la variación a crear.
+     * @param array      $filtered_data Datos de la variación a crear.
      *
      * @return int|WP_Error Retorna el ID de la variación creada o un error en caso de fallo.
      */
@@ -166,7 +166,7 @@ class Variations {
             $variation->save();
 
             $variation_id = $variation->get_id();
-            wc_delete_product_transients($variation_id);
+            wc_delete_product_transients( $variation_id );
 
             Debugger::ok( __( 'Variacion actualizada correctamente', Constants::TEXT_DOMAIN ) );
             return $variation_id;
@@ -247,12 +247,12 @@ class Variations {
 
         $parent_sku = $wc_product->get_sku();
         $sku        = $data['sku'] ?? null;
-        $attributes = $data['attributes'] ?? [];
+        $attributes = $data['attributes'] ?? array();
 
         $variations = $wc_product->get_children();
         foreach ( $variations as $variation_id ) {
             $variation = wc_get_product( $variation_id );
-            if ( $sku && $variation->get_sku() === $sku ) {
+            if ( $sku && $variation->get_sku() === $sku && $sku !== $parent_sku ) {
                 return $variation;
             }
 
@@ -273,9 +273,9 @@ class Variations {
      * @return bool True si los atributos coinciden, false si no.
      */
     public static function match_attributes( array $existing_attributes, array $new_attributes ): bool {
-        if ( empty( $existing_attributes ) && empty( $new_attributes) ) {
+        if ( empty( $existing_attributes ) && empty( $new_attributes ) ) {
             return true;
-        } else if ( empty( $existing_attributes ) || empty( $new_attributes) ) {
+        } elseif ( empty( $existing_attributes ) || empty( $new_attributes ) ) {
             return false;
         }
 

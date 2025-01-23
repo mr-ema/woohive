@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Stock {
 
     public static function init(): void {
-        add_action( 'woocommerce_product_set_stock', [ self::class, 'on_stock_update' ], 10, 2 );
-        add_action( 'woocommerce_variation_set_stock', [ self::class, 'on_variation_stock_update' ], 10, 2 );
+        add_action( 'woocommerce_product_set_stock', array( self::class, 'on_stock_update' ), 10, 2 );
+        add_action( 'woocommerce_variation_set_stock', array( self::class, 'on_variation_stock_update' ), 10, 2 );
     }
 
     /**
@@ -64,7 +64,7 @@ class Sync_Stock {
             self::set_sync_stock_in_progress( $variation_id, true );
 
             if ( Helpers::is_primary_site() ) {
-                self::sync_to_secondary_sites( $variation);
+                self::sync_to_secondary_sites( $variation );
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site( $variation );
             }
@@ -89,16 +89,16 @@ class Sync_Stock {
             return;
         }
 
-        $product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+        $product_id   = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
         $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
 
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-            $data = [
-                'product_id'    => $product_id,
-                'variation_id'  => $variation_id,
-                'from'          => 'primary',
-            ];
+            $data   = array(
+                'product_id'   => $product_id,
+                'variation_id' => $variation_id,
+                'from'         => 'primary',
+            );
 
             $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data );
             Debugger::debug( 'sync stock from primary: ', $response );
@@ -123,20 +123,20 @@ class Sync_Stock {
             return;
         }
 
-        $product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+        $product_id   = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
         $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
 
         $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
 
         $server_host = $_SERVER['HTTP_HOST'];
-        $headers = [ 'X-Source-Server-Host' => $server_host ];
-        $data = [
-            'product_id'    => $product_id,
-            'variation_id'  => $variation_id,
-            'from'          => 'secondary',
-        ];
+        $headers     = array( 'X-Source-Server-Host' => $server_host );
+        $data        = array(
+            'product_id'   => $product_id,
+            'variation_id' => $variation_id,
+            'from'         => 'secondary',
+        );
 
-        $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data, [], $headers );
+        $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data, array(), $headers );
         Debugger::debug( 'sync stock from secondary: ', $response );
     }
 
@@ -159,7 +159,7 @@ class Sync_Stock {
      *
      * @return void
      */
-    public  static function set_sync_stock_in_progress( int $post_id, bool $in_progress ): void {
+    public static function set_sync_stock_in_progress( int $post_id, bool $in_progress ): void {
         if ( $in_progress ) {
             set_transient( Constants::PLUGIN_SLUG . '_sync_stock_in_progress_' . $post_id, true, 3 );
         } else {

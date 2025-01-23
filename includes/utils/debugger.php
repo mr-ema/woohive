@@ -19,19 +19,19 @@ class Debugger {
     private const LEVEL_ERROR = 2;
     private const LEVEL_DEBUG = 3;
 
-    private const LOG_NAME       = 'debugger.log';
-    private const MAX_LOG_SIZE   = 9 * 1024;
-    private const MAX_LOG_LINES  = 9000;
+    private const LOG_NAME      = 'debugger.log';
+    private const MAX_LOG_SIZE  = 9 * 1024;
+    private const MAX_LOG_LINES = 9000;
 
-    private const LEVELS = [
+    private const LEVELS = array(
         'ok'      => self::LEVEL_OK,
         'warning' => self::LEVEL_WARN,
         'error'   => self::LEVEL_ERROR,
         'debug'   => self::LEVEL_DEBUG,
-    ];
+    );
 
     private static $log_file;
-    private static $enabled_levels = [self::LEVEL_ERROR, self::LEVEL_WARN, self::LEVEL_OK, self::LEVEL_DEBUG];
+    private static $enabled_levels = array( self::LEVEL_ERROR, self::LEVEL_WARN, self::LEVEL_OK, self::LEVEL_DEBUG );
 
     public static function init(): void {
         $directory = Constants::$PLUGIN_DIR_PATH . 'logs/';
@@ -89,7 +89,7 @@ class Debugger {
 
         foreach ( $messages as $message ) {
             $formatted_message = is_string( $message ) ? $message : var_export( $message, true );
-            $log_entry = "[$timestamp] [$level_name] $formatted_message" . PHP_EOL;
+            $log_entry         = "[$timestamp] [$level_name] $formatted_message" . PHP_EOL;
 
             // Check file size or line count before logging
             if ( file_exists( self::$log_file ) &&

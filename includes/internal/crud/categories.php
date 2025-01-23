@@ -54,8 +54,6 @@ class Categories {
             return new WP_Error( 'invalid_data', __( 'Las categorías no pueden estar vacías.', Constants::TEXT_DOMAIN ) );
         }
 
-        $filtered_categories = array_map( 'sanitize_text_field', $categories );
-
         $category_ids = array();
         foreach ( $categories as $category ) {
             $category_name = ( function () use ( $category ) {

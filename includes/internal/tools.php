@@ -44,7 +44,7 @@ class Tools {
             return new WP_Error( 'missing_sku', __( 'El producto no puede ser importado dado que su sku esta vacio.', Constants::TEXT_DOMAIN ) );
         }
 
-        Debugger::debug( '[IMPORT] Data del producto: ',  $res->json_fmt() );
+        Debugger::debug( '[IMPORT] Data del producto: ', $res->json_fmt() );
 
         if ( ! empty( $product['categories'] ) ) {
             $ids = array_column( $product['categories'], 'id' );
@@ -188,10 +188,16 @@ class Tools {
         if ( $external_variation_id && $internal_product && ! empty( $product['variations'] ) ) {
             $variations_res = $client->product_variations->pull_all( $product['id'], array( 'include' => $external_variation_id ) );
             if ( ! $variations_res->has_error() ) {
-                $variation = $variations_res->body()[0];
-                $variation_only_stock = array_intersect_key( $variation, [ 'sku' => null, 'stock_quantity' => null ] );
+                $variation            = $variations_res->body()[0];
+                $variation_only_stock = array_intersect_key(
+                    $variation,
+                    array(
+                        'sku'            => null,
+                        'stock_quantity' => null,
+                    )
+                );
 
-                $variation_res = Crud\Variations::update_batch( $internal_product_id, [ $variation_only_stock ] );
+                $variation_res = Crud\Variations::update_batch( $internal_product_id, array( $variation_only_stock ) );
                 if ( $variation_res['error_count'] > 0 ) {
                     return new WP_Error( 'sync_with_variations_errors', $variation_res );
                 }

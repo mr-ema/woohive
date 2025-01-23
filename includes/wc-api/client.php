@@ -70,14 +70,14 @@ class Client {
      * @param array      $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function request( string $method, string $endpoint, ?array $data = null, ?array $args = null, array $headers = [] ): Response {
+    public function request( string $method, string $endpoint, ?array $data = null, ?array $args = null, array $headers = array() ): Response {
         $url = $this->site_url . $endpoint;
 
         if ( ! empty( $args ) ) {
             $url = add_query_arg( $args, $url );
         }
 
-        $final_headers = array_merge($this->auth_header, $headers);
+        $final_headers = array_merge( $this->auth_header, $headers );
 
         $request_args = array(
             'method'  => $method,
@@ -114,7 +114,7 @@ class Client {
      * @param array  $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function get( string $endpoint, array $args = [], array $headers = [] ): Response {
+    public function get( string $endpoint, array $args = array(), array $headers = array() ): Response {
         return $this->request( 'GET', $endpoint, null, $args, $headers );
     }
 
@@ -127,7 +127,7 @@ class Client {
      * @param array  $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function post( string $endpoint, array $data, array $args = [], array $headers = [] ): Response {
+    public function post( string $endpoint, array $data, array $args = array(), array $headers = array() ): Response {
         return $this->request( 'POST', $endpoint, $data, $args, $headers );
     }
 
@@ -140,7 +140,7 @@ class Client {
      * @param array  $headers  Encabezados adicionales para la solicitud.
      * @return Response La respuesta de la API.
      */
-    public function put( string $endpoint, array $data, array $args = [], array $headers = [] ): Response {
+    public function put( string $endpoint, array $data, array $args = array(), array $headers = array() ): Response {
         return $this->request( 'PUT', $endpoint, $data, $args, $headers );
     }
 }

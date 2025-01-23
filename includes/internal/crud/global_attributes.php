@@ -48,9 +48,9 @@ class Global_Attributes {
     public static function create( string $attribute_name, array $options = array() ): int|WP_Error {
         $attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
         $args           = array(
-            'slug'         => $attribute_name,
-            'name'         => ucfirst( $attribute_name ),
-            'options'      => $options,
+            'slug'    => $attribute_name,
+            'name'    => ucfirst( $attribute_name ),
+            'options' => $options,
         );
 
         $result = wp_insert_term( $attribute_name, 'pa_' . $attribute_name, $args );
@@ -80,7 +80,7 @@ class Global_Attributes {
      * @return array|WP_Error Devuelve un array de IDs de términos creados o actualizados, o WP_Error en caso de error.
      */
     public static function create_or_update_batch( string $attribute_name, array $options ): array|WP_Error {
-        $created_or_updated_ids = [];
+        $created_or_updated_ids = array();
         foreach ( $options as $option ) {
             $result = self::create_or_update( $attribute_name, $option );
             if ( is_wp_error( $result ) ) {

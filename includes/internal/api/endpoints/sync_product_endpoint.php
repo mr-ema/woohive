@@ -35,7 +35,7 @@ class Sync_Product_Endpoint {
                             'required'          => true,
                             'validate_callback' => fn( $param ) => is_numeric( $param ),
                         ),
-                        'from' => array(
+                        'from'       => array(
                             'required'          => true,
                             'validate_callback' => fn( $param ) => in_array( $param, array( 'primary', 'secondary' ), true ),
                         ),
@@ -51,7 +51,7 @@ class Sync_Product_Endpoint {
                             'required'          => true,
                             'validate_callback' => fn( $param ) => is_numeric( $param ),
                         ),
-                        'from' => array(
+                        'from'       => array(
                             'required'          => true,
                             'validate_callback' => fn( $param ) => in_array( $param, array( 'primary', 'secondary' ), true ),
                         ),
@@ -77,7 +77,13 @@ class Sync_Product_Endpoint {
             return $result;
         }
 
-        return new WP_REST_Response( array( 'message' => 'Product imported successfully', 'product_id' => $result ), 200 );
+        return new WP_REST_Response(
+            array(
+                'message'    => 'Product imported successfully',
+                'product_id' => $result,
+            ),
+            200
+        );
     }
 
     public static function handle_update_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -96,7 +102,13 @@ class Sync_Product_Endpoint {
             return $result;
         }
 
-        return new WP_REST_Response( array( 'message' => 'Product updated successfully', 'product_id' => $result ), 200 );
+        return new WP_REST_Response(
+            array(
+                'message'    => 'Product updated successfully',
+                'product_id' => $result,
+            ),
+            200
+        );
     }
 
     private static function get_site_by_source( WP_REST_Request $request, string $from ) {

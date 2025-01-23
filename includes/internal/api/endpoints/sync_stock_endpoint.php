@@ -30,11 +30,11 @@ class Sync_Stock_Endpoint {
             $namespace,
             '/sync-stock',
             array(
-                'methods'             => WP_REST_Server::EDITABLE ,
+                'methods'             => WP_REST_Server::EDITABLE,
                 'callback'            => array( self::class, 'handle_sync_stock' ),
                 'permission_callback' => array( self::class, 'permission_check' ),
                 'args'                => array(
-                    'product_id' => array(
+                    'product_id'   => array(
                         'required'          => true,
                         'validate_callback' => fn( $param ) => is_numeric( $param ),
                     ),
@@ -42,7 +42,7 @@ class Sync_Stock_Endpoint {
                         'required'          => false,
                         'validate_callback' => fn( $param ) => is_numeric( $param ),
                     ),
-                    'from' => array(
+                    'from'         => array(
                         'required'          => true,
                         'validate_callback' => fn( $param ) => in_array( $param, array( 'primary', 'secondary' ), true ),
                     ),

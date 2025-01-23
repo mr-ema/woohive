@@ -19,13 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Request {
 
     public static function init(): void {
-        add_action( 'save_post_product', [ self::class, 'on_product_save' ], 10, 3 );
-        add_action( 'save_post_product_variation', [ self::class, 'on_product_variation_save' ], 10, 3 );
+        add_action( 'save_post_product', array( self::class, 'on_product_save' ), 10, 3 );
+        add_action( 'save_post_product_variation', array( self::class, 'on_product_variation_save' ), 10, 3 );
 
-        add_filter( 'woocommerce_product_import_get_product_object', [ self::class, 'on_import_start' ], 10, 2);
-        add_action( 'woocommerce_product_import_inserted_product_object', [ self::class, 'on_import_finished' ], 10, 2 );
+        add_filter( 'woocommerce_product_import_get_product_object', array( self::class, 'on_import_start' ), 10, 2 );
+        add_action( 'woocommerce_product_import_inserted_product_object', array( self::class, 'on_import_finished' ), 10, 2 );
 
-        add_action( Constants::PLUGIN_SLUG . '_sync_product',  [ self::class, 'on_sync_product' ] );
+        add_action( Constants::PLUGIN_SLUG . '_sync_product', array( self::class, 'on_sync_product' ) );
     }
 
     /**
@@ -88,7 +88,7 @@ class Sync_Request {
      * @return void
      */
     public static function on_product_variation_save( int $post_id, WP_Post $post, bool $update ): void {
-        $product_id = get_post_field( 'post_parent', $post_id );
+        $product_id      = get_post_field( 'post_parent', $post_id );
         $sync_in_process = self::is_sync_in_progress( $post_id ) || self::is_importing_in_progress( $post_id );
         if ( ! $product_id || $sync_in_process ) {
             return;
@@ -114,7 +114,7 @@ class Sync_Request {
      *
      * @return WC_Product
      */
-    public static function on_import_start( WC_Product $product, array $data = [] ): WC_Product {
+    public static function on_import_start( WC_Product $product, array $data = array() ): WC_Product {
         $post_id = $product->get_id();
         self::set_importing_in_progress( $post_id, true );
 
@@ -129,7 +129,7 @@ class Sync_Request {
      *
      * @return void
      */
-    public static function on_import_finished( WC_Product $product, array $data = [] ): void {
+    public static function on_import_finished( WC_Product $product, array $data = array() ): void {
         $post_id = $product->get_id();
 
         self::set_sync_in_progress( $post_id, false );
@@ -155,7 +155,10 @@ class Sync_Request {
         $sites = Helpers::sites();
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-            $data = [ 'product_id' => $product_id, 'from' => 'primary' ];
+            $data   = array(
+                'product_id' => $product_id,
+                'from'       => 'primary',
+            );
 
             $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data );
             Debugger::debug( 'sync product from primary: ', $response );
@@ -189,10 +192,13 @@ class Sync_Request {
         $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
 
         $server_host = $_SERVER['HTTP_HOST'];
-        $headers = [ 'X-Source-Server-Host' => $server_host ];
-        $data = [ 'product_id' => $product_id, 'from' => 'secondary' ];
+        $headers     = array( 'X-Source-Server-Host' => $server_host );
+        $data        = array(
+            'product_id' => $product_id,
+            'from'       => 'secondary',
+        );
 
-        $response = $client->post( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data, [], $headers );
+        $response = $client->post( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data, array(), $headers );
         Debugger::debug( 'sync product from secondary: ', $response );
     }
 
@@ -204,7 +210,7 @@ class Sync_Request {
      * @return bool
      */
     public static function is_importing_in_progress( int $post_id ): bool {
-        return get_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id);
+        return get_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id );
     }
 
     /**
@@ -226,7 +232,7 @@ class Sync_Request {
      *
      * @return void
      */
-    public  static function set_sync_in_progress( int $post_id, bool $in_progress ): void {
+    public static function set_sync_in_progress( int $post_id, bool $in_progress ): void {
         if ( $in_progress ) {
             set_transient( Constants::PLUGIN_SLUG . '_sync_in_progress_' . $post_id, true, 9 );
         } else {

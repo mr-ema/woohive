@@ -67,11 +67,11 @@ class Attributes {
         }
 
         $existing_attributes = $product->get_attributes();
-        $attribute_name = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
+        $attribute_name      = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
 
         if ( Global_Attributes::is_global( $attribute_name ) ) {
             $taxonomy_name = Global_Attributes::get_taxonomy_name( $attribute_name );
-            $result = Global_Attributes::create_or_update( $attribute_name, $filtered_data['options'] );
+            $result        = Global_Attributes::create_or_update( $attribute_name, $filtered_data['options'] );
             if ( is_wp_error( $result ) ) {
                 return $result;
             }
@@ -104,7 +104,7 @@ class Attributes {
             $message = sprintf( __( 'Error al guardar el producto: %s', Constants::TEXT_DOMAIN ), $e->getMessage() );
 
             Debugger::error( $message );
-            return new WP_Error( 'save_error', $message);
+            return new WP_Error( 'save_error', $message );
         }
     }
 
@@ -142,11 +142,11 @@ class Attributes {
         }
 
         $existing_attributes = $product->get_attributes();
-        $attribute_name = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
+        $attribute_name      = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
 
         if ( Global_Attributes::is_global( $attribute_name ) ) {
             $taxonomy_name = Global_Attributes::get_taxonomy_name( $attribute_name );
-            $result = Global_Attributes::create( $attribute_name, $filtered_data['options'] ?? array() );
+            $result        = Global_Attributes::create( $attribute_name, $filtered_data['options'] ?? array() );
             if ( is_wp_error( $result ) ) {
                 return $result;
             }
