@@ -9,6 +9,7 @@ use WooHive\WCApi\Client;
 
 use WP_REST_Request;
 use WP_REST_Response;
+use WP_REST_Server;
 use WP_Error;
 
 
@@ -29,7 +30,7 @@ class Sync_Stock_Endpoint {
             $namespace,
             '/sync-stock',
             array(
-                'methods'             => array( \WP_REST_Server::CREATABLE, \WP_REST_Server::EDITABLE ),
+                'methods'             => WP_REST_Server::EDITABLE ,
                 'callback'            => array( self::class, 'handle_sync_stock' ),
                 'permission_callback' => array( self::class, 'permission_check' ),
                 'args'                => array(
