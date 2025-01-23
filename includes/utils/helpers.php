@@ -294,6 +294,14 @@ class Helpers {
         return ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' );
     }
 
+    public static function is_create_products_in_secondary_sites_enabled(): bool {
+        if ( self::is_secondary_site() ) {
+            return false;
+        }
+
+        return ( get_option( Constants::PLUGIN_SLUG . '_create_products_in_secondary_sites', 'yes' ) === 'yes' );
+    }
+
     /**
      * Verificar si debe proceder con la sincronización de inventario.
      *
