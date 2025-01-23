@@ -143,6 +143,19 @@ class Client {
     public function put( string $endpoint, array $data, array $args = array(), array $headers = array() ): Response {
         return $this->request( 'PUT', $endpoint, $data, $args, $headers );
     }
+
+    /**
+     * Realizar una solicitud DELETE a la API.
+     *
+     * @param string $endpoint El endpoint de la API.
+     * @param array  $data     Los datos que se enviarán en el cuerpo de la solicitud (opcional).
+     * @param array  $args     Argumentos adicionales (query params).
+     * @param array  $headers  Encabezados adicionales para la solicitud.
+     * @return Response La respuesta de la API.
+     */
+    public function delete( string $endpoint, array $data = array(), array $args = array(), array $headers = array() ): Response {
+        return $this->request( 'DELETE', $endpoint, $data, $args, $headers );
+    }
 }
 
 class Response {
