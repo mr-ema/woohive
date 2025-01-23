@@ -83,6 +83,15 @@ class WC_Setting_Woo_Hive_Page extends WC_Settings_Page {
             );
         }
 
+        if ( Helpers::is_primary_site() ) {
+            $settings[ $this->id . '_create_products_in_secondary_sites' ] = array(
+                'title'   => __( 'Crear productos en sitios segundarios', Constants::TEXT_DOMAIN ),
+                'type'    => 'checkbox',
+                'id'      => $this->id . '_create_products_in_secondary_sites',
+                'default' => 'no',
+            );
+        }
+
         $settings[ $this->id . '_role' ] = array(
             'title'   => __( 'Rol de este sitio', Constants::TEXT_DOMAIN ),
             'type'    => 'select',
