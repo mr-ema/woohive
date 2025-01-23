@@ -179,6 +179,39 @@ class Variations {
     }
 
     /**
+     * Elimina una variación de un producto.
+     *
+     * @param int|WC_Product_Variation $variation La variación o su ID a eliminar.
+     *
+     * @return bool|WP_Error Retorna true si se elimina correctamente o un error en caso de fallo.
+     */
+    public static function delete( int|WC_Product_Variation $variation ): bool|WP_Error {
+        if ( is_numeric( $variation ) ) {
+            $variation = wc_get_product( $variation );
+
+            if ( ! $variation || $variation->get_type() !== 'variation' ) {
+                return new WP_Error( 'invalid_variation', __( 'El producto no es una variación válida.', Constants::TEXT_DOMAIN ) );
+            }
+        }
+
+        if ( ! $variation instanceof WC_Product_Variation ) {
+            return new WP_Error( 'invalid_variation', __( 'El objeto no es una instancia de WC_Product_Variation.', Constants::TEXT_DOMAIN ) );
+        }
+
+        try {
+            wp_delete_post( $variation->get_id(), true );
+
+            Debugger::ok( __( 'Variación eliminada correctamente.', Constants::TEXT_DOMAIN ) );
+            return true;
+        } catch ( \Exception $e ) {
+            $message = __( 'Error al eliminar la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
+
+            Debugger::error( $message );
+            return new WP_Error( 'delete_error', $message );
+        }
+    }
+
+    /**
      * Crea o actualiza una variación de un producto dependiendo de si ya existe.
      *
      * @param WC_Product $wc_product Objeto del producto padre.
