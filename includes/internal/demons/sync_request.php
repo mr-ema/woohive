@@ -249,5 +249,4 @@ class Sync_Request {
             delete_transient( Constants::PLUGIN_SLUG . '_importing_in_progress_' . $post_id );
         }
     }
-
 }

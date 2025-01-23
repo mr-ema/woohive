@@ -61,9 +61,7 @@ class Sync_Stock_Endpoint {
         $variation_id = (int) $request->get_param( 'variation_id' ) ?? null;
         $from         = $request->get_param( 'from' );
 
-        // Determinar el sitio con base en `from`
         $site = null;
-
         if ( $from === 'primary' ) {
             $site = Helpers::primary_site();
         } elseif ( $from === 'secondary' ) {
