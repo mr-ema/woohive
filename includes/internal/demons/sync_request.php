@@ -163,6 +163,7 @@ class Sync_Request {
         }
 
         $product_id = $product->get_id();
+        $should_create = Helpers::is_create_products_in_secondary_sites_enabled();
 
         $sites = Helpers::sites();
         foreach ( $sites as $site ) {
@@ -172,7 +173,12 @@ class Sync_Request {
                 'from'       => 'primary',
             );
 
-            $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data );
+            if ( $should_create ) {
+                $response = $client->post( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data );
+            } else {
+                $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-product', $data );
+            }
+
             Debugger::debug( 'sync product from primary: ', $response );
         }
     }
