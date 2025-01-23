@@ -109,6 +109,40 @@ class Attributes {
     }
 
     /**
+     * Elimina un atributo de producto (global o específico del producto).
+     *
+     * @param WC_Product $product El objeto del producto.
+     * @param string     $attribute_name El nombre (slug) del atributo a eliminar.
+     * @return bool|WP_Error Devuelve true si el atributo fue eliminado con éxito, o WP_Error en caso de fallo.
+     */
+    public static function delete( WC_Product $product, string $attribute_name ): bool|WP_Error {
+        $attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
+
+        $existing_attributes = $product->get_attributes();
+        if ( ! isset( $existing_attributes[ $attribute_name ] ) ) {
+            return new WP_Error(
+                'attribute_not_found',
+                sprintf( __( 'El atributo "%s" no existe en este producto.', Constants::TEXT_DOMAIN ), $attribute_name )
+            );
+        }
+
+        unset( $existing_attributes[ $attribute_name ] );
+        $product->set_attributes( $existing_attributes );
+
+        try {
+            $product->save();
+
+            Debugger::ok( sprintf( __( 'Atributo "%s" eliminado correctamente.', Constants::TEXT_DOMAIN ), $attribute_name ) );
+            return true;
+        } catch ( \Exception $e ) {
+            $message = sprintf( __( 'Error al eliminar el atributo: %s', Constants::TEXT_DOMAIN ), $e->getMessage() );
+
+            Debugger::error( $message );
+            return new WP_Error( 'delete_error', $message );
+        }
+    }
+
+    /**
      * Crea o actualiza un atributo de producto (maneja solo un atributo).
      *
      * @param WC_Product $product El objeto del producto.
