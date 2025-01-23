@@ -290,6 +290,10 @@ class Helpers {
         return array_merge( $types, $incl );
     }
 
+    public static function is_sync_only_stock_enabled(): bool {
+        return ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' );
+    }
+
     /**
      * Verificar si debe proceder con la sincronización de inventario.
      *

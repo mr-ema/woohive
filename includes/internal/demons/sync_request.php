@@ -36,6 +36,10 @@ class Sync_Request {
      * @return void
      */
     public static function on_sync_product( WC_Product $product ): void {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         if ( $product && Helpers::should_sync( $product ) ) {
             self::set_sync_in_progress( $product->get_id(), true );
 
@@ -61,6 +65,10 @@ class Sync_Request {
      * @return void
      */
     public static function on_product_save( int $post_id, WP_Post $post, bool $update ): void {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $sync_in_process = self::is_sync_in_progress( $post_id ) || self::is_importing_in_progress( $post_id );
         if ( $sync_in_process || 'product' !== $post->post_type || 'publish' !== $post->post_status ) {
             return;
@@ -88,6 +96,10 @@ class Sync_Request {
      * @return void
      */
     public static function on_product_variation_save( int $post_id, WP_Post $post, bool $update ): void {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $product_id      = get_post_field( 'post_parent', $post_id );
         $sync_in_process = self::is_sync_in_progress( $post_id ) || self::is_importing_in_progress( $post_id );
         if ( ! $product_id || $sync_in_process ) {
@@ -183,10 +195,6 @@ class Sync_Request {
         $main_site = Helpers::primary_site();
         if ( empty( $main_site ) ) {
             return; // Si no hay un sitio principal configurado, no se realiza la sincronización.
-        }
-
-        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
-            return;
         }
 
         $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );

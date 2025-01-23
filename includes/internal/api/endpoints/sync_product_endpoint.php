@@ -25,7 +25,6 @@ class Sync_Product_Endpoint {
             $namespace,
             '/sync-product',
             array(
-                // POST for importing products
                 array(
                     'methods'             => WP_REST_Server::CREATABLE,
                     'callback'            => array( self::class, 'handle_import_product' ),
@@ -41,7 +40,6 @@ class Sync_Product_Endpoint {
                         ),
                     ),
                 ),
-                // PUT for updating products
                 array(
                     'methods'             => WP_REST_Server::EDITABLE,
                     'callback'            => array( self::class, 'handle_update_product' ),
@@ -62,6 +60,11 @@ class Sync_Product_Endpoint {
     }
 
     public static function handle_import_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            $message = __( 'La sincronización está bloqueada porque solo está habilitada la sincronización de stock.', Constants::TEXT_DOMAIN );
+            return new WP_Error( 'sync_blocked', $message, array( 'status' => 403 ) );
+        }
+
         $product_id = (int) $request->get_param( 'product_id' );
         $from       = $request->get_param( 'from' );
 
@@ -87,6 +90,11 @@ class Sync_Product_Endpoint {
     }
 
     public static function handle_update_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            $message = __( 'La sincronización está bloqueada porque solo está habilitada la sincronización de stock.', Constants::TEXT_DOMAIN );
+            return new WP_Error( 'sync_blocked', $message, array( 'status' => 403 ) );
+        }
+
         $product_id = (int) $request->get_param( 'product_id' );
         $from       = $request->get_param( 'from' );
 
@@ -111,7 +119,7 @@ class Sync_Product_Endpoint {
         );
     }
 
-    private static function get_site_by_source( WP_REST_Request $request, string $from ) {
+    private static function get_site_by_source( WP_REST_Request $request, string $from ): null|array|WP_Error {
         if ( $from === 'primary' ) {
             return Helpers::primary_site();
         }
