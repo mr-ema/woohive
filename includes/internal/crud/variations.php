@@ -179,6 +179,39 @@ class Variations {
     }
 
     /**
+     * Elimina una variación de un producto.
+     *
+     * @param int|WC_Product_Variation $variation La variación o su ID a eliminar.
+     *
+     * @return bool|WP_Error Retorna true si se elimina correctamente o un error en caso de fallo.
+     */
+    public static function delete( int|WC_Product_Variation $variation ): bool|WP_Error {
+        if ( is_numeric( $variation ) ) {
+            $variation = wc_get_product( $variation );
+
+            if ( ! $variation || $variation->get_type() !== 'variation' ) {
+                return new WP_Error( 'invalid_variation', __( 'El producto no es una variación válida.', Constants::TEXT_DOMAIN ) );
+            }
+        }
+
+        if ( ! $variation instanceof WC_Product_Variation ) {
+            return new WP_Error( 'invalid_variation', __( 'El objeto no es una instancia de WC_Product_Variation.', Constants::TEXT_DOMAIN ) );
+        }
+
+        try {
+            wp_delete_post( $variation->get_id(), true );
+
+            Debugger::ok( __( 'Variación eliminada correctamente.', Constants::TEXT_DOMAIN ) );
+            return true;
+        } catch ( \Exception $e ) {
+            $message = __( 'Error al eliminar la variación: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
+
+            Debugger::error( $message );
+            return new WP_Error( 'delete_error', $message );
+        }
+    }
+
+    /**
      * Crea o actualiza una variación de un producto dependiendo de si ya existe.
      *
      * @param WC_Product $wc_product Objeto del producto padre.
@@ -373,6 +406,65 @@ class Variations {
         $results['total_processed'] = $total_processed;
 
         return $results;
+    }
+
+    /**
+     * Obtiene una variación de producto de WooCommerce a partir del SKU del producto principal y el SKU de la variación.
+     *
+     * Este método busca una variación en WooCommerce utilizando el SKU de la variación.
+     * Si se encuentra, verifica que el producto principal coincida. Si no coincide,
+     * intenta buscar manualmente entre las variaciones del producto principal.
+     *
+     * @param string $parent_sku El SKU del producto principal.
+     * @param string $variation_sku El SKU de la variación a buscar.
+     *
+     * @return WC_Product_Variation|WP_Error La instancia de la variación de WooCommerce asociada,
+     *                                       o un objeto WP_Error si ocurre algún error.
+     */
+    public static function get_by_sku( string $parent_sku, string $variation_sku ): WC_Product_Variation|WP_Error {
+        if ( empty( $parent_sku ) ) {
+            return new WP_Error( 'invalid_parent_sku', __( 'El SKU del producto principal está vacío.', Constants::TEXT_DOMAIN ) );
+        } else if ( empty( $variation_sku ) ) {
+            return new WP_Error( 'invalid_variation_sku', __( 'El SKU de la variación está vacío.', Constants::TEXT_DOMAIN ) );
+        }
+
+        $parent_product = wc_get_product( wc_get_product_id_by_sku( $parent_sku ) );
+        if ( ! $parent_product || ! $parent_product instanceof WC_Product ) {
+            return new WP_Error(
+                'parent_product_not_found',
+                __( "No se encontró un producto con el SKU: {$parent_sku}.", Constants::TEXT_DOMAIN )
+            );
+        }
+
+        $variation = wc_get_product( wc_get_product_id_by_sku( $variation_sku ) );
+        if ( $variation && $variation instanceof WC_Product_Variation ) {
+            if ( $variation->get_parent_id() === $parent_product->get_id() ) {
+                return $variation;
+            }
+        }
+
+        $variation_ids = $parent_product->get_children();
+        if ( empty( $variation_ids ) ) {
+            return new WP_Error(
+                'no_variations_found',
+                __( "No se encontraron variaciones para el producto con el SKU: {$parent_sku}.", Constants::TEXT_DOMAIN )
+            );
+        }
+
+        foreach ( $variation_ids as $variation_id ) {
+            $variation = wc_get_product( $variation_id );
+
+            if ( $variation && $variation instanceof WC_Product_Variation ) {
+                if ( $variation->get_sku() === $variation_sku ) {
+                    return $variation;
+                }
+            }
+        }
+
+        return new WP_Error(
+            'variation_not_found',
+            __( "No se encontró una variación con el SKU: {$variation_sku} para el producto principal con SKU: {$parent_sku}.", Constants::TEXT_DOMAIN )
+        );
     }
 
     /**

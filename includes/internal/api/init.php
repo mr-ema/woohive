@@ -5,6 +5,7 @@ namespace WooHive\Internal\Api;
 use WooHive\Config\Constants;
 use WooHive\Internal\Api\Endpoints\Sync_Product_Endpoint;
 use WooHive\Internal\Api\Endpoints\Sync_Stock_Endpoint;
+use WooHive\Internal\Api\Endpoints\Sync\Variations_Endpoint;
 
 
 /** Prevenir el acceso directo al script. */
@@ -26,5 +27,6 @@ class Init {
 
         Sync_Product_Endpoint::register_routes( $namespace );
         Sync_Stock_Endpoint::register_routes( $namespace );
+        Variations_Endpoint::register_routes( $namespace );
     }
 }

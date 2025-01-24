@@ -12,5 +12,6 @@ class Init {
     public static function start(): void {
         Sync_Request::init();
         Sync_Stock::init();
+        Sync_Variation::init();
     }
 }

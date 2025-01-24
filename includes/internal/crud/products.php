@@ -296,6 +296,36 @@ class Products {
     }
 
     /**
+     * Obtiene un producto de WooCommerce a partir de su SKU.
+     *
+     * Este método busca un producto en WooCommerce utilizando el SKU proporcionado
+     * y devuelve la instancia del producto correspondiente.
+     *
+     * @param string $sku El SKU del producto a buscar.
+     *
+     * @return WC_Product|WP_Error La instancia del producto de WooCommerce asociado al SKU,
+     *                             o un objeto WP_Error si ocurre algún error.
+     */
+    public static function get_by_sku( string $sku ): WC_Product|WP_Error {
+        if ( empty( $sku ) ) {
+            return new WP_Error(
+                'invalid_sku',
+                __( 'El SKU proporcionado está vacío.', Constants::TEXT_DOMAIN )
+            );
+        }
+
+        $product = wc_get_product( wc_get_product_id_by_sku( $sku ) );
+        if ( ! $product || ! $product instanceof WC_Product ) {
+            return new WP_Error(
+                'product_not_found',
+                __( "No se encontró un producto con el SKU: {$sku}.", Constants::TEXT_DOMAIN )
+            );
+        }
+
+        return $product;
+    }
+
+    /**
      * Crea o actualiza múltiples productos en WooCommerce.
      *
      * @param array $products Lista de productos a procesar. Cada elemento debe ser un array con las claves:
