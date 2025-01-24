@@ -92,6 +92,17 @@ class Product_Variations {
     }
 
     /**
+     * Obtener una variacion por su id.
+     *
+     * @param int   $parent_id El ID del producto principal.
+     * @param int $variation_id ID de la variacion.
+     * @return Response La respuesta de la API que contiene la lista de variaciones.
+     */
+    public function pull( $parent_id, $variation_id ): Response {
+        return $this->client->get( "products/{$parent_id}/variations/{$variation_id}" );
+    }
+
+    /**
      * Obtener una variación desde el sitio de WooCommerce para un producto específico por su ID.
      *
      * @param int $parent_id El ID del producto principal.
