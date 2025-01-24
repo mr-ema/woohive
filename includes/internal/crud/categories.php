@@ -308,6 +308,32 @@ class Categories {
     }
 
     /**
+     * Asocia un padre a una categoría si el padre existe.
+     *
+     * @param int   $term_id El ID de la categoría a la que se le asignará el padre.
+     * @param string $parent_name El nombre o slug del padre de la categoría.
+     *
+     * @return bool|WP_Error Devuelve true si el padre se ha establecido correctamente o un WP_Error si ocurre un error.
+     */
+    public static function set_parent( int $term_id, string $parent_name ): bool|WP_Error {
+        $parent_term = term_exists( $parent_name, 'product_cat' );
+
+        if ( ! $parent_term ) {
+            return new WP_Error( 'parent_not_found', __( 'El padre especificado no existe.', Constants::TEXT_DOMAIN ) );
+        }
+
+        $result = wp_update_term( $term_id, 'product_cat', array(
+            'parent' => $parent_term['term_id'],
+        ) );
+
+        if ( is_wp_error( $result ) ) {
+            return $result;
+        }
+
+        return true;
+    }
+
+    /**
      * Buscar una imagen en la biblioteca de medios de WordPress por su URL o por un ID externo.
      *
      * @param string      $image_url URL de la imagen a buscar.
