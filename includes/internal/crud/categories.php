@@ -121,7 +121,51 @@ class Categories {
             return $term;
         }
 
-        return $term['term_id'];
+        $term_id = $term['term_id'];
+
+        if ( isset( $filtered_data['image'] ) && ! empty( $filtered_data['image']['src'] ) ) {
+            $image_url   = $filtered_data['image']['src'];
+            $external_id = isset( $filtered_data['image']['id'] ) ? $filtered_data['image']['id'] : null;
+
+            $image_id = self::upload_image( $image_url, $term_id, $external_id );
+            if ( is_wp_error( $image_id ) ) {
+                return $image_id; // Return the error if image upload fails
+            }
+
+            update_term_meta( $term_id, 'thumbnail_id', $image_id );
+        }
+
+        return $term_id;
+    }
+
+    /**
+     * Actualiza una categoría existente con los nuevos datos.
+     *
+     * @param array $data Datos para actualizar la categoría.
+     * @param int $term_id ID de la categoría que se va a actualizar.
+     *
+     * @return int|WP_Error Devuelve el ID de la categoría actualizada o un WP_Error en caso de fallo.
+     */
+    public static function update( array $data, int $term_id ): int|WP_Error {
+        $filtered_data = self::clean_data( $data );
+        $result = wp_update_term( $term_id, 'product_cat', $filtered_data );
+        if ( is_wp_error( $result ) ) {
+            return $result;
+        }
+
+        if ( isset( $filtered_data['image'] ) && ! empty( $filtered_data['image']['src'] ) ) {
+            $image_url   = $filtered_data['image']['src'];
+            $external_id = isset( $filtered_data['image']['id'] ) ? $filtered_data['image']['id'] : null;
+
+            $image_id = self::upload_image( $image_url, $term_id, $external_id );
+            if ( is_wp_error( $image_id ) ) {
+                return $image_id;
+            }
+
+            update_term_meta( $term_id, 'thumbnail_id', $image_id );
+        }
+
+        return $term_id;
     }
 
     /**
@@ -139,19 +183,7 @@ class Categories {
 
         $existing_term = get_term_by( 'name', $filtered_data['name'], 'product_cat' );
         if ( $existing_term ) {
-            $term_id = $existing_term->term_id;
-
-            $result = wp_update_term(
-                $term_id,
-                'product_cat',
-                $filtered_data
-            );
-
-            if ( is_wp_error( $result ) ) {
-                return $result;
-            }
-
-            return $term_id;
+            return self::update( $filtered_data, $existing_term->term_id );
         }
 
         return self::create( $filtered_data );
@@ -239,5 +271,84 @@ class Categories {
         $results['total_updated']   = $total_updated;
 
         return $results;
+    }
+
+    /**
+     * Subir una imagen a la biblioteca de medios de WordPress y asociarla a una categoria de WooCommerce.
+     *
+     * @param string      $image_url URL de la imagen a subir.
+     * @param int         $category_id ID de la categoria de WooCommerce al que se asociará la imagen.
+     * @param string|null $external_id ID externo (opcional), para evitar duplicados.
+     *
+     * @return WP_Error|int ID de la imágen agregada a la galería del producto o un objeto WP_Error si ocurre un error.
+     */
+    public static function upload_image( string $image_url, int $category_id, ?string $external_id = null ): WP_Error|int {
+        $image_id = self::search_image( $image_url, $external_id );
+        if ( $image_id ) {
+            return $image_id;
+        }
+
+        // Sin esto media_sideload_image no functiona cuando se usa la api interna
+        if ( ! function_exists( 'media_sideload_image' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+        }
+
+        $image_id = media_sideload_image( $image_url, $category_id, null, 'id' );
+        if ( is_wp_error( $image_id ) ) {
+            return new WP_Error( 'upload_error', 'Error al subir la imagen: ' . $image_id->get_error_message() );
+        }
+
+        if ( $external_id ) {
+            update_post_meta( $image_id, '_external_image_id', $external_id );
+        }
+
+        return $image_id;
+    }
+
+    /**
+     * Buscar una imagen en la biblioteca de medios de WordPress por su URL o por un ID externo.
+     *
+     * @param string      $image_url URL de la imagen a buscar.
+     * @param string|null $external_id ID externo (opcional)
+     *
+     * @return int|null El ID de la imagen si existe, o null si no se encuentra.
+     */
+    public static function search_image( string $image_url, ?string $external_id = null ): ?int {
+        $image_id = attachment_url_to_postid( $image_url );
+
+        if ( ! $image_id && $external_id ) {
+            $image_id = self::search_image_by_external_id( $external_id );
+        }
+
+        return $image_id;
+    }
+
+    /**
+     * Buscar una imagen en la biblioteca de medios por su ID externo.
+     *
+     * @param string $external_id ID externo
+     *
+     * @return int|null El ID de la imagen si existe, o null si no se encuentra.
+     */
+    private static function search_image_by_external_id( string $external_id ): ?int {
+        $args = array(
+            'post_type'      => 'attachment',
+            'meta_key'       => '_external_image_id',
+            'meta_value'     => $external_id,
+            'posts_per_page' => 1,
+        );
+
+        $images = get_posts( $args );
+        if ( ! empty( $images ) ) {
+            $image_id  = $images[0]->ID;
+            $file_path = get_attached_file( $image_id );
+            if ( file_exists( $file_path ) ) {
+                return $image_id;
+            }
+        }
+
+        return null;
     }
 }

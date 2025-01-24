@@ -52,7 +52,7 @@ class Tools {
             $categories_res = $client->product_categories->pull_all( array( 'include' => implode( ',', $ids ) ) );
             if ( ! $categories_res->has_error() ) {
                 $categories = $categories_res->body();
-                $unused     = Crud\Categories::create_batch( $categories );
+                $unused     = Crud\Categories::create_or_update_batch( $categories );
             }
         }
 
@@ -120,7 +120,7 @@ class Tools {
             $categories_res = $client->product_categories->pull_all( array( 'include' => implode( ',', $ids ) ) );
             if ( ! $categories_res->has_error() ) {
                 $categories = $categories_res->body();
-                $unused     = Crud\Categories::create_batch( $categories );
+                $unused     = Crud\Categories::create_or_update_batch( $categories );
             }
         }
 
