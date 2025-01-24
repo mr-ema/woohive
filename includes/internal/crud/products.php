@@ -70,17 +70,21 @@ class Products {
         }
 
         try {
-            if ( ! $wc_product->is_type( $filtered_data['type'] ) ) {
+            if ( isset( $filtered_data['type'] ) && ! $wc_product->is_type( $filtered_data['type'] ) ) {
                 Helpers::update_product_type( $wc_product, $filtered_data['type'] );
             }
 
             $wc_product->set_props( $filtered_data );
             $wc_product->save();
 
-            $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
-            $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            if ( isset( $filtered_data['attributes'] ) ) {
+                $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
+            }
 
-            // Manejo de imágenes si están presentes en los datos
+            if ( isset( $filtered_data['categories'] ) ) {
+                $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            }
+
             if ( isset( $filtered_data['images'] ) && is_array( $filtered_data['images'] ) ) {
                 $image_ids = array();
 
@@ -196,8 +200,13 @@ class Products {
             $wc_product->set_props( $filtered_data );
             $wc_product->save();
 
-            $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
-            $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            if ( isset( $filtered_data['attributes'] ) ) {
+                $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
+            }
+
+            if ( isset( $filtered_data['categories'] ) ) {
+                $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            }
 
             $product_id = $wc_product->get_id();
             if ( ! empty( $filtered_data['images'] ) ) {
