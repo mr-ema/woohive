@@ -96,12 +96,12 @@ class Init {
         self::load_class( 'includes/internal/tools.php' );
 
         self::load_class( 'includes/internal/demons/sync_stock.php' );
-        self::load_class( 'includes/internal/demons/sync_request.php' );
+        self::load_class( 'includes/internal/demons/sync_product.php' );
         self::load_class( 'includes/internal/demons/sync_variation.php' );
+        self::load_class( 'includes/internal/demons/transients.php' );
         self::load_class( 'includes/internal/demons/init.php' );
 
-        self::load_class( 'includes/internal/api/endpoints/sync_product_endpoint.php' );
-        self::load_class( 'includes/internal/api/endpoints/sync_stock_endpoint.php' );
+        self::load_class( 'includes/internal/api/endpoints/sync/products_endpoint.php' );
         self::load_class( 'includes/internal/api/endpoints/sync/variations_endpoint.php' );
         self::load_class( 'includes/internal/api/init.php' );
 

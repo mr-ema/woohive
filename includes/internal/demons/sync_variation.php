@@ -17,7 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Variation {
 
     public static function init(): void {
-        add_action( 'before_delete_post', [ self::class, 'on_variation_delete' ], 10 );
+        add_action('woocommerce_update_product_variation', array( self::class, 'on_variation_update' ), 9, 1);
+        add_action( 'before_delete_post', array( self::class, 'on_variation_delete' ), 10 );
     }
 
     /**
@@ -36,6 +37,59 @@ class Sync_Variation {
             $parent = wc_get_product( $variation->get_parent_id() );
             if ( Helpers::should_sync( $parent ) ) {
                 self::sync_variation_deletion( $variation );
+            }
+        }
+    }
+
+    public static function on_variation_update( int $variation_id ): void {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
+        $variation = new WC_Product_Variation( $variation_id );
+        $parent_id = $variation->get_parent_id();
+
+        if ( ! self::is_sync_in_progress( $parent_id ) && $variation && Helpers::should_sync( $variation ) ) {
+            Debugger::debug( 'Variation Sync On Update Has Been Fired' );
+            Transients::set_sync_in_progress( $parent_id, true );
+
+            if ( Helpers::is_primary_site() ) {
+                self::sync_variation_update( $variation );
+            }
+
+            Transients::set_sync_in_progress( $parent_id, false );
+        }
+    }
+
+    /**
+     * Sincroniza la actualizacion de una variación de producto a otros sitios o al servidor principal.
+     *
+     * @param WC_Product_Variation $variation Instancia de la variación que será actualizada
+     *
+     * @return void
+     */
+    private static function sync_variation_update( WC_Product_Variation $variation ): void {
+        $parent_id = $variation->get_parent_id();
+        $parent = wc_get_product( $parent_id );
+        if ( ! $parent ) {
+            return;
+        }
+
+        $parent_sku = $parent->get_sku();
+        $variation_sku = $variation->get_sku();
+        if ( empty( $variation_sku ) || empty( $parent_sku) ) {
+            Debugger::debug( 'SKU de la variacion o padre vacío. No se puede sincronizar la eliminación de la variación.' );
+            return;
+        }
+
+        $data = $variation->get_data();
+        if ( Helpers::is_primary_site() ) {
+            $sites = Helpers::sites();
+            foreach ( $sites as $site ) {
+                $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+
+                $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$variation_sku}", $data );
+                Debugger::debug( 'Sync variation update to secondary site:', $response );
             }
         }
     }
@@ -66,9 +120,17 @@ class Sync_Variation {
             foreach ( $sites as $site ) {
                 $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 
-                $response = $client->delete( Constants::INTERNAL_API_BASE_NAME . "/sync/products/{$parent_sku}/variations/{$variation_sku}" );
-                Debugger::debug( 'Sync deletion to secondary site:', $response );
+                $response = $client->delete( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$variation_sku}" );
+                Debugger::debug( 'Sync variation deletion to secondary site:', $response );
             }
         }
+    }
+
+    private static function is_sync_in_progress( int $post_id ): bool {
+        $sync_in_progress = Transients::is_sync_in_progress( $post_id );
+        $sync_in_progress |= Transients::is_importing_in_progress( $post_id );
+        $sync_in_progress |= Transients::is_sync_stock_in_progress($post_id);
+
+        return $sync_in_progress;
     }
 }

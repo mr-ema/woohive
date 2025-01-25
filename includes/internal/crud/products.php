@@ -74,6 +74,11 @@ class Products {
                 Helpers::update_product_type( $wc_product, $filtered_data['type'] );
             }
 
+            $response = self::normalize_stock( $wc_product, $filtered_data );
+            if ( ! is_wp_error( $response ) ) {
+                unset( $filtered_data['stock_quantity'] );
+            }
+
             $wc_product->set_props( $filtered_data );
             $wc_product->save();
 
@@ -395,6 +400,47 @@ class Products {
         $results['total_processed'] = $total_processed;
 
         return $results;
+    }
+
+    /**
+     * Normaliza el stock de un producto en WooCommerce.
+     *
+     * Esta función toma un objeto de producto y un array de datos,
+     * valida la cantidad de stock proporcionada y actualiza el stock del producto
+     * si la gestión de inventario está habilitada.
+     *
+     * @param object $product Objeto del producto.
+     * @param array      $data    Array de datos que contiene información como la cantidad de stock.
+     *
+     * @return int|WP_Error Devuelve el nuevo stock actualizado si es exitoso,
+     *                      o un objeto WP_Error si ocurre un error.
+     */
+    public static function normalize_stock( object $product, array $data ): int|WP_Error {
+        if ( ! isset( $data['stock_quantity'] ) || ! is_numeric( $data['stock_quantity'] ) ) {
+            return new WP_Error(
+                'invalid_stock_quantity',
+                __( 'La cantidad de stock proporcionada no es válida.', 'tu-textdomain' )
+            );
+        }
+
+        $incoming_stock = (int) $data['stock_quantity'];
+        if ( $product->managing_stock() ) {
+            $current_stock = $product->get_stock_quantity();
+            $stock_difference = $incoming_stock - $current_stock;
+
+            $new_stock = $current_stock + $stock_difference;
+            $new_stock = max( 0, $new_stock );
+
+            $product->set_stock_quantity( $new_stock );
+            $product->save();
+
+            return $new_stock;
+        }
+
+        return new WP_Error(
+            'stock_management_disabled',
+            __( 'La gestión de inventario no está habilitada para este producto.', 'tu-textdomain' )
+        );
     }
 
     /**
