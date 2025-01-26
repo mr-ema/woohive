@@ -77,7 +77,7 @@ class Variations {
                 $data['attributes'],
                 function ( $carry, $attribute ) {
                     if ( is_array( $attribute ) && isset( $attribute['name'] ) && isset( $attribute['option'] ) ) {
-                        $slug = sanitize_title( $attribute['name'] );
+                        $slug           = sanitize_title( $attribute['name'] );
                         $carry[ $slug ] = $attribute['option'];
                     }
                     return $carry;
@@ -433,7 +433,7 @@ class Variations {
     public static function get_by_sku( string $parent_sku, string $variation_sku ): WC_Product_Variation|WP_Error {
         if ( empty( $parent_sku ) ) {
             return new WP_Error( 'invalid_parent_sku', __( 'El SKU del producto principal está vacío.', Constants::TEXT_DOMAIN ) );
-        } else if ( empty( $variation_sku ) ) {
+        } elseif ( empty( $variation_sku ) ) {
             return new WP_Error( 'invalid_variation_sku', __( 'El SKU de la variación está vacío.', Constants::TEXT_DOMAIN ) );
         }
 
@@ -497,7 +497,7 @@ class Variations {
 
         $incoming_stock = (int) $data['stock_quantity'];
         if ( $variation->managing_stock() ) {
-            $current_stock = $variation->get_stock_quantity();
+            $current_stock    = $variation->get_stock_quantity();
             $stock_difference = $incoming_stock - $current_stock;
 
             $new_stock = $current_stock + $stock_difference;

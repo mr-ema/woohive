@@ -39,7 +39,7 @@ class Variations_Endpoint {
                     'callback'            => array( self::class, 'handle_update' ),
                     'permission_callback' => array( self::class, 'permission_check' ),
                     'args'                => self::get_args(),
-                )
+                ),
             ),
         );
     }
@@ -49,7 +49,7 @@ class Variations_Endpoint {
     }
 
     private static function get_body_data( WP_REST_Request $request ): array {
-        $params = $request->get_json_params();
+        $params        = $request->get_json_params();
         $params['sku'] = $request->get_param( 'variation_sku' );
 
         unset( $params['variation_sku'], $params['product_sku'] );
@@ -58,8 +58,8 @@ class Variations_Endpoint {
     }
 
     public static function handle_delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        $product_sku    = $request->get_param( 'product_sku' );
-        $variation_sku  = $request->get_param( 'variation_sku' );
+        $product_sku   = $request->get_param( 'product_sku' );
+        $variation_sku = $request->get_param( 'variation_sku' );
 
         $result = Variations::get_by_sku( $product_sku, $variation_sku );
         if ( is_wp_error( $result ) ) {
@@ -67,7 +67,7 @@ class Variations_Endpoint {
         }
 
         $variation = $result;
-        $result = Variations::delete( $variation );
+        $result    = Variations::delete( $variation );
         if ( is_wp_error( $result ) ) {
             return $result;
         }
@@ -76,8 +76,8 @@ class Variations_Endpoint {
     }
 
     public static function handle_update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        $product_sku    = $request->get_param( 'product_sku' );
-        $variation_sku  = $request->get_param( 'variation_sku' );
+        $product_sku   = $request->get_param( 'product_sku' );
+        $variation_sku = $request->get_param( 'variation_sku' );
 
         $body_data = self::get_body_data( $request );
         if ( ! empty( $body_data ) ) {
@@ -87,7 +87,7 @@ class Variations_Endpoint {
             }
 
             $variation = $result;
-            $result = Variations::update( $variation, $body_data );
+            $result    = Variations::update( $variation, $body_data );
             if ( is_wp_error( $result ) ) {
                 return $result;
             }

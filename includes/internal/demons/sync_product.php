@@ -75,7 +75,7 @@ class Sync_Product {
             return;
         }
 
-        $valid_status    = in_array( $post->post_status, [ 'publish' ], true );
+        $valid_status = in_array( $post->post_status, array( 'publish' ), true );
         if ( self::is_sync_in_progress( $post_id ) || 'product' !== $post->post_type || ! $valid_status ) {
             return;
         }
@@ -132,7 +132,7 @@ class Sync_Product {
         }
 
         $should_create = Helpers::is_create_products_in_secondary_sites_enabled();
-        $sites = Helpers::sites();
+        $sites         = Helpers::sites();
 
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
@@ -173,9 +173,9 @@ class Sync_Product {
     }
 
     private static function is_sync_in_progress( int $post_id ): bool {
-        $sync_in_progress = Transients::is_sync_in_progress( $post_id );
+        $sync_in_progress  = Transients::is_sync_in_progress( $post_id );
         $sync_in_progress |= Transients::is_importing_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_sync_stock_in_progress($post_id);
+        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_id );
 
         return $sync_in_progress;
     }

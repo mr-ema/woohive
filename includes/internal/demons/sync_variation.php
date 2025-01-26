@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Variation {
 
     public static function init(): void {
-        add_action('woocommerce_update_product_variation', array( self::class, 'on_variation_update' ), 9, 1);
+        add_action( 'woocommerce_update_product_variation', array( self::class, 'on_variation_update' ), 9, 1 );
         add_action( 'before_delete_post', array( self::class, 'on_variation_delete' ), 10 );
     }
 
@@ -70,14 +70,14 @@ class Sync_Variation {
      */
     private static function sync_variation_update( WC_Product_Variation $variation ): void {
         $parent_id = $variation->get_parent_id();
-        $parent = wc_get_product( $parent_id );
+        $parent    = wc_get_product( $parent_id );
         if ( ! $parent ) {
             return;
         }
 
-        $parent_sku = $parent->get_sku();
+        $parent_sku    = $parent->get_sku();
         $variation_sku = $variation->get_sku();
-        if ( empty( $variation_sku ) || empty( $parent_sku) ) {
+        if ( empty( $variation_sku ) || empty( $parent_sku ) ) {
             Debugger::debug( 'SKU de la variacion o padre vacío. No se puede sincronizar la eliminación de la variación.' );
             return;
         }
@@ -103,14 +103,14 @@ class Sync_Variation {
      */
     private static function sync_variation_deletion( WC_Product_Variation $variation ): void {
         $parent_id = $variation->get_parent_id();
-        $parent = wc_get_product( $parent_id );
+        $parent    = wc_get_product( $parent_id );
         if ( ! $parent ) {
             return;
         }
 
-        $parent_sku = $parent->get_sku();
+        $parent_sku    = $parent->get_sku();
         $variation_sku = $variation->get_sku();
-        if ( empty( $variation_sku ) || empty( $parent_sku) ) {
+        if ( empty( $variation_sku ) || empty( $parent_sku ) ) {
             Debugger::debug( 'SKU de la variacion o padre vacío. No se puede sincronizar la eliminación de la variación.' );
             return;
         }
@@ -127,9 +127,9 @@ class Sync_Variation {
     }
 
     private static function is_sync_in_progress( int $post_id ): bool {
-        $sync_in_progress = Transients::is_sync_in_progress( $post_id );
+        $sync_in_progress  = Transients::is_sync_in_progress( $post_id );
         $sync_in_progress |= Transients::is_importing_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_sync_stock_in_progress($post_id);
+        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_id );
 
         return $sync_in_progress;
     }

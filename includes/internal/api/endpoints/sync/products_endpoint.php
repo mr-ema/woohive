@@ -64,11 +64,11 @@ class Products_Endpoint {
         }
 
         $product_sku = $request->get_param( 'product_sku' );
-        if ( !$product_sku ) {
+        if ( ! $product_sku ) {
             return new WP_REST_Response(
                 array(
-                    'message' => __( 'No se encontro el producto', Constants::TEXT_DOMAIN ),
-                    'product_sku' => $product_sku
+                    'message'     => __( 'No se encontro el producto', Constants::TEXT_DOMAIN ),
+                    'product_sku' => $product_sku,
                 ),
                 404
             );
@@ -81,8 +81,8 @@ class Products_Endpoint {
         }
 
         $product    = $result->body()[0];
-        $product_id = (int)$product['id'];
-        $result = Tools::import_product( $client, $product_id );
+        $product_id = (int) $product['id'];
+        $result     = Tools::import_product( $client, $product_id );
         if ( is_wp_error( $result ) ) {
             return $result;
         }
@@ -112,8 +112,8 @@ class Products_Endpoint {
         if ( ! $product_sku ) {
             return new WP_REST_Response(
                 array(
-                    'message' => __( 'No se encontro el producto', Constants::TEXT_DOMAIN ),
-                    'product_sku' => $product_sku
+                    'message'     => __( 'No se encontro el producto', Constants::TEXT_DOMAIN ),
+                    'product_sku' => $product_sku,
                 ),
                 404
             );
@@ -122,7 +122,7 @@ class Products_Endpoint {
         $body_data = self::get_body_data( $request );
         if ( ! empty( $body_data ) ) {
             $product_id = wc_get_product_id_by_sku( $product_sku );
-            $result = Products::update( $product_id, $body_data );
+            $result     = Products::update( $product_id, $body_data );
             if ( is_wp_error( $result ) ) {
                 return $result;
             }
@@ -145,8 +145,8 @@ class Products_Endpoint {
         }
 
         $product    = $result->body()[0];
-        $product_id = (int)$product['id'];
-        $result = Tools::update_product( $client, $product_id );
+        $product_id = (int) $product['id'];
+        $result     = Tools::update_product( $client, $product_id );
         if ( is_wp_error( $result ) ) {
             return $result;
         }

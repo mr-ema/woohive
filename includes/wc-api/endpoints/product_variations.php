@@ -94,7 +94,7 @@ class Product_Variations {
     /**
      * Obtener una variacion por su id.
      *
-     * @param int   $parent_id El ID del producto principal.
+     * @param int $parent_id El ID del producto principal.
      * @param int $variation_id ID de la variacion.
      * @return Response La respuesta de la API que contiene la lista de variaciones.
      */

@@ -44,15 +44,15 @@ class Products {
      */
     public static function clean_data( array $data ): array {
         $custom_invalid_props = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_props', array() );
-        $all_invalid_props = array_merge(self::$invalid_props, $custom_invalid_props);
+        $all_invalid_props    = array_merge( self::$invalid_props, $custom_invalid_props );
 
-         $filtered_data = array_filter(
+        $filtered_data = array_filter(
             $data,
             fn( $key ) => ! in_array( $key, $all_invalid_props, true ),
             ARRAY_FILTER_USE_KEY
         );
 
-         if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
+        if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
             $invalid_meta_keys = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_meta_keys', array() );
 
             $filtered_data['meta'] = array_filter(
@@ -424,7 +424,7 @@ class Products {
      * si la gestión de inventario está habilitada.
      *
      * @param object $product Objeto del producto.
-     * @param array      $data    Array de datos que contiene información como la cantidad de stock.
+     * @param array  $data    Array de datos que contiene información como la cantidad de stock.
      *
      * @return int|WP_Error Devuelve el nuevo stock actualizado si es exitoso,
      *                      o un objeto WP_Error si ocurre un error.
@@ -439,7 +439,7 @@ class Products {
 
         $incoming_stock = (int) $data['stock_quantity'];
         if ( $product->managing_stock() ) {
-            $current_stock = $product->get_stock_quantity();
+            $current_stock    = $product->get_stock_quantity();
             $stock_difference = $incoming_stock - $current_stock;
 
             $new_stock = $current_stock + $stock_difference;

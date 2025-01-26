@@ -123,7 +123,7 @@ class Categories {
 
             $result = self::upload_image( $image_url, $term_id, $external_id );
             if ( is_wp_error( $result ) ) {
-                Debugger::error('Image error on update category: ', $result);
+                Debugger::error( 'Image error on update category: ', $result );
             }
 
             $image_id = $result;
@@ -136,14 +136,14 @@ class Categories {
     /**
      * Actualiza una categoría existente con los nuevos datos.
      *
-     * @param int $term_id ID de la categoría que se va a actualizar.
+     * @param int   $term_id ID de la categoría que se va a actualizar.
      * @param array $data Datos para actualizar la categoría.
      *
      * @return int|WP_Error Devuelve el ID de la categoría actualizada o un WP_Error en caso de fallo.
      */
     public static function update( int $term_id, array $data ): int|WP_Error {
         $filtered_data = self::clean_data( $data );
-        $result = wp_update_term( $term_id, 'product_cat', $filtered_data );
+        $result        = wp_update_term( $term_id, 'product_cat', $filtered_data );
         if ( is_wp_error( $result ) ) {
             return $result;
         }
@@ -154,7 +154,7 @@ class Categories {
 
             $result = self::upload_image( $image_url, $term_id, $external_id );
             if ( is_wp_error( $result ) ) {
-                Debugger::error('Image error on update category: ', $result);
+                Debugger::error( 'Image error on update category: ', $result );
             }
 
             $image_id = $result;
@@ -193,57 +193,57 @@ class Categories {
      *
      * @return int|WP_Error Devuelve el ID del término de la categoría creada o existente, o WP_Error en caso de error.
      */
-    public static function create_category_with_parents(array $category_data, &$existing_categories = []): int|WP_Error {
-        if (empty($category_data['name'])) {
-            return new WP_Error('invalid_data', __('Category name is required.', Constants::TEXT_DOMAIN));
+    public static function create_category_with_parents( array $category_data, &$existing_categories = array() ): int|WP_Error {
+        if ( empty( $category_data['name'] ) ) {
+            return new WP_Error( 'invalid_data', __( 'Category name is required.', Constants::TEXT_DOMAIN ) );
         }
 
-        if (isset($existing_categories[$category_data['id']])) {
-            return $existing_categories[$category_data['id']];
+        if ( isset( $existing_categories[ $category_data['id'] ] ) ) {
+            return $existing_categories[ $category_data['id'] ];
         }
 
-        $existing_term = get_term_by('slug', $category_data['slug'], 'product_cat');
-        if ($existing_term) {
-            $existing_categories[$category_data['id']] = $existing_term->term_id;
+        $existing_term = get_term_by( 'slug', $category_data['slug'], 'product_cat' );
+        if ( $existing_term ) {
+            $existing_categories[ $category_data['id'] ] = $existing_term->term_id;
             return $existing_term->term_id;
         }
 
         $parent_id = 0;
-        if (!empty($category_data['parent'])) {
+        if ( ! empty( $category_data['parent'] ) ) {
             $parent_data = array_filter(
                 $category_data['all_categories'],
-                fn($cat) => $cat['id'] === $category_data['parent']
+                fn( $cat ) => $cat['id'] === $category_data['parent']
             );
 
-            if (!empty($parent_data)) {
-                $parent_data = array_values($parent_data)[0];
-                $parent_id = self::create_category_with_parents($parent_data, $existing_categories);
-                if (is_wp_error($parent_id)) {
+            if ( ! empty( $parent_data ) ) {
+                $parent_data = array_values( $parent_data )[0];
+                $parent_id   = self::create_category_with_parents( $parent_data, $existing_categories );
+                if ( is_wp_error( $parent_id ) ) {
                     return $parent_id;
                 }
             }
         }
 
-        $filtered_data = self::clean_data($category_data);
+        $filtered_data           = self::clean_data( $category_data );
         $filtered_data['parent'] = $parent_id;
 
-        $term = wp_insert_term($filtered_data['name'], 'product_cat', $filtered_data);
-        if (is_wp_error($term)) {
+        $term = wp_insert_term( $filtered_data['name'], 'product_cat', $filtered_data );
+        if ( is_wp_error( $term ) ) {
             return $term;
         }
 
-        $term_id = $term['term_id'];
-        $existing_categories[$category_data['id']] = $term_id; // Cache the created category.
+        $term_id                                     = $term['term_id'];
+        $existing_categories[ $category_data['id'] ] = $term_id; // Cache the created category.
 
-        if (isset($filtered_data['image']) && !empty($filtered_data['image']['src'])) {
-            $image_url = $filtered_data['image']['src'];
+        if ( isset( $filtered_data['image'] ) && ! empty( $filtered_data['image']['src'] ) ) {
+            $image_url   = $filtered_data['image']['src'];
             $external_id = $filtered_data['image']['id'] ?? null;
 
-            $image_result = self::upload_image($image_url, $term_id, $external_id);
-            if (is_wp_error($image_result)) {
-                Debugger::error('Image error for category: ' . $image_result->get_error_message());
+            $image_result = self::upload_image( $image_url, $term_id, $external_id );
+            if ( is_wp_error( $image_result ) ) {
+                Debugger::error( 'Image error for category: ' . $image_result->get_error_message() );
             } else {
-                update_term_meta($term_id, 'thumbnail_id', $image_result);
+                update_term_meta( $term_id, 'thumbnail_id', $image_result );
             }
         }
 
@@ -259,17 +259,17 @@ class Categories {
      *               - 'error_count'        (int)
      *               - 'total_processed'    (int)
      */
-    public static function create_category_with_parents_batch(array $categories): array {
+    public static function create_category_with_parents_batch( array $categories ): array {
         $results         = array();
         $error_count     = 0;
         $total_processed = 0;
 
-        $existing_categories = [];
-        foreach ($categories as $category_data) {
+        $existing_categories = array();
+        foreach ( $categories as $category_data ) {
             $category_data['all_categories'] = $categories;
 
             $result = self::create_category_with_parents( $category_data, $existing_categories );
-            if (is_wp_error($result)) {
+            if ( is_wp_error( $result ) ) {
                 $results[]    = $result;
                 $error_count += 1;
             } else {
@@ -384,7 +384,7 @@ class Categories {
     /**
      * Asocia un padre a una categoría si el padre existe.
      *
-     * @param int   $term_id El ID de la categoría a la que se le asignará el padre.
+     * @param int    $term_id El ID de la categoría a la que se le asignará el padre.
      * @param string $parent_name El nombre o slug del padre de la categoría.
      *
      * @return bool|WP_Error Devuelve true si el padre se ha establecido correctamente o un WP_Error si ocurre un error.
@@ -396,9 +396,13 @@ class Categories {
             return new WP_Error( 'parent_not_found', __( 'El padre especificado no existe.', Constants::TEXT_DOMAIN ) );
         }
 
-        $result = wp_update_term( $term_id, 'product_cat', array(
-            'parent' => $parent_term['term_id'],
-        ) );
+        $result = wp_update_term(
+            $term_id,
+            'product_cat',
+            array(
+                'parent' => $parent_term['term_id'],
+            )
+        );
 
         if ( is_wp_error( $result ) ) {
             return $result;
