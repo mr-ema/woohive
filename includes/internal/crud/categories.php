@@ -186,6 +186,105 @@ class Categories {
     }
 
     /**
+     * Crea una categoría y su jerarquía de padres de manera recursiva.
+     *
+     * @param array $category_data Array con los datos de la categoría (id, parent, name, etc.).
+     * @param array $existing_categories Caché de categorías ya creadas para evitar consultas redundantes.
+     *
+     * @return int|WP_Error Devuelve el ID del término de la categoría creada o existente, o WP_Error en caso de error.
+     */
+    public static function create_category_with_parents(array $category_data, &$existing_categories = []): int|WP_Error {
+        if (empty($category_data['name'])) {
+            return new WP_Error('invalid_data', __('Category name is required.', Constants::TEXT_DOMAIN));
+        }
+
+        if (isset($existing_categories[$category_data['id']])) {
+            return $existing_categories[$category_data['id']];
+        }
+
+        $existing_term = get_term_by('slug', $category_data['slug'], 'product_cat');
+        if ($existing_term) {
+            $existing_categories[$category_data['id']] = $existing_term->term_id;
+            return $existing_term->term_id;
+        }
+
+        $parent_id = 0;
+        if (!empty($category_data['parent'])) {
+            $parent_data = array_filter(
+                $category_data['all_categories'],
+                fn($cat) => $cat['id'] === $category_data['parent']
+            );
+
+            if (!empty($parent_data)) {
+                $parent_data = array_values($parent_data)[0];
+                $parent_id = self::create_category_with_parents($parent_data, $existing_categories);
+                if (is_wp_error($parent_id)) {
+                    return $parent_id;
+                }
+            }
+        }
+
+        $filtered_data = self::clean_data($category_data);
+        $filtered_data['parent'] = $parent_id;
+
+        $term = wp_insert_term($filtered_data['name'], 'product_cat', $filtered_data);
+        if (is_wp_error($term)) {
+            return $term;
+        }
+
+        $term_id = $term['term_id'];
+        $existing_categories[$category_data['id']] = $term_id; // Cache the created category.
+
+        if (isset($filtered_data['image']) && !empty($filtered_data['image']['src'])) {
+            $image_url = $filtered_data['image']['src'];
+            $external_id = $filtered_data['image']['id'] ?? null;
+
+            $image_result = self::upload_image($image_url, $term_id, $external_id);
+            if (is_wp_error($image_result)) {
+                Debugger::error('Image error for category: ' . $image_result->get_error_message());
+            } else {
+                update_term_meta($term_id, 'thumbnail_id', $image_result);
+            }
+        }
+
+        return $term_id;
+    }
+
+    /**
+     * Crea múltiples categorías y sus padres de forma jerárquica.
+     *
+     * @param array $categories Lista de datos de categorías (incluyendo jerarquías).
+     *
+     * @return array Resultado para cada categoría y estadísticas generales.
+     *               - 'error_count'        (int)
+     *               - 'total_processed'    (int)
+     */
+    public static function create_category_with_parents_batch(array $categories): array {
+        $results         = array();
+        $error_count     = 0;
+        $total_processed = 0;
+
+        $existing_categories = [];
+        foreach ($categories as $category_data) {
+            $category_data['all_categories'] = $categories;
+
+            $result = self::create_category_with_parents( $category_data, $existing_categories );
+            if (is_wp_error($result)) {
+                $results[]    = $result;
+                $error_count += 1;
+            } else {
+                $results[]        = $result;
+                $total_processed += 1;
+            }
+        }
+
+        $results['error_count']     = $error_count;
+        $results['total_processed'] = $total_processed;
+
+        return $results;
+    }
+
+    /**
      * Crea múltiples categorías en un solo lote.
      *
      * @param array $categories Lista de datos para crear las categorías.

@@ -47,12 +47,14 @@ class Tools {
         Debugger::debug( '[IMPORT] Data del producto: ', $res->json_fmt() );
 
         if ( ! empty( $product['categories'] ) ) {
-            $ids = array_column( $product['categories'], 'id' );
+            $normal_ids = array_column( $product['categories'], 'id' );
+            $parent_ids = array_column( $product['categories'], 'parent' );
 
+            $ids = array_merge( $normal_ids, $parent_ids );
             $categories_res = $client->product_categories->pull_all( array( 'include' => implode( ',', $ids ) ) );
             if ( ! $categories_res->has_error() ) {
                 $categories = $categories_res->body();
-                $unused     = Crud\Categories::create_batch( $categories );
+                $unused = Crud\Categories::create_category_with_parents_batch( $categories );
             }
         }
 
