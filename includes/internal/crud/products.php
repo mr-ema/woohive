@@ -43,11 +43,25 @@ class Products {
      * @return array Datos filtrados con las propiedades inválidas eliminadas.
      */
     public static function clean_data( array $data ): array {
-        return array_filter(
+        $custom_invalid_props = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_props', array() );
+        $all_invalid_props = array_merge(self::$invalid_props, $custom_invalid_props);
+
+         $filtered_data = array_filter(
             $data,
-            fn( $key ) => ! in_array( $key, self::$invalid_props, true ),
+            fn( $key ) => ! in_array( $key, $all_invalid_props, true ),
             ARRAY_FILTER_USE_KEY
         );
+
+         if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
+            $invalid_meta_keys = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_meta_keys', array() );
+
+            $filtered_data['meta'] = array_filter(
+                $data['meta'],
+                fn( $meta_key ) => ! in_array( $meta_key, $invalid_meta_keys, true )
+            );
+        }
+
+        return $filtered_data;
     }
 
     /**
@@ -70,17 +84,26 @@ class Products {
         }
 
         try {
-            if ( ! $wc_product->is_type( $filtered_data['type'] ) ) {
+            if ( isset( $filtered_data['type'] ) && ! $wc_product->is_type( $filtered_data['type'] ) ) {
                 Helpers::update_product_type( $wc_product, $filtered_data['type'] );
+            }
+
+            $response = self::normalize_stock( $wc_product, $filtered_data );
+            if ( ! is_wp_error( $response ) ) {
+                unset( $filtered_data['stock_quantity'] );
             }
 
             $wc_product->set_props( $filtered_data );
             $wc_product->save();
 
-            $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
-            $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            if ( isset( $filtered_data['attributes'] ) ) {
+                $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
+            }
 
-            // Manejo de imágenes si están presentes en los datos
+            if ( isset( $filtered_data['categories'] ) ) {
+                $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            }
+
             if ( isset( $filtered_data['images'] ) && is_array( $filtered_data['images'] ) ) {
                 $image_ids = array();
 
@@ -196,8 +219,13 @@ class Products {
             $wc_product->set_props( $filtered_data );
             $wc_product->save();
 
-            $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
-            $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            if ( isset( $filtered_data['attributes'] ) ) {
+                $unused = Attributes::create_or_update_batch( $wc_product, $filtered_data['attributes'] );
+            }
+
+            if ( isset( $filtered_data['categories'] ) ) {
+                $unused = Categories::assign_categories( $wc_product, $filtered_data['categories'] );
+            }
 
             $product_id = $wc_product->get_id();
             if ( ! empty( $filtered_data['images'] ) ) {
@@ -386,6 +414,47 @@ class Products {
         $results['total_processed'] = $total_processed;
 
         return $results;
+    }
+
+    /**
+     * Normaliza el stock de un producto en WooCommerce.
+     *
+     * Esta función toma un objeto de producto y un array de datos,
+     * valida la cantidad de stock proporcionada y actualiza el stock del producto
+     * si la gestión de inventario está habilitada.
+     *
+     * @param object $product Objeto del producto.
+     * @param array      $data    Array de datos que contiene información como la cantidad de stock.
+     *
+     * @return int|WP_Error Devuelve el nuevo stock actualizado si es exitoso,
+     *                      o un objeto WP_Error si ocurre un error.
+     */
+    public static function normalize_stock( object $product, array $data ): int|WP_Error {
+        if ( ! isset( $data['stock_quantity'] ) || ! is_numeric( $data['stock_quantity'] ) ) {
+            return new WP_Error(
+                'invalid_stock_quantity',
+                __( 'La cantidad de stock proporcionada no es válida.', 'tu-textdomain' )
+            );
+        }
+
+        $incoming_stock = (int) $data['stock_quantity'];
+        if ( $product->managing_stock() ) {
+            $current_stock = $product->get_stock_quantity();
+            $stock_difference = $incoming_stock - $current_stock;
+
+            $new_stock = $current_stock + $stock_difference;
+            $new_stock = max( 0, $new_stock );
+
+            $product->set_stock_quantity( $new_stock );
+            $product->save();
+
+            return $new_stock;
+        }
+
+        return new WP_Error(
+            'stock_management_disabled',
+            __( 'La gestión de inventario no está habilitada para este producto.', 'tu-textdomain' )
+        );
     }
 
     /**

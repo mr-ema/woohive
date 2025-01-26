@@ -96,12 +96,12 @@ class Init {
         self::load_class( 'includes/internal/tools.php' );
 
         self::load_class( 'includes/internal/demons/sync_stock.php' );
-        self::load_class( 'includes/internal/demons/sync_request.php' );
+        self::load_class( 'includes/internal/demons/sync_product.php' );
         self::load_class( 'includes/internal/demons/sync_variation.php' );
+        self::load_class( 'includes/internal/demons/transients.php' );
         self::load_class( 'includes/internal/demons/init.php' );
 
-        self::load_class( 'includes/internal/api/endpoints/sync_product_endpoint.php' );
-        self::load_class( 'includes/internal/api/endpoints/sync_stock_endpoint.php' );
+        self::load_class( 'includes/internal/api/endpoints/sync/products_endpoint.php' );
         self::load_class( 'includes/internal/api/endpoints/sync/variations_endpoint.php' );
         self::load_class( 'includes/internal/api/init.php' );
 
@@ -121,7 +121,8 @@ class Init {
      * Carga un archivo de clase y, opcionalmente, instancia la clase.
      *
      * @param string      $filepath La ruta relativa del archivo de clase a incluir.
-     *                              Debe ser relativa a la constante `WOO_MULTISITE_STOCK_SYNC_DIR_PATH`.
+     *                              Debe ser relativa al 'plugin dir path'.
+     *
      * @param string|bool $class_name (Opcional) El nombre de la clase a instanciar.
      *                                Si se establece como `FALSE`, la clase no se instancia.
      *

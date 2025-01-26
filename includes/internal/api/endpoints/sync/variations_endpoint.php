@@ -26,13 +26,21 @@ class Variations_Endpoint {
     public static function register_routes( string $namespace ): void {
         register_rest_route(
             $namespace,
-            '/sync/products/(?P<parent_sku>[a-zA-Z0-9_-]+)/variations/(?P<variation_sku>[a-zA-Z0-9_-]+)',
+            '/products/(?P<product_sku>[a-zA-Z0-9_-]+)/variations/(?P<variation_sku>[a-zA-Z0-9_-]+)',
             array(
-                'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => array( self::class, 'handle_delete' ),
-                'permission_callback' => array( self::class, 'permission_check' ),
-                'args'                => self::get_args(),
-            )
+                array(
+                    'methods'             => WP_REST_Server::DELETABLE,
+                    'callback'            => array( self::class, 'handle_delete' ),
+                    'permission_callback' => array( self::class, 'permission_check' ),
+                    'args'                => self::get_args(),
+                ),
+                array(
+                    'methods'             => WP_REST_Server::EDITABLE,
+                    'callback'            => array( self::class, 'handle_update' ),
+                    'permission_callback' => array( self::class, 'permission_check' ),
+                    'args'                => self::get_args(),
+                )
+            ),
         );
     }
 
@@ -40,11 +48,20 @@ class Variations_Endpoint {
         return array();
     }
 
-    public static function handle_delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        $parent_sku    = $request->get_param( 'parent_sku' );
-        $variation_sku = $request->get_param( 'variation_sku' );
+    private static function get_body_data( WP_REST_Request $request ): array {
+        $params = $request->get_json_params();
+        $params['sku'] = $request->get_param( 'variation_sku' );
 
-        $result = Variations::get_by_sku( $parent_sku, $variation_sku );
+        unset( $params['variation_sku'], $params['product_sku'] );
+
+        return $params;
+    }
+
+    public static function handle_delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+        $product_sku    = $request->get_param( 'product_sku' );
+        $variation_sku  = $request->get_param( 'variation_sku' );
+
+        $result = Variations::get_by_sku( $product_sku, $variation_sku );
         if ( is_wp_error( $result ) ) {
             return $result;
         }
@@ -58,6 +75,27 @@ class Variations_Endpoint {
         return new WP_REST_Response( array( 'message' => __( 'Variación eliminada exitosamente.', Constants::TEXT_DOMAIN ) ), 200 );
     }
 
+    public static function handle_update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+        $product_sku    = $request->get_param( 'product_sku' );
+        $variation_sku  = $request->get_param( 'variation_sku' );
+
+        $body_data = self::get_body_data( $request );
+        if ( ! empty( $body_data ) ) {
+            $result = Variations::get_by_sku( $product_sku, $variation_sku );
+            if ( is_wp_error( $result ) ) {
+                return $result;
+            }
+
+            $variation = $result;
+            $result = Variations::update( $variation, $body_data );
+            if ( is_wp_error( $result ) ) {
+                return $result;
+            }
+        }
+
+        return new WP_REST_Response( array( 'message' => __( 'Variación actualizada exitosamente.', Constants::TEXT_DOMAIN ) ), 200 );
+    }
+
     /**
      * Verifica los permisos para el endpoint.
      *
@@ -65,5 +103,22 @@ class Variations_Endpoint {
      */
     public static function permission_check(): bool {
         return current_user_can( 'manage_woocommerce' );
+    }
+
+    private static function get_request_domain( WP_REST_Request $request ): string {
+        $scheme = is_ssl() ? 'https' : 'http';
+        $host   = $request->get_header( 'X-Source-Server-Host' ) ?? $request->get_header( 'host' );
+
+        return "{$scheme}://{$host}";
+    }
+
+    private static function find_site_by_domain( array $sites, string $domain ): ?array {
+        foreach ( $sites as $site ) {
+            if ( isset( $site['url'] ) && strpos( $site['url'], $domain ) !== false ) {
+                return $site;
+            }
+        }
+
+        return null;
     }
 }

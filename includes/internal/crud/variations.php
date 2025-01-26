@@ -58,7 +58,7 @@ class Variations {
      * @return void
      */
     public static function set_props( WC_Product_Variation $variation, array $data ): void {
-        $valid_set_props = array( 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight', 'sku' );
+        $valid_set_props = array( 'regular_price', 'sale_price', 'stock_quantity', 'status', 'manage_stock', 'weight', 'sku', 'stock_status' );
         $filtered_data   = array_intersect_key( $data, array_flip( $valid_set_props ) );
         $variation->set_props( $filtered_data );
 
@@ -72,18 +72,22 @@ class Variations {
             $variation->set_description( $data['description'] );
         }
 
-        if ( ! empty( $data['attributes'] ) ) {
+        if ( ! empty( $data['attributes'] ) && is_array( $data['attributes'] ) ) {
             $attributes_map = array_reduce(
                 $data['attributes'],
                 function ( $carry, $attribute ) {
-                    $slug           = sanitize_title( $attribute['name'] );
-                    $carry[ $slug ] = $attribute['option'];
+                    if ( is_array( $attribute ) && isset( $attribute['name'] ) && isset( $attribute['option'] ) ) {
+                        $slug = sanitize_title( $attribute['name'] );
+                        $carry[ $slug ] = $attribute['option'];
+                    }
                     return $carry;
                 },
                 array()
             );
 
-            $variation->set_attributes( $attributes_map );
+            if ( ! empty( $attributes_map ) ) {
+                $variation->set_attributes( $attributes_map );
+            }
         }
 
         if ( ! empty( $data['image'] ) ) {
@@ -161,6 +165,11 @@ class Variations {
 
         try {
             $filtered_data = self::clean_data( $data );
+
+            $response = self::normalize_stock( $variation, $filtered_data );
+            if ( ! is_wp_error( $response ) ) {
+                unset( $filtered_data['stock_quantity'] );
+            }
 
             self::set_props( $variation, $filtered_data );
             $variation->save();
@@ -437,23 +446,21 @@ class Variations {
         }
 
         $variation = wc_get_product( wc_get_product_id_by_sku( $variation_sku ) );
-        if ( $variation && $variation instanceof WC_Product_Variation ) {
+        if ( $variation && $variation->get_type() === 'variation' ) {
             if ( $variation->get_parent_id() === $parent_product->get_id() ) {
                 return $variation;
             }
         }
 
-        $variation_ids = $parent_product->get_children();
-        if ( empty( $variation_ids ) ) {
+        $variations = $parent_product->get_available_variations( 'objects' );
+        if ( empty( $variations ) ) {
             return new WP_Error(
                 'no_variations_found',
                 __( "No se encontraron variaciones para el producto con el SKU: {$parent_sku}.", Constants::TEXT_DOMAIN )
             );
         }
 
-        foreach ( $variation_ids as $variation_id ) {
-            $variation = wc_get_product( $variation_id );
-
+        foreach ( $variations as $variation ) {
             if ( $variation && $variation instanceof WC_Product_Variation ) {
                 if ( $variation->get_sku() === $variation_sku ) {
                     return $variation;
@@ -464,6 +471,47 @@ class Variations {
         return new WP_Error(
             'variation_not_found',
             __( "No se encontró una variación con el SKU: {$variation_sku} para el producto principal con SKU: {$parent_sku}.", Constants::TEXT_DOMAIN )
+        );
+    }
+
+    /**
+     * Normaliza el stock de una variación de producto en WooCommerce.
+     *
+     * Esta función toma un objeto de variación de producto y un array de datos,
+     * valida la cantidad de stock proporcionada y actualiza el stock de la variación
+     * si la gestión de inventario está habilitada.
+     *
+     * @param WC_Product_Variation $variation Objeto de la variación de producto.
+     * @param array                $data      Array de datos que contiene información como la cantidad de stock.
+     *
+     * @return int|WP_Error Devuelve el nuevo stock actualizado si es exitoso,
+     *                      o un objeto WP_Error si ocurre un error.
+     */
+    public static function normalize_stock( WC_Product_Variation $variation, array $data ): int|WP_Error {
+        if ( ! isset( $data['stock_quantity'] ) || ! is_numeric( $data['stock_quantity'] ) ) {
+            return new WP_Error(
+                'invalid_stock_quantity',
+                __( 'La cantidad de stock proporcionada no es válida.', 'tu-textdomain' )
+            );
+        }
+
+        $incoming_stock = (int) $data['stock_quantity'];
+        if ( $variation->managing_stock() ) {
+            $current_stock = $variation->get_stock_quantity();
+            $stock_difference = $incoming_stock - $current_stock;
+
+            $new_stock = $current_stock + $stock_difference;
+            $new_stock = max( 0, $new_stock );
+
+            $variation->set_stock_quantity( $new_stock );
+            $variation->save();
+
+            return $new_stock;
+        }
+
+        return new WP_Error(
+            'stock_management_disabled',
+            __( 'La gestión de inventario no está habilitada para esta variación.', 'tu-textdomain' )
         );
     }
 

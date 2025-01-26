@@ -19,8 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Stock {
 
     public static function init(): void {
-        add_action( 'woocommerce_product_set_stock', array( self::class, 'on_stock_update' ), 10, 2 );
-        add_action( 'woocommerce_variation_set_stock', array( self::class, 'on_variation_stock_update' ), 10, 2 );
+        add_action( 'woocommerce_product_set_stock', array( self::class, 'on_product_set_stock' ), 6, 2 );
+        add_action( 'woocommerce_variation_set_stock', array( self::class, 'on_variation_set_stock' ), 6, 2 );
+
+        add_action( Constants::PLUGIN_SLUG . '_sync_product_stock', array( self::class, 'sync_product_stock' ) );
+        add_action( Constants::PLUGIN_SLUG . '_sync_variation_stock', array( self::class, 'sync_variation_stock' ) );
     }
 
     /**
@@ -30,20 +33,25 @@ class Sync_Stock {
      *
      * @return void
      */
-    public static function on_stock_update( WC_Product $product ): void {
+    public static function sync_product_stock( WC_Product $product ): void {
         $product_id = $product->get_id();
-        if ( self::is_sync_stock_in_progress( $product_id ) ) {
+        if ( Transients::is_sync_stock_in_progress( $product_id ) ) {
             return;
         }
 
         if ( Helpers::should_sync_stock( $product ) ) {
-            self::set_sync_stock_in_progress( $product_id, true );
+            do_action( Constants::PLUGIN_SLUG . '_before_product_sync_stock', $product );
+
+            Debugger::debug( 'Sync Product Stock Has Being Fire' );
+            Transients::set_sync_stock_in_progress( $product_id, true );
 
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites( $product );
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site( $product );
             }
+
+            Transients::set_sync_stock_in_progress( $product_id, false );
         }
     }
 
@@ -54,20 +62,61 @@ class Sync_Stock {
      *
      * @return void
      */
-    public static function on_variation_stock_update( WC_Product_Variation $variation ): void {
+    public static function sync_variation_stock( WC_Product_Variation $variation ): void {
         $variation_id = $variation->get_id();
-        if ( self::is_sync_stock_in_progress( $variation_id ) ) {
+        if ( Transients::is_sync_stock_in_progress( $variation_id ) ) {
             return;
         }
 
         if ( Helpers::should_sync_stock( $variation ) ) {
-            self::set_sync_stock_in_progress( $variation_id, true );
+            do_action( Constants::PLUGIN_SLUG . '_before_variation_sync_stock', $variation );
+
+            Debugger::debug( 'Sync Variation Stock Has Being Fire' );
+            Transients::set_sync_stock_in_progress( $variation_id, true );
 
             if ( Helpers::is_primary_site() ) {
-                self::sync_to_secondary_sites( $variation );
+                self::sync_variation_to_secondary_sites( $variation );
             } elseif ( Helpers::is_secondary_site() ) {
-                self::sync_to_primary_site( $variation );
+                self::sync_variation_to_primary_site( $variation );
             }
+
+            Transients::set_sync_stock_in_progress( $variation_id, false );
+        }
+    }
+
+    /**
+     * Maneja la actualización del stock de un producto.
+     *
+     * @param WC_Product $product Instancia del producto actualizado.
+     *
+     * @return void
+     */
+    public static function on_product_set_stock( WC_Product $product ): void {
+        $product_id = $product->get_id();
+        if ( Transients::is_sync_stock_in_progress( $product_id ) ) {
+            return;
+        }
+
+        if ( Helpers::should_sync_stock( $product ) ) {
+            do_action( Constants::PLUGIN_SLUG . '_sync_product_stock', $product );
+        }
+    }
+
+    /**
+     * Maneja la actualización del stock de una variación de producto.
+     *
+     * @param WC_Product_Variation $variation Instancia de la variación de producto.
+     *
+     * @return void
+     */
+    public static function on_variation_set_stock( WC_Product_Variation $variation ): void {
+        $variation_id = $variation->get_id();
+        if ( Transients::is_sync_stock_in_progress( $variation_id ) ) {
+            return;
+        }
+
+        if ( Helpers::should_sync_stock( $variation ) ) {
+            do_action( Constants::PLUGIN_SLUG . '_sync_variation_stock', $variation );
         }
     }
 
@@ -89,18 +138,15 @@ class Sync_Stock {
             return;
         }
 
-        $product_id   = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
-        $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
-
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-            $data   = array(
-                'product_id'   => $product_id,
-                'variation_id' => $variation_id,
-                'from'         => 'primary',
-            );
+            $data   = array( 'stock_status' => $product->get_stock_status() );
 
-            $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data );
+            if ( $product->managing_stock() ) {
+                $data['stock_quantity'] = $product->get_stock_quantity();
+            }
+
+            $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", $data, array() );
             Debugger::debug( 'sync stock from primary: ', $response );
         }
     }
@@ -123,47 +169,82 @@ class Sync_Stock {
             return;
         }
 
-        $product_id   = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
-        $variation_id = $product->is_type( 'variation' ) ? $product->get_id() : null;
+        $client  = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+        $headers = array( 'X-Source-Server-Host' => $_SERVER['HTTP_HOST'] );
+        $data    = array( 'stock_status' => $product->get_stock_status() );
 
-        $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+        if ( $product->managing_stock() ) {
+            $data['stock_quantity'] = $product->get_stock_quantity();
+        }
 
-        $server_host = $_SERVER['HTTP_HOST'];
-        $headers     = array( 'X-Source-Server-Host' => $server_host );
-        $data        = array(
-            'product_id'   => $product_id,
-            'variation_id' => $variation_id,
-            'from'         => 'secondary',
-        );
-
-        $response = $client->put( Constants::INTERNAL_API_BASE_NAME . '/sync-stock', $data, array(), $headers );
+        $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", $data, array(), $headers );
         Debugger::debug( 'sync stock from secondary: ', $response );
     }
 
     /**
-     * Verifica si la sincronización de stock está en progreso para un producto.
+     * Sincroniza el stock del producto con los sitios secundarios configurados.
      *
-     * @param int $post_id ID del producto.
-     *
-     * @return bool
-     */
-    public static function is_sync_stock_in_progress( int $post_id ): bool {
-        return get_transient( Constants::PLUGIN_SLUG . '_sync_stock_in_progress_' . $post_id );
-    }
-
-    /**
-     * Establece el estado de sincronización en progreso para un producto.
-     *
-     * @param int  $post_id  ID del producto.
-     * @param bool $in_progress Indica si la sincronización esta en progreso.
+     * @param WC_Product_Variation $variation Instancia del producto.
      *
      * @return void
      */
-    public static function set_sync_stock_in_progress( int $post_id, bool $in_progress ): void {
-        if ( $in_progress ) {
-            set_transient( Constants::PLUGIN_SLUG . '_sync_stock_in_progress_' . $post_id, true, 3 );
-        } else {
-            delete_transient( Constants::PLUGIN_SLUG . '_sync_stock_in_progress_' . $post_id );
+    private static function sync_variation_to_secondary_sites( WC_Product_Variation $variation ): void {
+        $parent     = wc_get_product( $variation->get_parent_id() );
+        $parent_sku = $parent->get_sku();
+
+        $sku = $variation->get_sku();
+        if ( empty( $sku ) || empty( $parent_sku ) ) {
+            return;
         }
+
+        $sites = Helpers::sites();
+        if ( empty( $sites ) ) {
+            return;
+        }
+
+        foreach ( $sites as $site ) {
+            $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+            $data   = array( 'stock_status' => $variation->get_stock_status() );
+
+            if ( $variation->managing_stock() ) {
+                $data['stock_quantity'] = $variation->get_stock_quantity();
+            }
+
+            $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$sku}", $data, array() );
+            Debugger::debug( 'sync stock from primary: ', $response );
+        }
+    }
+
+    /**
+     * Sincroniza el stock del producto al sitio principal.
+     *
+     * @param WC_Product_Variation $variation Instancia del producto.
+     *
+     * @return void
+     */
+    private static function sync_variation_to_primary_site( WC_Product_Variation $variation ): void {
+        $parent     = wc_get_product( $variation->get_parent_id() );
+        $parent_sku = $parent->get_sku();
+
+        $sku = $variation->get_sku();
+        if ( empty( $sku ) || empty( $parent_sku ) ) {
+            return;
+        }
+
+        $main_site = Helpers::primary_site();
+        if ( empty( $main_site ) ) {
+            return;
+        }
+
+        $client  = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+        $headers = array( 'X-Source-Server-Host' => $_SERVER['HTTP_HOST'] );
+        $data    = array( 'stock_status' => $variation->get_stock_status() );
+
+        if ( $variation->managing_stock() ) {
+            $data['stock_quantity'] = $variation->get_stock_quantity();
+        }
+
+        $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$sku}", $data, array(), $headers );
+        Debugger::debug( 'sync stock from secondary: ', $response );
     }
 }
