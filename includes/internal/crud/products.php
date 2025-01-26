@@ -43,11 +43,25 @@ class Products {
      * @return array Datos filtrados con las propiedades inválidas eliminadas.
      */
     public static function clean_data( array $data ): array {
-        return array_filter(
+        $custom_invalid_props = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_props', array() );
+        $all_invalid_props = array_merge(self::$invalid_props, $custom_invalid_props);
+
+         $filtered_data = array_filter(
             $data,
-            fn( $key ) => ! in_array( $key, self::$invalid_props, true ),
+            fn( $key ) => ! in_array( $key, $all_invalid_props, true ),
             ARRAY_FILTER_USE_KEY
         );
+
+         if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
+            $invalid_meta_keys = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_meta_keys', array() );
+
+            $filtered_data['meta'] = array_filter(
+                $data['meta'],
+                fn( $meta_key ) => ! in_array( $meta_key, $invalid_meta_keys, true )
+            );
+        }
+
+        return $filtered_data;
     }
 
     /**
