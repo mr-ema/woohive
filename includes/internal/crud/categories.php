@@ -110,13 +110,7 @@ class Categories {
             return $existing_term->term_id;
         }
 
-        // Si no existe, crear una nueva categoría.
-        $term = wp_insert_term(
-            $filtered_data['name'],
-            'product_cat',
-            $filtered_data
-        );
-
+        $term = wp_insert_term( $filtered_data['name'], 'product_cat', $filtered_data );
         if ( is_wp_error( $term ) ) {
             return $term;
         }
@@ -127,11 +121,12 @@ class Categories {
             $image_url   = $filtered_data['image']['src'];
             $external_id = isset( $filtered_data['image']['id'] ) ? $filtered_data['image']['id'] : null;
 
-            $image_id = self::upload_image( $image_url, $term_id, $external_id );
-            if ( is_wp_error( $image_id ) ) {
-                return $image_id; // Return the error if image upload fails
+            $result = self::upload_image( $image_url, $term_id, $external_id );
+            if ( is_wp_error( $result ) ) {
+                Debugger::error('Image error on update category: ', $result);
             }
 
+            $image_id = $result;
             update_term_meta( $term_id, 'thumbnail_id', $image_id );
         }
 
@@ -141,12 +136,12 @@ class Categories {
     /**
      * Actualiza una categoría existente con los nuevos datos.
      *
-     * @param array $data Datos para actualizar la categoría.
      * @param int $term_id ID de la categoría que se va a actualizar.
+     * @param array $data Datos para actualizar la categoría.
      *
      * @return int|WP_Error Devuelve el ID de la categoría actualizada o un WP_Error en caso de fallo.
      */
-    public static function update( array $data, int $term_id ): int|WP_Error {
+    public static function update( int $term_id, array $data ): int|WP_Error {
         $filtered_data = self::clean_data( $data );
         $result = wp_update_term( $term_id, 'product_cat', $filtered_data );
         if ( is_wp_error( $result ) ) {
@@ -157,11 +152,12 @@ class Categories {
             $image_url   = $filtered_data['image']['src'];
             $external_id = isset( $filtered_data['image']['id'] ) ? $filtered_data['image']['id'] : null;
 
-            $image_id = self::upload_image( $image_url, $term_id, $external_id );
-            if ( is_wp_error( $image_id ) ) {
-                return $image_id;
+            $result = self::upload_image( $image_url, $term_id, $external_id );
+            if ( is_wp_error( $result ) ) {
+                Debugger::error('Image error on update category: ', $result);
             }
 
+            $image_id = $result;
             update_term_meta( $term_id, 'thumbnail_id', $image_id );
         }
 
@@ -183,7 +179,7 @@ class Categories {
 
         $existing_term = get_term_by( 'name', $filtered_data['name'], 'product_cat' );
         if ( $existing_term ) {
-            return self::update( $filtered_data, $existing_term->term_id );
+            return self::update( $existing_term->term_id, $filtered_data );
         }
 
         return self::create( $filtered_data );
@@ -196,14 +192,12 @@ class Categories {
      *
      * @return array Resultado para cada categoría y estadísticas generales.
      *               - 'error_count'        (int)
-     *               - 'total_created'      (int)
      *               - 'total_processed'    (int)
      */
     public static function create_batch( array $categories ): array {
         $results         = array();
         $error_count     = 0;
         $total_processed = 0;
-        $total_created   = 0;
 
         foreach ( $categories as $data ) {
             $result = self::create( $data );
@@ -214,14 +208,11 @@ class Categories {
             } else {
                 $results[]        = $result;
                 $total_processed += 1;
-                $total_created   += 1;
             }
         }
 
-        // Resumen de las estadísticas
         $results['error_count']     = $error_count;
         $results['total_processed'] = $total_processed;
-        $results['total_created']   = $total_created;
 
         return $results;
     }
@@ -233,42 +224,26 @@ class Categories {
      *
      * @return array Resultados para cada categoría y estadísticas generales.
      *               - 'error_count'        (int)
-     *               - 'total_updated'      (int)
-     *               - 'total_created'      (int)
      *               - 'total_processed'    (int)
      */
     public static function create_or_update_batch( array $categories ): array {
         $results         = array();
         $error_count     = 0;
         $total_processed = 0;
-        $total_created   = 0;
-        $total_updated   = 0;
 
         foreach ( $categories as $data ) {
             $result = self::create_or_update( $data );
-
             if ( is_wp_error( $result ) ) {
                 $results[]    = $result;
                 $error_count += 1;
             } else {
                 $results[]        = $result;
                 $total_processed += 1;
-
-                // Si la categoría fue creada, incrementar 'total_created'.
-                // Si la categoría fue actualizada, incrementar 'total_updated'.
-                if ( isset( $result['created'] ) && $result['created'] ) {
-                    $total_created += 1;
-                } elseif ( isset( $result['updated'] ) && $result['updated'] ) {
-                    $total_updated += 1;
-                }
             }
         }
 
-        // Resumen
         $results['error_count']     = $error_count;
         $results['total_processed'] = $total_processed;
-        $results['total_created']   = $total_created;
-        $results['total_updated']   = $total_updated;
 
         return $results;
     }
