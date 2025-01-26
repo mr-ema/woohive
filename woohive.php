@@ -121,7 +121,8 @@ class Init {
      * Carga un archivo de clase y, opcionalmente, instancia la clase.
      *
      * @param string      $filepath La ruta relativa del archivo de clase a incluir.
-     *                              Debe ser relativa a la constante `WOO_MULTISITE_STOCK_SYNC_DIR_PATH`.
+     *                              Debe ser relativa al 'plugin dir path'.
+     *
      * @param string|bool $class_name (Opcional) El nombre de la clase a instanciar.
      *                                Si se establece como `FALSE`, la clase no se instancia.
      *
