@@ -40,7 +40,7 @@ class Sync_Product {
             return;
         }
 
-        if ( $product && Helpers::should_sync( $product ) ) {
+        if ( $product ) {
             do_action( Constants::PLUGIN_SLUG . '_before_sync_product', $product );
 
             $post_id = $product->get_id();
