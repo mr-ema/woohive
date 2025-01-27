@@ -991,11 +991,6 @@ Search.appendIndex(
             "summary": "Obtener\u0020el\u0020rol\u0020del\u0020sitio.",
             "url": "classes/WooHive-Utils-Helpers.html#method_get_role"
         },                {
-            "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Arequest_role\u0028\u0029",
-            "name": "request_role",
-            "summary": "Get\u0020request\u0020source\u0020role\u0020\u0028Primary\u0020\/\u0020Inventory\u0029",
-            "url": "classes/WooHive-Utils-Helpers.html#method_request_role"
-        },                {
             "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Aapi_credentials_field_name\u0028\u0029",
             "name": "api_credentials_field_name",
             "summary": "Formatear\u0020el\u0020nombre\u0020del\u0020campo\u0020de\u0020las\u0020credenciales\u0020de\u0020la\u0020API.",
