@@ -284,7 +284,7 @@ class Helpers {
     }
 
     public static function is_sync_only_stock_enabled(): bool {
-        return ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' );
+        return ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'no' ) === 'yes' );
     }
 
     public static function is_create_products_in_secondary_sites_enabled(): bool {
@@ -373,12 +373,13 @@ class Helpers {
         }
 
         // Si la sincronización de solo inventario está habilitada
-        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
+        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'no' ) === 'yes' ) {
             return false;
         }
 
         // Si es un Inventario Secundario y el cambio fue desencadenado por una solicitud de Stock Sync, no crear un nuevo trabajo
         if ( self::is_secondary_site() && self::is_self_request() ) {
+            Debugger::debug("Should Sync - Same Request");
             return false;
         }
 
