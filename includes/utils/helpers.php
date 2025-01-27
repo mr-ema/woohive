@@ -147,14 +147,7 @@ class Helpers {
      * @return string Rol del sitio, 'primary' por defecto.
      */
     public static function get_role(): string {
-        return get_option( 'woo_multisite_stock_sync_role', 'primary' );
-    }
-
-    /**
-     * Get request source role (Primary / Inventory)
-     */
-    public static function request_role(): bool {
-        return isset( $GLOBALS['woo_multisite_stock_sync_request_role'] ) ? $GLOBALS['woo_multisite_stock_sync_request_role'] : false;
+        return get_option( Constants::PLUGIN_SLUG . '_role', 'primary' );
     }
 
     /**
@@ -319,11 +312,6 @@ class Helpers {
             return false;
         }
 
-        // Si el cambio de inventario proviene del Inventario Principal, no crear un nuevo trabajo
-        if ( self::request_role() === 'primary' ) {
-            return false;
-        }
-
         // Si es un Inventario Secundario y el cambio fue desencadenado por una solicitud de Stock Sync, no crear un nuevo trabajo
         if ( self::is_secondary_site() && self::is_self_request() ) {
             return false;
@@ -386,11 +374,6 @@ class Helpers {
 
         // Si la sincronización de solo inventario está habilitada
         if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'yes' ) === 'yes' ) {
-            return false;
-        }
-
-        // Si el cambio de inventario proviene del Inventario Principal, no crear un nuevo trabajo
-        if ( self::request_role() === 'primary' ) {
             return false;
         }
 
