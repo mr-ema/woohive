@@ -20,7 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Product {
 
     public static function init(): void {
-        add_action( 'save_post_product', array( self::class, 'on_product_save' ), 10, 3 );
+        add_action( 'woocommerce_new_product', array( self::class, 'on_product_create' ), 10, 1 );
+        add_action( 'woocommerce_update_product', array( self::class, 'on_product_update' ), 10, 1 );
 
         add_filter( 'woocommerce_product_import_get_product_object', array( self::class, 'on_import_start' ), 10, 2 );
         add_action( 'woocommerce_product_import_inserted_product_object', array( self::class, 'on_import_finished' ), 10, 2 );
@@ -58,15 +59,70 @@ class Sync_Product {
     }
 
     /**
+     * Maneja la sincronización cuando se actualiza un producto.
+     *
+     * @since 1.1.0
+     *
+     * @param int $product_id ID del producto.
+     *
+     * @return void
+     */
+    public static function on_product_update( int $product_id ): void {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
+        if ( self::is_sync_in_progress( $product_id ) ) {
+            return;
+        }
+
+        $product = wc_get_product( $product_id );
+        if ( $product && Helpers::should_sync( $product ) ) {
+            Debugger::debug( 'Product Sync On Update Has Been Fired' );
+            do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
+        }
+    }
+
+    /**
+     * Maneja la sincronización cuando se crea un producto.
+     *
+     * @since 1.1.0
+     *
+     * @param int $product_id ID del producto.
+     *
+     * @return void
+     */
+    public static function on_product_create( int $product_id ): void {
+        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
+        if ( self::is_sync_in_progress( $product_id ) ) {
+            return;
+        }
+
+        $product = wc_get_product( $product_id );
+        if ( $product && Helpers::should_sync( $product ) ) {
+            Debugger::debug( 'Product Sync On Create Has Been Fired' );
+            do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
+        }
+    }
+
+
+    /**
      * Maneja la sincronización cuando se guarda un producto.
      *
      * @param int     $post_id ID del post.
      * @param WP_Post $post    Objeto del post.
      * @param bool    $update  Indica si es una actualización.
      *
+     * @deprecated 1.1.0 Ahora usamos on_product_create().
+     *
      * @return void
      */
     public static function on_product_save( int $post_id, WP_Post $post, bool $update ): void {
+        _deprecated_function( __METHOD__, '1.1.0', 'self::sync_new_product()' );
+
         if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
             return;
         }
