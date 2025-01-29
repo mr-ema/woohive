@@ -10,7 +10,7 @@
  * @wordpress-plugin
  * Plugin Name:         WooCommerce Multisite Product Sync
  * Description:         Coordina productos entre páginas web que usan WooCommerce.
- * Version:             1.0.0
+ * Version:             1.1.0
  * Requires at least:   6.7
  * Requires PHP:        8.0
  * Author:              Marco, Emanuel, Alexander
