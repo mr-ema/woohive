@@ -45,7 +45,7 @@ class Sync_Product {
             do_action( Constants::PLUGIN_SLUG . '_before_sync_product', $product );
 
             $post_sku = $product->get_sku();
-            if ( !$post_sku ) {
+            if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
                 return;
             }
 
@@ -56,9 +56,6 @@ class Sync_Product {
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site_data( $product );
             }
-
-            Transients::set_sync_in_progress( $post_sku, false );
-            Transients::set_importing_in_progress( $post_sku, false );
         }
     }
 
@@ -72,12 +69,21 @@ class Sync_Product {
      * @return void
      */
     public static function on_product_update( int $product_id ): void {
-        if ( Helpers::is_sync_only_stock_enabled() || self::is_sync_in_progress( $product_id ) ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
         $product = wc_get_product( $product_id );
-        if ( $product && Helpers::should_sync( $product ) ) {
+        if ( ! $product ) {
+            return;
+        }
+
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            return;
+        }
+
+        if ( Helpers::should_sync( $product ) ) {
             Debugger::debug( 'Product Sync On Update Has Been Fired' );
             do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
         }
@@ -98,7 +104,16 @@ class Sync_Product {
         }
 
         $product = wc_get_product( $product_id );
-        if ( $product && Helpers::should_sync( $product ) ) {
+        if ( ! $product ) {
+            return;
+        }
+
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            return;
+        }
+
+        if ( Helpers::should_sync( $product ) ) {
             Debugger::debug( 'Product Sync On Create Has Been Fired' );
             do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
         }

@@ -89,6 +89,7 @@ class Products_Endpoint {
         $product_id = (int) $product['id'];
 
         Transients::set_importing_in_progress( $product_sku, true );
+        Transients::set_sync_in_progress( $product_sku, true );
 
         $result     = Tools::import_product( $client, $product_id );
         if ( is_wp_error( $result ) ) {
@@ -96,6 +97,7 @@ class Products_Endpoint {
         }
 
         Transients::set_importing_in_progress( $product_sku, false );
+        Transients::set_sync_in_progress( $product_sku, false );
 
         $product_id = $result;
         return new WP_REST_Response(

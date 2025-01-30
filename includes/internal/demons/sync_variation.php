@@ -59,7 +59,7 @@ class Sync_Variation {
             return;
         }
 
-        $sync_in_progress = self::is_sync_in_progress( $parent_sku ) || self::is_sync_in_progress( $variation_sku );
+        $sync_in_progress = self::is_sync_in_progress( $variation_sku );
         if ( ! $sync_in_progress && $variation && Helpers::should_sync( $variation ) ) {
             Debugger::debug( 'Variation Sync On Update Has Been Fired' );
             Transients::set_sync_in_progress( $parent_sku, true );
@@ -68,9 +68,6 @@ class Sync_Variation {
             if ( Helpers::is_primary_site() ) {
                 self::sync_variation_update( $variation );
             }
-
-            Transients::set_sync_in_progress( $parent_sku, false );
-            Transients::set_sync_in_progress( $variation_sku, false );
         }
     }
 
