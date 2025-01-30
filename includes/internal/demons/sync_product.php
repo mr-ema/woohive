@@ -44,8 +44,12 @@ class Sync_Product {
         if ( $product ) {
             do_action( Constants::PLUGIN_SLUG . '_before_sync_product', $product );
 
-            $post_id = $product->get_id();
-            Transients::set_sync_in_progress( $post_id, true );
+            $post_sku = $product->get_sku();
+            if ( !$post_sku ) {
+                return;
+            }
+
+            Transients::set_sync_in_progress( $post_sku, true );
 
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $product );
@@ -53,8 +57,8 @@ class Sync_Product {
                 self::sync_to_primary_site_data( $product );
             }
 
-            Transients::set_sync_in_progress( $post_id, false );
-            Transients::set_importing_in_progress( $post_id, false );
+            Transients::set_sync_in_progress( $post_sku, false );
+            Transients::set_importing_in_progress( $post_sku, false );
         }
     }
 
@@ -143,8 +147,12 @@ class Sync_Product {
      * @return WC_Product
      */
     public static function on_import_start( WC_Product $product, array $data = array() ): WC_Product {
-        $post_id = $product->get_id();
-        Transients::set_importing_in_progress( $post_id, true );
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku ) {
+            $post_sku = $product->get_id();
+        }
+
+        Transients::set_importing_in_progress( $post_sku, true );
 
         return $product;
     }
@@ -158,10 +166,13 @@ class Sync_Product {
      * @return void
      */
     public static function on_import_finished( WC_Product $product, array $data = array() ): void {
-        $post_id = $product->get_id();
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku ) {
+            $post_sku = $product->get_id();
+        }
 
-        Transients::set_sync_in_progress( $post_id, false );
-        Transients::set_importing_in_progress( $post_id, false );
+        Transients::set_sync_in_progress( $post_sku, false );
+        Transients::set_importing_in_progress( $post_sku, false );
         do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
     }
 
@@ -216,10 +227,10 @@ class Sync_Product {
         Debugger::debug( 'sync product from secondary: ', $response );
     }
 
-    private static function is_sync_in_progress( int $post_id ): bool {
-        $sync_in_progress  = Transients::is_sync_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_importing_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_id );
+    private static function is_sync_in_progress( string|int $post_sku ): bool {
+        $sync_in_progress  = Transients::is_sync_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_importing_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_sku );
 
         return $sync_in_progress;
     }

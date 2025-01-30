@@ -9,6 +9,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
+use WooHive\Internal\Demons\Transients;
 
 
 /** Evitar acceso directo al script. */
@@ -89,6 +90,9 @@ class Variations_Endpoint {
         $product_sku   = $request->get_param( 'product_sku' );
         $variation_sku = $request->get_param( 'variation_sku' );
 
+        Transients::set_sync_in_progress( $product_sku, true );
+        Transients::set_sync_in_progress( $variation_sku, true );
+
         $body_data = self::get_body_data( $request );
         if ( ! empty( $body_data ) ) {
             $result = Variations::get_by_sku( $product_sku, $variation_sku );
@@ -102,6 +106,9 @@ class Variations_Endpoint {
                 return $result;
             }
         }
+
+        Transients::set_sync_in_progress( $product_sku, false );
+        Transients::set_sync_in_progress( $variation_sku, false );
 
         return new WP_REST_Response( array( 'message' => __( 'Variación actualizada exitosamente.', Constants::TEXT_DOMAIN ) ), 200 );
     }

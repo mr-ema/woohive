@@ -4,6 +4,7 @@ namespace WooHive\Internal\Api\Endpoints\Sync;
 
 use WooHive\Config\Constants;
 use WooHive\Internal\Crud\Products;
+use WooHive\Internal\Demons\Transients;
 use WooHive\Internal\Tools;
 use WooHive\Utils\Helpers;
 use WooHive\WCApi\Client;
@@ -86,10 +87,15 @@ class Products_Endpoint {
 
         $product    = $result->body()[0];
         $product_id = (int) $product['id'];
+
+        Transients::set_importing_in_progress( $product_sku, true );
+
         $result     = Tools::import_product( $client, $product_id );
         if ( is_wp_error( $result ) ) {
             return $result;
         }
+
+        Transients::set_importing_in_progress( $product_sku, false );
 
         $product_id = $result;
         return new WP_REST_Response(
@@ -123,6 +129,8 @@ class Products_Endpoint {
             );
         }
 
+        Transients::set_sync_in_progress( $product_sku, true );
+
         $body_data = self::get_body_data( $request );
         if ( ! empty( $body_data ) ) {
             $product_id = wc_get_product_id_by_sku( $product_sku );
@@ -154,6 +162,8 @@ class Products_Endpoint {
         if ( is_wp_error( $result ) ) {
             return $result;
         }
+
+        Transients::set_sync_in_progress( $product_sku, false );
 
         $product_id = $result;
         return new WP_REST_Response(
