@@ -44,7 +44,7 @@ class Sync_Product {
             do_action( Constants::PLUGIN_SLUG . '_before_sync_product', $product );
 
             $post_sku = $product->get_sku();
-            if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            if ( ! $post_sku ) {
                 return;
             }
 
