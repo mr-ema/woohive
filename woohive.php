@@ -96,6 +96,7 @@ class Init {
         self::load_class( 'includes/internal/tools.php' );
 
         self::load_class( 'includes/internal/demons/sync_stock.php' );
+        self::load_class( 'includes/internal/demons/sync_price.php' );
         self::load_class( 'includes/internal/demons/sync_product.php' );
         self::load_class( 'includes/internal/demons/sync_variation.php' );
         self::load_class( 'includes/internal/demons/transients.php' );

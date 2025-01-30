@@ -250,6 +250,7 @@ class Sync_Product {
         $sync_in_progress  = Transients::is_sync_in_progress( $post_sku );
         $sync_in_progress |= Transients::is_importing_in_progress( $post_sku );
         $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_sync_price_in_progress( $post_sku );
 
         return $sync_in_progress;
     }

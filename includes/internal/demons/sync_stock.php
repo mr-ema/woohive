@@ -106,7 +106,7 @@ class Sync_Stock {
      * @return void
      */
     public static function on_variation_set_stock( WC_Product_Variation $variation ): void {
-        $variation_sku = $variation->get_id();
+        $variation_sku = $variation->get_sku();
         if ( ! $variation_sku || Transients::is_sync_stock_in_progress( $variation_sku ) ) {
             return;
         }
