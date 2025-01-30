@@ -7,12 +7,18 @@ Todos los cambios importantes en este proyecto serán documentados en este archi
 
 ### **Agregado**  
 
-- **Nuevos hooks y reemplazo de los antiguos:** Se agregaron nuevos hooks para una mejor personalización y se eliminaron los obsoletos.  
+- **Sincronizacion individual de precios:** Ahora si se cambia el precio se actualiza solo el precio y no todo el producto
 - **Mejora en la sincronización de productos:** Ahora la caché se actualiza automáticamente cuando un producto es modificado.  
+- **Opciones personalizables para la sincronización:** Se agregaron nuevas opciones en el panel de configuración para personalizar la sincronización del plugin, incluyendo:  
+  - "Sincronizar stock" - Remplaza a "Sincronizar solo stock"
+  - "Crear productos en este sitio" - Reemplaza a "Crear productos en sitios segundarios"
+  - "Sincronizar datos de productos"  
+  - "Sincronizar a sitio primario"  
 
 ### **Cambiado**  
 
 - **Actualización de la versión:** Se ajustó la numeración de la versión para reflejar los últimos cambios.  
+- **Mejorar transients de sincronizacion:** Ahora se puede pasar sku o id.
 
 ### **Corregido**  
 
