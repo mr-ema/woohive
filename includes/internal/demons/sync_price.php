@@ -24,11 +24,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Price {
 
     public static function init(): void {
-        add_action( 'woocommerce_update_product', array( self::class, 'on_product_update' ), 10, 1 );
-        add_action( 'woocommerce_update_product_variation', array( self::class, 'on_variation_update' ), 10, 1 );
+        add_action( 'woocommerce_product_object_updated_props', array( self::class, 'on_product_or_variation_update' ), 10, 2 );
 
         add_action( Constants::PLUGIN_SLUG . '_sync_product_price', array( self::class, 'sync_product_price' ) );
         add_action( Constants::PLUGIN_SLUG . '_sync_variation_price', array( self::class, 'sync_variation_price' ) );
+    }
+
+    /**
+     * Se activa cuando se actualizan propiedades de un producto o variación en WooCommerce.
+     *
+     * Este hook detecta cambios en las propiedades del producto, incluyendo el precio.
+     * Solo ejecuta la sincronización si se han actualizado los precios (precio regular,
+     * precio de oferta o precio final).
+     *
+     * @param WC_Product $product El producto o variación que ha sido actualizado.
+     * @param array $updated_props Lista de propiedades que han cambiado.
+     */
+    public static function on_product_or_variation_update( WC_Product $product, $updated_props ): void {
+        $price_keys = ['regular_price', 'sale_price', 'price'];
+
+        if ( array_intersect( $price_keys, $updated_props ) ) {
+            if ( $product->is_type( 'variation' ) ) {
+                do_action( Constants::PLUGIN_SLUG . '_sync_variation_price', $product );
+            } else {
+                do_action( Constants::PLUGIN_SLUG . '_sync_product_price', $product );
+            }
+        }
     }
 
     /**
