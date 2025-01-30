@@ -39,7 +39,17 @@ class Sync_Variation {
             $variation = new WC_Product_Variation( $post_id );
 
             $parent = wc_get_product( $variation->get_parent_id() );
-            if ( Helpers::should_sync( $parent ) ) {
+            $variation_sku = $variation->get_sku();
+
+            $parent_sku = $parent->get_sku();
+            if ( ! $parent_sku || ! $variation_sku ) {
+                return;
+            }
+
+            if ( Helpers::should_sync( $variation ) ) {
+                Transients::set_sync_in_progress( $parent_sku, true );
+                Transients::set_sync_in_progress( $variation_sku, true );
+
                 self::sync_variation_deletion( $variation );
             }
         }

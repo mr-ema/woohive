@@ -50,8 +50,6 @@ class Sync_Stock {
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site( $product );
             }
-
-            Transients::set_sync_stock_in_progress( $product_sku, false );
         }
     }
 
@@ -79,8 +77,6 @@ class Sync_Stock {
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_variation_to_primary_site( $variation );
             }
-
-            Transients::set_sync_stock_in_progress( $variation_sku, false );
         }
     }
 

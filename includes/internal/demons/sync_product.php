@@ -20,8 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Product {
 
     public static function init(): void {
-        //add_action( 'woocommerce_new_product', array( self::class, 'on_product_create' ), 10, 1 );
-        //add_action( 'woocommerce_update_product', array( self::class, 'on_product_update' ), 10, 1 );
         add_action( 'save_post_product', array( self::class, 'on_product_save' ), 10, 3 );
 
         add_filter( 'woocommerce_product_import_get_product_object', array( self::class, 'on_import_start' ), 10, 2 );
