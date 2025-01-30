@@ -20,8 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Product {
 
     public static function init(): void {
-        add_action( 'woocommerce_new_product', array( self::class, 'on_product_create' ), 10, 1 );
-        add_action( 'woocommerce_update_product', array( self::class, 'on_product_update' ), 10, 1 );
+        //add_action( 'woocommerce_new_product', array( self::class, 'on_product_create' ), 10, 1 );
+        //add_action( 'woocommerce_update_product', array( self::class, 'on_product_update' ), 10, 1 );
+        add_action( 'save_post_product', array( self::class, 'on_product_save' ), 10, 3 );
 
         add_filter( 'woocommerce_product_import_get_product_object', array( self::class, 'on_import_start' ), 10, 2 );
         add_action( 'woocommerce_product_import_inserted_product_object', array( self::class, 'on_import_finished' ), 10, 2 );
@@ -99,7 +100,7 @@ class Sync_Product {
      * @return void
      */
     public static function on_product_create( int $product_id ): void {
-        if ( Helpers::is_sync_only_stock_enabled() || self::is_sync_in_progress( $product_id ) ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
@@ -126,13 +127,9 @@ class Sync_Product {
      * @param WP_Post $post    Objeto del post.
      * @param bool    $update  Indica si es una actualización.
      *
-     * @deprecated 1.1.0 Ahora usamos on_product_create().
-     *
      * @return void
      */
     public static function on_product_save( int $post_id, WP_Post $post, bool $update ): void {
-        _deprecated_function( __METHOD__, '1.1.0', 'self::sync_new_product()' );
-
         if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
             return;
         }
@@ -141,13 +138,22 @@ class Sync_Product {
             return;
         }
 
-        $valid_status = in_array( $post->post_status, array( 'publish' ), true );
-        if ( self::is_sync_in_progress( $post_id ) || 'product' !== $post->post_type || ! $valid_status ) {
+        $product = wc_get_product( $post_id );
+        if ( ! $product ) {
             return;
         }
 
-        $product = wc_get_product( $post_id );
-        if ( $product && Helpers::should_sync( $product ) ) {
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            return;
+        }
+
+        $valid_status = in_array( $post->post_status, array( 'publish' ), true );
+        if ( 'product' !== $post->post_type || ! $valid_status ) {
+            return;
+        }
+
+        if ( Helpers::should_sync( $product ) ) {
             Debugger::debug( 'Product Sync On Save Has Being Fire' );
             do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
         }
