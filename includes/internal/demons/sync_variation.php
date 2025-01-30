@@ -29,35 +29,55 @@ class Sync_Variation {
      * @return void
      */
     public static function on_variation_delete( int $post_id ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $post_type = get_post_type( $post_id );
 
         if ( 'product_variation' === $post_type ) {
             $variation = new WC_Product_Variation( $post_id );
 
             $parent = wc_get_product( $variation->get_parent_id() );
-            if ( Helpers::should_sync( $parent ) ) {
+            $variation_sku = $variation->get_sku();
+
+            $parent_sku = $parent->get_sku();
+            if ( ! $parent_sku || ! $variation_sku ) {
+                return;
+            }
+
+            if ( Helpers::should_sync( $variation ) ) {
+                Transients::set_sync_in_progress( $parent_sku, true );
+                Transients::set_sync_in_progress( $variation_sku, true );
+
                 self::sync_variation_deletion( $variation );
             }
         }
     }
 
     public static function on_variation_update( int $variation_id ): void {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
         $variation = new WC_Product_Variation( $variation_id );
-        $parent_id = $variation->get_parent_id();
+        $parent = wc_get_product( $variation->get_parent_id() );
+        $variation_sku = $variation->get_sku();
 
-        if ( ! self::is_sync_in_progress( $parent_id ) && $variation && Helpers::should_sync( $variation ) ) {
+        $parent_sku = $parent->get_sku();
+        if ( ! $parent_sku || ! $variation_sku ) {
+            return;
+        }
+
+        $sync_in_progress = self::is_sync_in_progress( $variation_sku );
+        if ( ! $sync_in_progress && $variation && Helpers::should_sync( $variation ) ) {
             Debugger::debug( 'Variation Sync On Update Has Been Fired' );
-            Transients::set_sync_in_progress( $parent_id, true );
+            Transients::set_sync_in_progress( $parent_sku, true );
+            Transients::set_sync_in_progress( $variation_sku, true );
 
             if ( Helpers::is_primary_site() ) {
                 self::sync_variation_update( $variation );
             }
-
-            Transients::set_sync_in_progress( $parent_id, false );
         }
     }
 
@@ -69,6 +89,10 @@ class Sync_Variation {
      * @return void
      */
     private static function sync_variation_update( WC_Product_Variation $variation ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $parent_id = $variation->get_parent_id();
         $parent    = wc_get_product( $parent_id );
         if ( ! $parent ) {
@@ -102,6 +126,10 @@ class Sync_Variation {
      * @return void
      */
     private static function sync_variation_deletion( WC_Product_Variation $variation ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $parent_id = $variation->get_parent_id();
         $parent    = wc_get_product( $parent_id );
         if ( ! $parent ) {
@@ -126,10 +154,11 @@ class Sync_Variation {
         }
     }
 
-    private static function is_sync_in_progress( int $post_id ): bool {
-        $sync_in_progress  = Transients::is_sync_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_importing_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_id );
+    private static function is_sync_in_progress( string|int $post_sku ): bool {
+        $sync_in_progress  = Transients::is_sync_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_importing_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_sync_price_in_progress( $post_sku );
 
         return $sync_in_progress;
     }

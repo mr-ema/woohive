@@ -10,8 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Init {
 
     public static function start(): void {
-        Sync_Product::init();
         Sync_Stock::init();
+        Sync_Price::init();
         Sync_Variation::init();
+        Sync_Product::init();
     }
 }

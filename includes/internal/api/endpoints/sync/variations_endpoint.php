@@ -4,6 +4,8 @@ namespace WooHive\Internal\Api\Endpoints\Sync;
 
 use WooHive\Config\Constants;
 use WooHive\Internal\Crud\Variations;
+use WooHive\Internal\Demons\Transients;
+use WooHive\Utils\Helpers;
 
 use WP_REST_Request;
 use WP_REST_Response;
@@ -58,6 +60,11 @@ class Variations_Endpoint {
     }
 
     public static function handle_delete( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+        if ( ! Helpers::is_sync_product_data_enabled() && ! Helpers::is_sync_stock_enabled() ) {
+            $message = __( 'La sincronización está bloqueada por el sitio.', Constants::TEXT_DOMAIN );
+            return new WP_Error( 'sync_blocked', $message, array( 'status' => 403 ) );
+        }
+
         $product_sku   = $request->get_param( 'product_sku' );
         $variation_sku = $request->get_param( 'variation_sku' );
 
@@ -76,8 +83,16 @@ class Variations_Endpoint {
     }
 
     public static function handle_update( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+        if ( ! Helpers::is_sync_product_data_enabled() && ! Helpers::is_sync_stock_enabled() ) {
+            $message = __( 'La sincronización está bloqueada por el sitio.', Constants::TEXT_DOMAIN );
+            return new WP_Error( 'sync_blocked', $message, array( 'status' => 403 ) );
+        }
+
         $product_sku   = $request->get_param( 'product_sku' );
         $variation_sku = $request->get_param( 'variation_sku' );
+
+        Transients::set_sync_in_progress( $product_sku, true );
+        Transients::set_sync_in_progress( $variation_sku, true );
 
         $body_data = self::get_body_data( $request );
         if ( ! empty( $body_data ) ) {
@@ -92,6 +107,9 @@ class Variations_Endpoint {
                 return $result;
             }
         }
+
+        Transients::set_sync_in_progress( $product_sku, false );
+        Transients::set_sync_in_progress( $variation_sku, false );
 
         return new WP_REST_Response( array( 'message' => __( 'Variación actualizada exitosamente.', Constants::TEXT_DOMAIN ) ), 200 );
     }

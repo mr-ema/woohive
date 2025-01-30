@@ -36,24 +36,85 @@ class Sync_Product {
      * @return void
      */
     public static function on_sync_product( WC_Product $product ): void {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
         if ( $product ) {
             do_action( Constants::PLUGIN_SLUG . '_before_sync_product', $product );
 
-            $post_id = $product->get_id();
-            Transients::set_sync_in_progress( $post_id, true );
+            $post_sku = $product->get_sku();
+            if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+                return;
+            }
+
+            Transients::set_sync_in_progress( $post_sku, true );
 
             if ( Helpers::is_primary_site() ) {
                 self::sync_to_secondary_sites_data( $product );
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site_data( $product );
             }
+        }
+    }
 
-            Transients::set_sync_in_progress( $post_id, false );
-            Transients::set_importing_in_progress( $post_id, false );
+    /**
+     * Maneja la sincronización cuando se actualiza un producto.
+     *
+     * @since 1.1.0
+     *
+     * @param int $product_id ID del producto.
+     *
+     * @return void
+     */
+    public static function on_product_update( int $product_id ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
+        $product = wc_get_product( $product_id );
+        if ( ! $product ) {
+            return;
+        }
+
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            return;
+        }
+
+        if ( Helpers::should_sync( $product ) ) {
+            Debugger::debug( 'Product Sync On Update Has Been Fired' );
+            do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
+        }
+    }
+
+    /**
+     * Maneja la sincronización cuando se crea un producto.
+     *
+     * @since 1.1.0
+     *
+     * @param int $product_id ID del producto.
+     *
+     * @return void
+     */
+    public static function on_product_create( int $product_id ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
+        $product = wc_get_product( $product_id );
+        if ( ! $product ) {
+            return;
+        }
+
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            return;
+        }
+
+        if ( Helpers::should_sync( $product ) ) {
+            Debugger::debug( 'Product Sync On Create Has Been Fired' );
+            do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
         }
     }
 
@@ -71,17 +132,26 @@ class Sync_Product {
             return;
         }
 
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
-            return;
-        }
-
-        $valid_status = in_array( $post->post_status, array( 'publish' ), true );
-        if ( self::is_sync_in_progress( $post_id ) || 'product' !== $post->post_type || ! $valid_status ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
         $product = wc_get_product( $post_id );
-        if ( $product && Helpers::should_sync( $product ) ) {
+        if ( ! $product ) {
+            return;
+        }
+
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            return;
+        }
+
+        $valid_status = in_array( $post->post_status, array( 'publish' ), true );
+        if ( 'product' !== $post->post_type || ! $valid_status ) {
+            return;
+        }
+
+        if ( Helpers::should_sync( $product ) ) {
             Debugger::debug( 'Product Sync On Save Has Being Fire' );
             do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
         }
@@ -96,8 +166,12 @@ class Sync_Product {
      * @return WC_Product
      */
     public static function on_import_start( WC_Product $product, array $data = array() ): WC_Product {
-        $post_id = $product->get_id();
-        Transients::set_importing_in_progress( $post_id, true );
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku ) {
+            $post_sku = $product->get_id();
+        }
+
+        Transients::set_importing_in_progress( $post_sku, true );
 
         return $product;
     }
@@ -111,10 +185,13 @@ class Sync_Product {
      * @return void
      */
     public static function on_import_finished( WC_Product $product, array $data = array() ): void {
-        $post_id = $product->get_id();
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku ) {
+            $post_sku = $product->get_id();
+        }
 
-        Transients::set_sync_in_progress( $post_id, false );
-        Transients::set_importing_in_progress( $post_id, false );
+        Transients::set_sync_in_progress( $post_sku, false );
+        Transients::set_importing_in_progress( $post_sku, false );
         do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
     }
 
@@ -131,18 +208,11 @@ class Sync_Product {
             return;
         }
 
-        $should_create = Helpers::is_create_products_in_secondary_sites_enabled();
         $sites         = Helpers::sites();
-
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 
-            if ( $should_create ) {
-                $response = $client->post( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", array() );
-            } else {
-                $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", array() );
-            }
-
+            $response = $client->post( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", array() );
             Debugger::debug( 'sync product from primary: ', $response );
         }
     }
@@ -155,6 +225,10 @@ class Sync_Product {
      * @return void
      */
     private static function sync_to_primary_site_data( WC_Product $product ): void {
+        if ( ! Helpers::is_sync_to_primary_site_enabled() ) {
+            return;
+        }
+
         $sku = $product->get_sku();
         if ( empty( $sku ) ) {
             return;
@@ -172,10 +246,11 @@ class Sync_Product {
         Debugger::debug( 'sync product from secondary: ', $response );
     }
 
-    private static function is_sync_in_progress( int $post_id ): bool {
-        $sync_in_progress  = Transients::is_sync_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_importing_in_progress( $post_id );
-        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_id );
+    private static function is_sync_in_progress( string|int $post_sku ): bool {
+        $sync_in_progress  = Transients::is_sync_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_importing_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_sync_stock_in_progress( $post_sku );
+        $sync_in_progress |= Transients::is_sync_price_in_progress( $post_sku );
 
         return $sync_in_progress;
     }

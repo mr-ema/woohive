@@ -5,7 +5,7 @@ namespace WooHive\Config;
 class Constants {
 
     public const PLUGIN_NAME    = 'Multisite Product Sync';
-    public const VERSION        = '1.0.0';
+    public const VERSION        = '1.1.0';
     public const DB_VERSION     = '1.0.0';
     public const MIN_WC_VERSION = '6.0';
 

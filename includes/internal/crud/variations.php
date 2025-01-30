@@ -4,6 +4,7 @@ namespace WooHive\Internal\Crud;
 
 use WooHive\Config\Constants;
 use WooHive\Utils\Debugger;
+use WooHive\Utils\Helpers;
 
 use WP_Error;
 use WC_Product_Variation;
@@ -38,9 +39,18 @@ class Variations {
             '_edit_last',
         );
 
+        $conditional_invalid_props = (function() {
+            if ( ! Helpers::is_sync_stock_enabled() ) {
+                return array( 'stock_quantity', 'stock_status', 'manage_stock' );
+            }
+
+            return array();
+        })();
+
+        $all_invalid_props = array_merge( $invalid_props, $conditional_invalid_props );
         return array_filter(
             $data,
-            fn( $key ) => ! in_array( $key, $invalid_props, true ),
+            fn( $key ) => ! in_array( $key, $all_invalid_props, true ),
             ARRAY_FILTER_USE_KEY
         );
     }
@@ -166,9 +176,16 @@ class Variations {
         try {
             $filtered_data = self::clean_data( $data );
 
-            $response = self::normalize_stock( $variation, $filtered_data );
-            if ( ! is_wp_error( $response ) ) {
-                unset( $filtered_data['stock_quantity'] );
+            if ( Helpers::is_sync_only_stock_enabled() ) {
+                $allowed_keys = array( 'stock_quantity', 'stock_status', 'manage_stock' );
+                $filtered_data = array_intersect_key( $filtered_data, array_flip( $allowed_keys ) );
+            }
+
+            if ( isset( $filtered_data['stock_quantity'] ) ) {
+                $response = self::normalize_stock( $variation, $filtered_data );
+                if ( ! is_wp_error( $response ) ) {
+                    unset( $filtered_data['stock_quantity'] );
+                }
             }
 
             self::set_props( $variation, $filtered_data );
