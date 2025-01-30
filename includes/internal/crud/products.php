@@ -134,7 +134,10 @@ class Products {
             }
 
             Debugger::ok( __( 'Producto actualizado correctamente', Constants::TEXT_DOMAIN ) );
-            return $wc_product->get_id();
+            $wc_product_id = $wc_product->get_id();
+            wc_delete_product_transients( $wc_product_id );
+
+            return $wc_product_id;
         } catch ( \Exception $e ) {
             $message = __( 'Error al guardar el producto: ' . $e->getMessage(), Constants::TEXT_DOMAIN );
 
@@ -256,6 +259,9 @@ class Products {
                     $wc_product->add_meta_data( $meta_key, $meta_data, true );
                 }
             }
+
+            $wc_product->save();
+            wc_delete_product_transients( $product_id );
 
             Debugger::ok( __( 'Producto creado correctamente', Constants::TEXT_DOMAIN ) );
             return $product_id;
