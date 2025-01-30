@@ -159,6 +159,10 @@ class Sync_Stock {
      * @return void
      */
     private static function sync_to_primary_site( WC_Product $product ): void {
+        if ( ! Helpers::is_sync_to_primary_site_enabled() ) {
+            return;
+        }
+
         $sku = $product->get_sku();
         if ( empty( $sku ) ) {
             return;
@@ -223,6 +227,10 @@ class Sync_Stock {
      * @return void
      */
     private static function sync_variation_to_primary_site( WC_Product_Variation $variation ): void {
+        if ( ! Helpers::is_sync_to_primary_site_enabled() ) {
+            return;
+        }
+
         $parent     = wc_get_product( $variation->get_parent_id() );
         $parent_sku = $parent->get_sku();
 

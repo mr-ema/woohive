@@ -283,16 +283,65 @@ class Helpers {
         return array_merge( $types, $incl );
     }
 
+    /**
+     * Verifica si la sincronización solo de stock está habilitada.
+     *
+     * Esta función comprueba si la opción de sincronización de stock está activada
+     * y si la sincronización de datos del producto está desactivada.
+     *
+     * @return bool True si solo la sincronización de stock está habilitada, False en caso contrario.
+     */
     public static function is_sync_only_stock_enabled(): bool {
-        return ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'no' ) === 'yes' );
+        $is_enabled  = (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_stock', 'yes' ) === 'yes' );
+        $is_enabled &= (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_product_data', 'yes' ) !== 'yes' );
+
+        return $is_enabled;
     }
 
-    public static function is_create_products_in_secondary_sites_enabled(): bool {
-        if ( self::is_secondary_site() ) {
-            return false;
-        }
+    /**
+     * Verifica si la sincronización de stock está habilitada.
+     *
+     * Comprueba si la opción de sincronización de stock está activada en la configuración.
+     *
+     * @since 1.1.0
+     * @return bool True si la sincronización de stock está habilitada, False en caso contrario.
+     */
+    public static function is_sync_stock_enabled(): bool {
+       return (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_stock', 'yes' ) === 'yes' );
+    }
 
-        return ( get_option( Constants::PLUGIN_SLUG . '_create_products_in_secondary_sites', 'yes' ) === 'yes' );
+    /**
+     * Verifica si la sincronización de datos está habilitada.
+     *
+     * Comprueba si la opción de sincronización de datos está activada en la configuración.
+     *
+     * @since 1.1.0
+     * @return bool True si la sincronización de datos está habilitada, False en caso contrario.
+     */
+    public static function is_sync_product_data_enabled(): bool {
+       return (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_product_data', 'yes' ) === 'yes' );
+    }
+
+    /**
+     * Verifica si la creación de productos está habilitada.
+     *
+     * @since 1.1.0
+     * @return bool True si la creación de productos está habilitada, False en caso contrario.
+     */
+    public static function is_create_products_in_site_enabled(): bool {
+        return (bool)( get_option( Constants::PLUGIN_SLUG . '_create_products_in_site', 'yes' ) === 'yes' );
+    }
+
+    /**
+     * Verifica si la sincronización con el sitio primario está habilitada.
+     *
+     * Comprueba en la configuración si la opción de sincronización de datos hacia el sitio primario está activada.
+     *
+     * @since 1.1.0
+     * @return bool True si la sincronización con el sitio primario está habilitada, False en caso contrario.
+     */
+    public static function is_sync_to_primary_site_enabled(): bool {
+        return (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_to_primary', 'yes' ) === 'yes' );
     }
 
     /**
@@ -309,6 +358,10 @@ class Helpers {
 
         // Si la sincronización de inventario no está habilitada
         if ( get_option( Constants::PLUGIN_SLUG . '_enabled', 'yes' ) !== 'yes' ) {
+            return false;
+        }
+
+        if ( get_option( Constants::PLUGIN_SLUG . '_sync_stock', 'yes' ) !== 'yes' ) {
             return false;
         }
 
@@ -373,13 +426,12 @@ class Helpers {
         }
 
         // Si la sincronización de solo inventario está habilitada
-        if ( get_option( Constants::PLUGIN_SLUG . '_sync_only_stock', 'no' ) === 'yes' ) {
+        if ( get_option( Constants::PLUGIN_SLUG . '_sync_product_data', 'yes' ) !== 'yes' ) {
             return false;
         }
 
         // Si es un Inventario Secundario y el cambio fue desencadenado por una solicitud de Stock Sync, no crear un nuevo trabajo
         if ( self::is_secondary_site() && self::is_self_request() ) {
-            Debugger::debug("Should Sync - Same Request");
             return false;
         }
 

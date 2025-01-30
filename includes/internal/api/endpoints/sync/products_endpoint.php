@@ -53,8 +53,12 @@ class Products_Endpoint {
     }
 
     public static function handle_create_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
-            $message = __( 'La sincronización está bloqueada porque solo está habilitada la sincronización de stock.', Constants::TEXT_DOMAIN );
+        if ( ! Helpers::is_create_products_in_site_enabled() ) {
+            return self::handle_update_product( $request );
+        }
+
+        if ( Helpers::is_sync_only_stock_enabled() || ! Helpers::is_sync_product_data_enabled() ) {
+            $message = __( 'La sincronización está bloqueada por el sitio.', Constants::TEXT_DOMAIN );
             return new WP_Error( 'sync_blocked', $message, array( 'status' => 403 ) );
         }
 
@@ -98,8 +102,8 @@ class Products_Endpoint {
     }
 
     public static function handle_update_product( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
-            $message = __( 'La sincronización está bloqueada porque solo está habilitada la sincronización de stock.', Constants::TEXT_DOMAIN );
+        if ( ! Helpers::is_sync_product_data_enabled() && ! Helpers::is_sync_stock_enabled() ) {
+            $message = __( 'La sincronización está bloqueada por el sitio.', Constants::TEXT_DOMAIN );
             return new WP_Error( 'sync_blocked', $message, array( 'status' => 403 ) );
         }
 

@@ -37,7 +37,7 @@ class Sync_Product {
      * @return void
      */
     public static function on_sync_product( WC_Product $product ): void {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
@@ -68,11 +68,7 @@ class Sync_Product {
      * @return void
      */
     public static function on_product_update( int $product_id ): void {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
-            return;
-        }
-
-        if ( self::is_sync_in_progress( $product_id ) ) {
+        if ( Helpers::is_sync_only_stock_enabled() || self::is_sync_in_progress( $product_id ) ) {
             return;
         }
 
@@ -93,11 +89,7 @@ class Sync_Product {
      * @return void
      */
     public static function on_product_create( int $product_id ): void {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
-            return;
-        }
-
-        if ( self::is_sync_in_progress( $product_id ) ) {
+        if ( Helpers::is_sync_only_stock_enabled() || self::is_sync_in_progress( $product_id ) ) {
             return;
         }
 
@@ -107,7 +99,6 @@ class Sync_Product {
             do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
         }
     }
-
 
     /**
      * Maneja la sincronización cuando se guarda un producto.
@@ -127,7 +118,7 @@ class Sync_Product {
             return;
         }
 
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
@@ -187,18 +178,11 @@ class Sync_Product {
             return;
         }
 
-        $should_create = Helpers::is_create_products_in_secondary_sites_enabled();
         $sites         = Helpers::sites();
-
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 
-            if ( $should_create ) {
-                $response = $client->post( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", array() );
-            } else {
-                $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", array() );
-            }
-
+            $response = $client->post( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", array() );
             Debugger::debug( 'sync product from primary: ', $response );
         }
     }
@@ -211,6 +195,10 @@ class Sync_Product {
      * @return void
      */
     private static function sync_to_primary_site_data( WC_Product $product ): void {
+        if ( ! Helpers::is_sync_to_primary_site_enabled() ) {
+            return;
+        }
+
         $sku = $product->get_sku();
         if ( empty( $sku ) ) {
             return;

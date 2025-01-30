@@ -74,21 +74,35 @@ class WC_Setting_Woo_Hive_Page extends WC_Settings_Page {
             'default' => 'yes',
         );
 
-        $settings[ $this->id . '_sync_only_stock' ] = array(
-            'title'   => __( 'Sincronizar solo stock', Constants::TEXT_DOMAIN ),
+        $settings[ $this->id . '_sync_stock' ] = array(
+            'title'   => __( 'Sincronizar stock', Constants::TEXT_DOMAIN ),
             'type'    => 'checkbox',
-            'id'      => $this->id . '_sync_only_stock',
-            'default' => 'no',
+            'id'      => $this->id . '_sync_stock',
+            'default' => 'yes',
         );
 
-        if ( Helpers::is_primary_site() ) {
-            $settings[ $this->id . '_create_products_in_secondary_sites' ] = array(
-                'title'   => __( 'Crear productos en sitios segundarios', Constants::TEXT_DOMAIN ),
+        $settings[ $this->id . '_sync_product_data' ] = array(
+            'title'   => __( 'Sincronizar datos de productos', Constants::TEXT_DOMAIN ),
+            'type'    => 'checkbox',
+            'id'      => $this->id . '_sync_product_data',
+            'default' => 'yes',
+        );
+
+        if ( Helpers::is_secondary_site() ) {
+            $settings[ $this->id . '_sync_to_primary' ] = array(
+                'title'   => __( 'Permite sincronizar desde este sitio al sitio primario', Constants::TEXT_DOMAIN ),
                 'type'    => 'checkbox',
-                'id'      => $this->id . '_create_products_in_secondary_sites',
-                'default' => 'no',
+                'id'      => $this->id . '_sync_to_primary',
+                'default' => 'yes',
             );
         }
+
+        $settings[ $this->id . '_create_products_in_site' ] = array(
+            'title'   => __( 'Permitir crear productos en este sitio', Constants::TEXT_DOMAIN ),
+            'type'    => 'checkbox',
+            'id'      => $this->id . '_create_products_in_site',
+            'default' => 'yes',
+        );
 
         $settings[ $this->id . '_role' ] = array(
             'title'   => __( 'Rol de este sitio', Constants::TEXT_DOMAIN ),

@@ -29,6 +29,10 @@ class Sync_Variation {
      * @return void
      */
     public static function on_variation_delete( int $post_id ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $post_type = get_post_type( $post_id );
 
         if ( 'product_variation' === $post_type ) {
@@ -42,7 +46,7 @@ class Sync_Variation {
     }
 
     public static function on_variation_update( int $variation_id ): void {
-        if ( Helpers::is_secondary_site() && Helpers::is_sync_only_stock_enabled() ) {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
             return;
         }
 
@@ -69,6 +73,10 @@ class Sync_Variation {
      * @return void
      */
     private static function sync_variation_update( WC_Product_Variation $variation ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $parent_id = $variation->get_parent_id();
         $parent    = wc_get_product( $parent_id );
         if ( ! $parent ) {
@@ -102,6 +110,10 @@ class Sync_Variation {
      * @return void
      */
     private static function sync_variation_deletion( WC_Product_Variation $variation ): void {
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            return;
+        }
+
         $parent_id = $variation->get_parent_id();
         $parent    = wc_get_product( $parent_id );
         if ( ! $parent ) {

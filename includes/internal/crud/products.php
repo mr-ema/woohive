@@ -43,8 +43,16 @@ class Products {
      * @return array Datos filtrados con las propiedades inválidas eliminadas.
      */
     public static function clean_data( array $data ): array {
+        $conditional_invalid_props = (function() {
+            if ( ! Helpers::is_sync_stock_enabled() ) {
+                return array( 'stock_quantity', 'stock_status', 'manage_stock' );
+            }
+
+            return array();
+        })();
+
         $custom_invalid_props = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_props', array() );
-        $all_invalid_props    = array_merge( self::$invalid_props, $custom_invalid_props );
+        $all_invalid_props    = array_merge( self::$invalid_props, $custom_invalid_props, $conditional_invalid_props );
 
         $filtered_data = array_filter(
             $data,
@@ -83,14 +91,21 @@ class Products {
             return new WP_Error( 'invalid_data', __( 'No se proporcionaron campos válidos para actualizar.', Constants::TEXT_DOMAIN ) );
         }
 
+        if ( Helpers::is_sync_only_stock_enabled() ) {
+            $allowed_keys = array( 'stock_quantity', 'stock_status', 'manage_stock' );
+            $filtered_data = array_intersect_key( $body_data, array_flip( $allowed_keys ) );
+        }
+
         try {
             if ( isset( $filtered_data['type'] ) && ! $wc_product->is_type( $filtered_data['type'] ) ) {
                 Helpers::update_product_type( $wc_product, $filtered_data['type'] );
             }
 
-            $response = self::normalize_stock( $wc_product, $filtered_data );
-            if ( ! is_wp_error( $response ) ) {
-                unset( $filtered_data['stock_quantity'] );
+            if ( isset( $filtered_data['stock_quantity'] ) ) {
+                $response = self::normalize_stock( $wc_product, $filtered_data );
+                if ( ! is_wp_error( $response ) ) {
+                    unset( $filtered_data['stock_quantity'] );
+                }
             }
 
             $wc_product->set_props( $filtered_data );
@@ -439,7 +454,7 @@ class Products {
         if ( ! isset( $data['stock_quantity'] ) || ! is_numeric( $data['stock_quantity'] ) ) {
             return new WP_Error(
                 'invalid_stock_quantity',
-                __( 'La cantidad de stock proporcionada no es válida.', 'tu-textdomain' )
+                __( 'La cantidad de stock proporcionada no es válida.', Constants::TEXT_DOMAIN )
             );
         }
 
@@ -459,7 +474,7 @@ class Products {
 
         return new WP_Error(
             'stock_management_disabled',
-            __( 'La gestión de inventario no está habilitada para este producto.', 'tu-textdomain' )
+            __( 'La gestión de inventario no está habilitada para este producto.', Constants::TEXT_DOMAIN )
         );
     }
 
