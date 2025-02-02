@@ -34,15 +34,12 @@ class Attributes {
      * @return array Datos filtrados con las propiedades inválidas eliminadas y el slug generado.
      */
     public static function clean_data( array $data ): array {
-        // Get human-readable name
         $human_name = isset( $data['name'] ) ? sanitize_text_field( $data['name'] ) : '';
-
-        // Generate the slug for internal use
         $slug = wc_sanitize_taxonomy_name( $human_name );
 
         return array(
-            'name'      => $human_name,  // Use human-readable name for display
-            'slug'      => $slug,        // Use slug for internal taxonomy or URL
+            'name'      => $human_name,
+            'slug'   => isset( $data['slug'] ) ? sanitize_text_field($data['slug']) : $slug,
             'options'   => isset( $data['options'] ) ? array_map( 'sanitize_text_field', $data['options'] ) : array(),
             'visible'   => isset( $data['visible'] ) ? (bool) $data['visible'] : true,
             'variation' => isset( $data['variation'] ) ? (bool) $data['variation'] : false,
@@ -58,7 +55,6 @@ class Attributes {
      */
     public static function update( WC_Product $product, array $data ): int|WP_Error {
         $filtered_data = self::clean_data( $data );
-
         if ( empty( $filtered_data['name'] ) ) {
             return new WP_Error(
                 'invalid_data',
@@ -67,28 +63,58 @@ class Attributes {
         }
 
         $existing_attributes = $product->get_attributes();
-        $attribute_name      = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
+        $attribute_name      = $filtered_data['name'];
+        $attribute_slug      = $filtered_data['slug'];
 
-        if ( Global_Attributes::is_global( $attribute_name ) ) {
-            $taxonomy_name = Global_Attributes::get_taxonomy_name( $attribute_name );
-            $result        = Global_Attributes::create_or_update( $attribute_name, $filtered_data['options'] );
+        if ( Global_Attributes::is_global_by_slug( $attribute_slug ) ) {
+            Debugger::debug("Atributo {$attribute_name} es global [update]");
+            $taxonomy_id_result = Global_Attributes::get_attribute_taxonomy_id_by_name( $attribute_name );
+            if ( is_wp_error( $taxonomy_id_result ) ) {
+                Debugger::error("Atributo {$attribute_name} error: ", $taxonomy_id_result);
+                return $taxonomy_id_result;
+            }
+
+            $result = Global_Attributes::update( $taxonomy_id_result, $filtered_data );
             if ( is_wp_error( $result ) ) {
+                Debugger::error("Atributo {$attribute_name} error: ", $result);
                 return $result;
             }
 
-            $attribute = new WC_Product_Attribute();
-            $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
-            $attribute->set_options( $filtered_data['options'] );
-            $attribute->set_visible( $filtered_data['visible'] );
-            $attribute->set_variation( $filtered_data['variation'] );
+            $taxonomy_name = Global_Attributes::get_taxonomy_name( $attribute_name );
+            $term_ids_result = Global_Attributes::get_term_ids_by_options( $attribute_name, $filtered_data['options'] );
+            if ( is_wp_error( $term_ids_result ) ) {
+                Debugger::error("Atributo {$attribute_name} error: ", $term_ids_result);
+                return $term_ids_result;
+            }
+
+            $attribute = (function() use ( $existing_attributes, $taxonomy_name ) {
+                if ( isset( $existing_attributes[ $taxonomy_name ] ) ) {
+                    return $existing_attributes[ $taxonomy_name ];
+                }
+
+                return new WC_Product_Attribute();
+            })();
+
+            $attribute->set_id( $taxonomy_id_result );
+            $attribute->set_name( $taxonomy_name );
+            $attribute->set_options( $term_ids_result );
+            $attribute->set_visible( $filtered_data['visible'] ?? true );
+            $attribute->set_variation( $filtered_data['variation'] ?? false );
 
             $existing_attributes[ $taxonomy_name ] = $attribute;
         } else {
-            $attribute = new WC_Product_Attribute();
-            $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
-            $attribute->set_options( $filtered_data['options'] );
-            $attribute->set_visible( $filtered_data['visible'] );
-            $attribute->set_variation( $filtered_data['variation'] );
+            $attribute = (function() use ( $existing_attributes, $attribute_name ) {
+                if ( isset( $existing_attributes[ $attribute_name ] ) ) {
+                    return $existing_attributes[ $attribute_name ];
+                }
+
+                return new WC_Product_Attribute();
+            })();
+
+            $attribute->set_name( $filtered_data['name'] );
+            $attribute->set_options( $filtered_data['options'] ?? array() );
+            $attribute->set_visible( $filtered_data['visible'] ?? true );
+            $attribute->set_variation( $filtered_data['variation'] ?? false );
 
             $existing_attributes[ $attribute_name ] = $attribute;
         }
@@ -176,22 +202,32 @@ class Attributes {
         }
 
         $existing_attributes = $product->get_attributes();
-        $attribute_name      = $filtered_data['slug'];  // Use the slug for taxonomy or internal storage
+        $attribute_name      = $filtered_data['name'];
+        $attribute_slug      = $filtered_data['slug'];
 
-        if ( Global_Attributes::is_global( $attribute_name ) ) {
+        if ( Global_Attributes::is_global_by_slug( $attribute_slug ) ) {
+            Debugger::debug("Atributo {$attribute_name} es global [create]");
+
             $taxonomy_name = Global_Attributes::get_taxonomy_name( $attribute_name );
-            $result        = Global_Attributes::create( $attribute_name, $filtered_data['options'] ?? array() );
-            if ( is_wp_error( $result ) ) {
-                return $result;
+            $attribute_id_result = Global_Attributes::create( $attribute_name, $filtered_data['options'] );
+            if ( is_wp_error( $attribute_id_result ) ) {
+                return $attribute_id_result;
+            }
+
+            $term_ids_result = Global_Attributes::get_term_ids_by_options( $attribute_name, $filtered_data['options'] );
+            if ( is_wp_error( $term_ids_result ) ) {
+                Debugger::error("Atributo {$attribute_name} error: ", $term_ids_result);
+                return $term_ids_result;
             }
 
             $attribute = new WC_Product_Attribute();
-            $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
-            $attribute->set_options( $filtered_data['options'] ?? array() );
+            $attribute->set_id( $attribute_id_result );
+            $attribute->set_name( $taxonomy_name );
+            $attribute->set_options( $term_ids_result );
             $attribute->set_visible( $filtered_data['visible'] ?? true );
             $attribute->set_variation( $filtered_data['variation'] ?? false );
 
-            $existing_attributes[ $taxonomy_name ] = $attribute;
+            $existing_attributes[ $attribute_name ] = $attribute;
         } else {
             $attribute = new WC_Product_Attribute();
             $attribute->set_name( $filtered_data['name'] );  // Set human-readable name here
