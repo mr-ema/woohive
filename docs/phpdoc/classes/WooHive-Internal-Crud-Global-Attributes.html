@@ -143,7 +143,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">13</span>
+    <span class="phpdocumentor-element-found-in__line">16</span>
 
     </aside>
 
@@ -175,53 +175,60 @@
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_check_taxonomy_exists">check_taxonomy_exists()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Verifica si la taxonomia existe en base a su nombre</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create">create()</a>
     <span>
                                 &nbsp;: int|<abbr title="\WP_Error">WP_Error</abbr>    </span>
 </dt>
-<dd>Crea un atributo global.</dd>
+<dd>Crea un atributo global usando wc_create_attribute.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update">create_or_update()</a>
+    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_attribute_taxonomy_id_by_name">get_attribute_taxonomy_id_by_name()</a>
     <span>
                                 &nbsp;: int|<abbr title="\WP_Error">WP_Error</abbr>    </span>
 </dt>
-<dd>Crea o actualiza un término en una taxonomía global (maneja solo un término).</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update_batch">create_or_update_batch()</a>
-    <span>
-                                &nbsp;: array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr>    </span>
-</dt>
-<dd>Crea o actualiza múltiples términos en una taxonomía global (maneja múltiples términos).</dd>
+<dd>Obtiene el ID de la taxonomía de un atributo global basado en su nombre.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_taxonomy_name">get_taxonomy_name()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
-<dd>Obtiene el nombre del taxonomy para un atributo global.</dd>
+<dd>Obtiene el nombre de la taxonomía global por nombre.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global">is_global()</a>
+    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_id_by_name">get_term_id_by_name()</a>
+    <span>
+                                &nbsp;: int|<abbr title="\WP_Error">WP_Error</abbr>    </span>
+</dt>
+<dd>Obtiene el ID del término global por nombre.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_ids_by_options">get_term_ids_by_options()</a>
+    <span>
+                                &nbsp;: array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr>    </span>
+</dt>
+<dd>Obtiene los IDs de términos correspondientes a las opciones proporcionadas para un atributo global.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global_by_slug">is_global_by_slug()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Verifica si el atributo es global.</dd>
+<dd>Verifica si el slug del atributo es un nombre válido para un atributo global.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_update">update()</a>
     <span>
-                                &nbsp;: int|<abbr title="\WP_Error">WP_Error</abbr>    </span>
+                                &nbsp;: <abbr title="\WP_Error">WP_Error</abbr>|int    </span>
 </dt>
-<dd>Actualiza un término en una taxonomía global (maneja solo un término).</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_update_batch">update_batch()</a>
-    <span>
-                                &nbsp;: array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr>    </span>
-</dt>
-<dd>Actualiza múltiples términos en una taxonomía global (maneja múltiples términos).</dd>
+<dd>Actualiza un atributo global.</dd>
 
     </dl>
 
@@ -244,6 +251,73 @@
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_check_taxonomy_exists">
+        check_taxonomy_exists()
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_check_taxonomy_exists" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">25</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Verifica si la taxonomia existe en base a su nombre</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">check_taxonomy_exists</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$name</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>El nombre o slug del atributo.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_check_taxonomy_exists#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True si el atributo es global, false si no lo es.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_create">
         create()
         <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create" class="headerlink"><i class="fas fa-link"></i></a>
@@ -252,15 +326,15 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">48</span>
+    <span class="phpdocumentor-element-found-in__line">56</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Crea un atributo global.</p>
+        <p class="phpdocumentor-summary">Crea un atributo global usando wc_create_attribute.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">create</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$options</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">array()</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">create</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$options</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -268,20 +342,20 @@
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$attribute_name</span>
+                <span class="phpdocumentor-signature__argument__name">$name</span>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Nombre del atributo.</p>
+                    <section class="phpdocumentor-description"><p>El nombre del atributo.</p>
 </section>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$options</span>
                 : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
-                 = <span class="phpdocumentor-signature__argument__default-value">array()</span>            </dt>
+                            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Opciones del atributo.</p>
+                    <section class="phpdocumentor-description"><p>Las opciones del atributo.</p>
 </section>
 
             </dd>
@@ -293,7 +367,7 @@
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span>
                     &mdash;
-                <section class="phpdocumentor-description"><p>El ID del atributo creado o WP_Error en caso de error.</p>
+                <section class="phpdocumentor-description"><p>El ID del atributo creado o WP_Error si falla.</p>
 </section>
 
             </section>
@@ -305,117 +379,65 @@
             -public
                                     -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method_create_or_update">
-        create_or_update()
-        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_get_attribute_taxonomy_id_by_name">
+        get_attribute_taxonomy_id_by_name()
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_attribute_taxonomy_id_by_name" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">71</span>
+    <span class="phpdocumentor-element-found-in__line">120</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Crea o actualiza un término en una taxonomía global (maneja solo un término).</p>
+        <p class="phpdocumentor-summary">Obtiene el ID de la taxonomía de un atributo global basado en su nombre.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">create_or_update</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$option</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">get_attribute_taxonomy_id_by_name</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>Esta función busca la taxonomía global del atributo por su nombre y devuelve el ID correspondiente.
+Si no se encuentra la taxonomía, se devuelve un error.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$attribute_name</span>
+                <span class="phpdocumentor-signature__argument__name">$name</span>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Nombre del atributo.</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$option</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>El término a crear o actualizar.</p>
+                    <section class="phpdocumentor-description"><p>El nombre del atributo para el cual se desea obtener el ID de la taxonomía.</p>
 </section>
 
             </dd>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_attribute_taxonomy_id_by_name#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span>
                     &mdash;
-                <section class="phpdocumentor-description"><p>Devuelve el ID del término creado o actualizado o WP_Error en caso de error.</p>
-</section>
-
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                    -static                    "
->
-    <h4 class="phpdocumentor-element__name" id="method_create_or_update_batch">
-        create_or_update_batch()
-        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update_batch" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">82</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Crea o actualiza múltiples términos en una taxonomía global (maneja múltiples términos).</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">create_or_update_batch</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$options</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr></span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$attribute_name</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Nombre del atributo.</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$options</span>
-                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Lista de términos.</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Devuelve un array de IDs de términos creados o actualizados, o WP_Error en caso de error.</p>
+                <section class="phpdocumentor-description"><p>El ID de la taxonomía si se encuentra, o un objeto WP_Error si no se encuentra.</p>
 </section>
 
             </section>
@@ -435,15 +457,15 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">191</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Obtiene el nombre del taxonomy para un atributo global.</p>
+        <p class="phpdocumentor-summary">Obtiene el nombre de la taxonomía global por nombre.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">get_taxonomy_name</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">get_taxonomy_name</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -451,7 +473,7 @@
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$attribute_name</span>
+                <span class="phpdocumentor-signature__argument__name">$name</span>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -466,6 +488,10 @@
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">string</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>El nombre de la taxonomía.</p>
+</section>
+
             </section>
 
 </article>
@@ -475,23 +501,99 @@
             -public
                                     -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method_is_global">
-        is_global()
-        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_get_term_id_by_name">
+        get_term_id_by_name()
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_id_by_name" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">21</span>
+    <span class="phpdocumentor-element-found-in__line">174</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Verifica si el atributo es global.</p>
+        <p class="phpdocumentor-summary">Obtiene el ID del término global por nombre.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_global</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">get_term_id_by_name</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$taxonomy</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$name</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>El nombre del atributo.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$taxonomy</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>El nombre de la taxonomia.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_id_by_name#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>El ID del término o WP_Error si no se encuentra.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_get_term_ids_by_options">
+        get_term_ids_by_options()
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_ids_by_options" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">204</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Obtiene los IDs de términos correspondientes a las opciones proporcionadas para un atributo global.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">get_term_ids_by_options</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$options</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -503,17 +605,112 @@
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>El nombre del atributo.</p>
+                    <section class="phpdocumentor-description"><p>El nombre del atributo global.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$options</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Las opciones cuyos IDs de término se quieren obtener.</p>
 </section>
 
             </dd>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_ids_by_options#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr></span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Un array de IDs de términos o WP_Error en caso de error.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_is_global_by_slug">
+        is_global_by_slug()
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global_by_slug" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">45</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Verifica si el slug del atributo es un nombre válido para un atributo global.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_global_by_slug</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$slug</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$slug</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>El slug del atributo.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global_by_slug#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True si el slug es válido, false si no lo es.</p>
+</section>
+
             </section>
 
 </article>
@@ -531,15 +728,15 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">101</span>
+    <span class="phpdocumentor-element-found-in__line">137</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Actualiza un término en una taxonomía global (maneja solo un término).</p>
+        <p class="phpdocumentor-summary">Actualiza un atributo global.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">update</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$option</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">update</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$term_id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\WP_Error">WP_Error</abbr>|int</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -547,93 +744,47 @@
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$attribute_name</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
+                <span class="phpdocumentor-signature__argument__name">$term_id</span>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Nombre del atributo.</p>
+                    <section class="phpdocumentor-description"><p>El ID del término (atributo global).</p>
 </section>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$option</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>El término a actualizar.</p>
-</section>
-
-            </dd>
-            </dl>
-
-    
-
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">int|<abbr title="\WP_Error">WP_Error</abbr></span>
-                    &mdash;
-                <section class="phpdocumentor-description"><p>Devuelve el ID del término actualizado o WP_Error en caso de error.</p>
-</section>
-
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                    -static                    "
->
-    <h4 class="phpdocumentor-element__name" id="method_update_batch">
-        update_batch()
-        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_update_batch" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/crud/global_attributes.php"><a href="files/includes-internal-crud-global-attributes.html"><abbr title="includes/internal/crud/global_attributes.php">global_attributes.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">112</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Actualiza múltiples términos en una taxonomía global (maneja múltiples términos).</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">update_batch</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$options</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr></span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$attribute_name</span>
-                : <span class="phpdocumentor-signature__argument__return-type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Nombre del atributo.</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$options</span>
+                <span class="phpdocumentor-signature__argument__name">$data</span>
                 : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Lista de términos a actualizar.</p>
+                    <section class="phpdocumentor-description"><p>Datos actualizados para el atributo global.</p>
 </section>
 
             </dd>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_update#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">array&lt;string|int, mixed&gt;|<abbr title="\WP_Error">WP_Error</abbr></span>
+        <span class="phpdocumentor-signature__response_type"><abbr title="\WP_Error">WP_Error</abbr>|int</span>
                     &mdash;
-                <section class="phpdocumentor-description"><p>Devuelve un array de IDs de términos actualizados, o WP_Error en caso de error.</p>
+                <section class="phpdocumentor-description"><p>El ID del término actualizado o WP_Error en caso de error.</p>
 </section>
 
             </section>
@@ -752,13 +903,14 @@
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_check_taxonomy_exists">check_taxonomy_exists()</a></li>
                                             <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create">create()</a></li>
-                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update">create_or_update()</a></li>
-                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update_batch">create_or_update_batch()</a></li>
+                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_attribute_taxonomy_id_by_name">get_attribute_taxonomy_id_by_name()</a></li>
                                             <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_taxonomy_name">get_taxonomy_name()</a></li>
-                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global">is_global()</a></li>
+                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_id_by_name">get_term_id_by_name()</a></li>
+                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_ids_by_options">get_term_ids_by_options()</a></li>
+                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global_by_slug">is_global_by_slug()</a></li>
                                             <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_update">update()</a></li>
-                                            <li><a href="classes/WooHive-Internal-Crud-Global-Attributes.html#method_update_batch">update_batch()</a></li>
                                     </ul>
             </li>
                     </ul>

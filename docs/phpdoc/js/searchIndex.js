@@ -451,40 +451,45 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/WooHive-Internal-Crud-Global-Attributes.html"
         },                {
-            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Ais_global\u0028\u0029",
-            "name": "is_global",
-            "summary": "Verifica\u0020si\u0020el\u0020atributo\u0020es\u0020global.",
-            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global"
+            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Acheck_taxonomy_exists\u0028\u0029",
+            "name": "check_taxonomy_exists",
+            "summary": "Verifica\u0020si\u0020la\u0020taxonomia\u0020existe\u0020en\u0020base\u0020a\u0020su\u0020nombre",
+            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_check_taxonomy_exists"
         },                {
-            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Aget_taxonomy_name\u0028\u0029",
-            "name": "get_taxonomy_name",
-            "summary": "Obtiene\u0020el\u0020nombre\u0020del\u0020taxonomy\u0020para\u0020un\u0020atributo\u0020global.",
-            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_taxonomy_name"
+            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Ais_global_by_slug\u0028\u0029",
+            "name": "is_global_by_slug",
+            "summary": "Verifica\u0020si\u0020el\u0020slug\u0020del\u0020atributo\u0020es\u0020un\u0020nombre\u0020v\u00E1lido\u0020para\u0020un\u0020atributo\u0020global.",
+            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_is_global_by_slug"
         },                {
             "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Acreate\u0028\u0029",
             "name": "create",
-            "summary": "Crea\u0020un\u0020atributo\u0020global.",
+            "summary": "Crea\u0020un\u0020atributo\u0020global\u0020usando\u0020wc_create_attribute.",
             "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_create"
         },                {
-            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Acreate_or_update\u0028\u0029",
-            "name": "create_or_update",
-            "summary": "Crea\u0020o\u0020actualiza\u0020un\u0020t\u00E9rmino\u0020en\u0020una\u0020taxonom\u00EDa\u0020global\u0020\u0028maneja\u0020solo\u0020un\u0020t\u00E9rmino\u0029.",
-            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update"
-        },                {
-            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Acreate_or_update_batch\u0028\u0029",
-            "name": "create_or_update_batch",
-            "summary": "Crea\u0020o\u0020actualiza\u0020m\u00FAltiples\u0020t\u00E9rminos\u0020en\u0020una\u0020taxonom\u00EDa\u0020global\u0020\u0028maneja\u0020m\u00FAltiples\u0020t\u00E9rminos\u0029.",
-            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_create_or_update_batch"
+            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Aget_attribute_taxonomy_id_by_name\u0028\u0029",
+            "name": "get_attribute_taxonomy_id_by_name",
+            "summary": "Obtiene\u0020el\u0020ID\u0020de\u0020la\u0020taxonom\u00EDa\u0020de\u0020un\u0020atributo\u0020global\u0020basado\u0020en\u0020su\u0020nombre.",
+            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_attribute_taxonomy_id_by_name"
         },                {
             "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Aupdate\u0028\u0029",
             "name": "update",
-            "summary": "Actualiza\u0020un\u0020t\u00E9rmino\u0020en\u0020una\u0020taxonom\u00EDa\u0020global\u0020\u0028maneja\u0020solo\u0020un\u0020t\u00E9rmino\u0029.",
+            "summary": "Actualiza\u0020un\u0020atributo\u0020global.",
             "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_update"
         },                {
-            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Aupdate_batch\u0028\u0029",
-            "name": "update_batch",
-            "summary": "Actualiza\u0020m\u00FAltiples\u0020t\u00E9rminos\u0020en\u0020una\u0020taxonom\u00EDa\u0020global\u0020\u0028maneja\u0020m\u00FAltiples\u0020t\u00E9rminos\u0029.",
-            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_update_batch"
+            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Aget_term_id_by_name\u0028\u0029",
+            "name": "get_term_id_by_name",
+            "summary": "Obtiene\u0020el\u0020ID\u0020del\u0020t\u00E9rmino\u0020global\u0020por\u0020nombre.",
+            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_id_by_name"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Aget_taxonomy_name\u0028\u0029",
+            "name": "get_taxonomy_name",
+            "summary": "Obtiene\u0020el\u0020nombre\u0020de\u0020la\u0020taxonom\u00EDa\u0020global\u0020por\u0020nombre.",
+            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_taxonomy_name"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Crud\\Global_Attributes\u003A\u003Aget_term_ids_by_options\u0028\u0029",
+            "name": "get_term_ids_by_options",
+            "summary": "Obtiene\u0020los\u0020IDs\u0020de\u0020t\u00E9rminos\u0020correspondientes\u0020a\u0020las\u0020opciones\u0020proporcionadas\u0020para\u0020un\u0020atributo\u0020global.",
+            "url": "classes/WooHive-Internal-Crud-Global-Attributes.html#method_get_term_ids_by_options"
         },                {
             "fqsen": "\\WooHive\\Internal\\Crud\\Products",
             "name": "Products",
@@ -646,6 +651,61 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/WooHive-Internal-Demons-Init.html#method_start"
         },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price",
+            "name": "Sync_Price",
+            "summary": "Sync\u0020Price\u0020Demon",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Ainit\u0028\u0029",
+            "name": "init",
+            "summary": "",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_init"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Aon_product_or_variation_update\u0028\u0029",
+            "name": "on_product_or_variation_update",
+            "summary": "Se\u0020activa\u0020cuando\u0020se\u0020actualizan\u0020propiedades\u0020de\u0020un\u0020producto\u0020o\u0020variaci\u00F3n\u0020en\u0020WooCommerce.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_on_product_or_variation_update"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Aon_product_update\u0028\u0029",
+            "name": "on_product_update",
+            "summary": "Se\u0020activa\u0020cuando\u0020se\u0020actualiza\u0020el\u0020precio\u0020de\u0020un\u0020producto.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_on_product_update"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Aon_variation_update\u0028\u0029",
+            "name": "on_variation_update",
+            "summary": "Se\u0020activa\u0020cuando\u0020se\u0020actualiza\u0020el\u0020precio\u0020de\u0020una\u0020variaci\u00F3n\u0020de\u0020producto.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_on_variation_update"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Async_product_price\u0028\u0029",
+            "name": "sync_product_price",
+            "summary": "Sincroniza\u0020el\u0020precio\u0020del\u0020producto\u0020con\u0020los\u0020sitios\u0020secundarios.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_sync_product_price"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Async_variation_price\u0028\u0029",
+            "name": "sync_variation_price",
+            "summary": "Sincroniza\u0020el\u0020precio\u0020de\u0020una\u0020variaci\u00F3n\u0020de\u0020producto\u0020con\u0020los\u0020sitios\u0020secundarios.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_sync_variation_price"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Async_price_to_secondary_sites\u0028\u0029",
+            "name": "sync_price_to_secondary_sites",
+            "summary": "Sincroniza\u0020el\u0020precio\u0020de\u0020un\u0020producto\u0020a\u0020los\u0020sitios\u0020secundarios.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_sync_price_to_secondary_sites"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Async_price_to_primary_site\u0028\u0029",
+            "name": "sync_price_to_primary_site",
+            "summary": "Sincroniza\u0020el\u0020precio\u0020de\u0020un\u0020producto\u0020al\u0020sitio\u0020principal.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_sync_price_to_primary_site"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Async_variation_price_to_secondary_sites\u0028\u0029",
+            "name": "sync_variation_price_to_secondary_sites",
+            "summary": "Sincroniza\u0020el\u0020precio\u0020de\u0020una\u0020variaci\u00F3n\u0020de\u0020producto\u0020a\u0020los\u0020sitios\u0020secundarios.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_sync_variation_price_to_secondary_sites"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Price\u003A\u003Async_variation_price_to_primary_site\u0028\u0029",
+            "name": "sync_variation_price_to_primary_site",
+            "summary": "Sincroniza\u0020el\u0020precio\u0020de\u0020una\u0020variaci\u00F3n\u0020de\u0020producto\u0020al\u0020sitio\u0020principal.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Price.html#method_sync_variation_price_to_primary_site"
+        },                {
             "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Product",
             "name": "Sync_Product",
             "summary": "",
@@ -660,6 +720,16 @@ Search.appendIndex(
             "name": "on_sync_product",
             "summary": "Maneja\u0020la\u0020sincronizaci\u00F3n\u0020de\u0020un\u0020producto\u0020espec\u00EDfico.",
             "url": "classes/WooHive-Internal-Demons-Sync-Product.html#method_on_sync_product"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Product\u003A\u003Aon_product_update\u0028\u0029",
+            "name": "on_product_update",
+            "summary": "Maneja\u0020la\u0020sincronizaci\u00F3n\u0020cuando\u0020se\u0020actualiza\u0020un\u0020producto.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Product.html#method_on_product_update"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Product\u003A\u003Aon_product_create\u0028\u0029",
+            "name": "on_product_create",
+            "summary": "Maneja\u0020la\u0020sincronizaci\u00F3n\u0020cuando\u0020se\u0020crea\u0020un\u0020producto.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Product.html#method_on_product_create"
         },                {
             "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Product\u003A\u003Aon_product_save\u0028\u0029",
             "name": "on_product_save",
@@ -810,6 +880,16 @@ Search.appendIndex(
             "name": "set_sync_stock_in_progress",
             "summary": "Establece\u0020el\u0020estado\u0020de\u0020sincronizaci\u00F3n\u0020en\u0020progreso\u0020para\u0020un\u0020producto.",
             "url": "classes/WooHive-Internal-Demons-Transients.html#method_set_sync_stock_in_progress"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Transients\u003A\u003Ais_sync_price_in_progress\u0028\u0029",
+            "name": "is_sync_price_in_progress",
+            "summary": "Verifica\u0020si\u0020la\u0020sincronizaci\u00F3n\u0020de\u0020price\u0020est\u00E1\u0020en\u0020progreso\u0020para\u0020un\u0020producto.",
+            "url": "classes/WooHive-Internal-Demons-Transients.html#method_is_sync_price_in_progress"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Transients\u003A\u003Aset_sync_price_in_progress\u0028\u0029",
+            "name": "set_sync_price_in_progress",
+            "summary": "Establece\u0020el\u0020estado\u0020de\u0020sincronizaci\u00F3n\u0020en\u0020progreso\u0020para\u0020un\u0020producto.",
+            "url": "classes/WooHive-Internal-Demons-Transients.html#method_set_sync_price_in_progress"
         },                {
             "fqsen": "\\WooHive\\Internal\\Tools",
             "name": "Tools",
@@ -1028,13 +1108,28 @@ Search.appendIndex(
         },                {
             "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Ais_sync_only_stock_enabled\u0028\u0029",
             "name": "is_sync_only_stock_enabled",
-            "summary": "",
+            "summary": "Verifica\u0020si\u0020la\u0020sincronizaci\u00F3n\u0020solo\u0020de\u0020stock\u0020est\u00E1\u0020habilitada.",
             "url": "classes/WooHive-Utils-Helpers.html#method_is_sync_only_stock_enabled"
         },                {
-            "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Ais_create_products_in_secondary_sites_enabled\u0028\u0029",
-            "name": "is_create_products_in_secondary_sites_enabled",
-            "summary": "",
-            "url": "classes/WooHive-Utils-Helpers.html#method_is_create_products_in_secondary_sites_enabled"
+            "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Ais_sync_stock_enabled\u0028\u0029",
+            "name": "is_sync_stock_enabled",
+            "summary": "Verifica\u0020si\u0020la\u0020sincronizaci\u00F3n\u0020de\u0020stock\u0020est\u00E1\u0020habilitada.",
+            "url": "classes/WooHive-Utils-Helpers.html#method_is_sync_stock_enabled"
+        },                {
+            "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Ais_sync_product_data_enabled\u0028\u0029",
+            "name": "is_sync_product_data_enabled",
+            "summary": "Verifica\u0020si\u0020la\u0020sincronizaci\u00F3n\u0020de\u0020datos\u0020est\u00E1\u0020habilitada.",
+            "url": "classes/WooHive-Utils-Helpers.html#method_is_sync_product_data_enabled"
+        },                {
+            "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Ais_create_products_in_site_enabled\u0028\u0029",
+            "name": "is_create_products_in_site_enabled",
+            "summary": "Verifica\u0020si\u0020la\u0020creaci\u00F3n\u0020de\u0020productos\u0020est\u00E1\u0020habilitada.",
+            "url": "classes/WooHive-Utils-Helpers.html#method_is_create_products_in_site_enabled"
+        },                {
+            "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Ais_sync_to_primary_site_enabled\u0028\u0029",
+            "name": "is_sync_to_primary_site_enabled",
+            "summary": "Verifica\u0020si\u0020la\u0020sincronizaci\u00F3n\u0020con\u0020el\u0020sitio\u0020primario\u0020est\u00E1\u0020habilitada.",
+            "url": "classes/WooHive-Utils-Helpers.html#method_is_sync_to_primary_site_enabled"
         },                {
             "fqsen": "\\WooHive\\Utils\\Helpers\u003A\u003Ashould_sync_stock\u0028\u0029",
             "name": "should_sync_stock",

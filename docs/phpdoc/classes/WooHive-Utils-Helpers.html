@@ -216,10 +216,11 @@
 <dd>Obtener las claves de los sitios registrados.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/WooHive-Utils-Helpers.html#method_is_create_products_in_secondary_sites_enabled">is_create_products_in_secondary_sites_enabled()</a>
+    <a href="classes/WooHive-Utils-Helpers.html#method_is_create_products_in_site_enabled">is_create_products_in_site_enabled()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
+<dd>Verifica si la creación de productos está habilitada.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/WooHive-Utils-Helpers.html#method_is_primary_site">is_primary_site()</a>
@@ -247,6 +248,28 @@
     <span>
                                 &nbsp;: bool    </span>
 </dt>
+<dd>Verifica si la sincronización solo de stock está habilitada.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_product_data_enabled">is_sync_product_data_enabled()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Verifica si la sincronización de datos está habilitada.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_stock_enabled">is_sync_stock_enabled()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Verifica si la sincronización de stock está habilitada.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_to_primary_site_enabled">is_sync_to_primary_site_enabled()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Verifica si la sincronización con el sitio primario está habilitada.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/WooHive-Utils-Helpers.html#method_primary_report_url">primary_report_url()</a>
@@ -549,7 +572,7 @@ genera un enlace HTML con el título como texto visible.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">406</span>
+    <span class="phpdocumentor-element-found-in__line">459</span>
 
     </aside>
 
@@ -667,32 +690,52 @@ genera un enlace HTML con el título como texto visible.</p>
             -public
                                     -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method_is_create_products_in_secondary_sites_enabled">
-        is_create_products_in_secondary_sites_enabled()
-        <a href="classes/WooHive-Utils-Helpers.html#method_is_create_products_in_secondary_sites_enabled" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_is_create_products_in_site_enabled">
+        is_create_products_in_site_enabled()
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_create_products_in_site_enabled" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">290</span>
+    <span class="phpdocumentor-element-found-in__line">331</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Verifica si la creación de productos está habilitada.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_create_products_in_secondary_sites_enabled</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_create_products_in_site_enabled</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_create_products_in_site_enabled#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True si la creación de productos está habilitada, False en caso contrario.</p>
+</section>
+
             </section>
 
 </article>
@@ -790,7 +833,7 @@ genera un enlace HTML con el título como texto visible.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">399</span>
+    <span class="phpdocumentor-element-found-in__line">452</span>
 
     </aside>
 
@@ -826,24 +869,203 @@ genera un enlace HTML con el título como texto visible.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">286</span>
+    <span class="phpdocumentor-element-found-in__line">294</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Verifica si la sincronización solo de stock está habilitada.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_sync_only_stock_enabled</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
-    
+        <section class="phpdocumentor-description"><p>Esta función comprueba si la opción de sincronización de stock está activada
+y si la sincronización de datos del producto está desactivada.</p>
+</section>
+
     
     
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True si solo la sincronización de stock está habilitada, False en caso contrario.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_is_sync_product_data_enabled">
+        is_sync_product_data_enabled()
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_product_data_enabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">321</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Verifica si la sincronización de datos está habilitada.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_sync_product_data_enabled</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+        <section class="phpdocumentor-description"><p>Comprueba si la opción de sincronización de datos está activada en la configuración.</p>
+</section>
+
+    
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_product_data_enabled#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True si la sincronización de datos está habilitada, False en caso contrario.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_is_sync_stock_enabled">
+        is_sync_stock_enabled()
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_stock_enabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">309</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Verifica si la sincronización de stock está habilitada.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_sync_stock_enabled</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+        <section class="phpdocumentor-description"><p>Comprueba si la opción de sincronización de stock está activada en la configuración.</p>
+</section>
+
+    
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_stock_enabled#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True si la sincronización de stock está habilitada, False en caso contrario.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_is_sync_to_primary_site_enabled">
+        is_sync_to_primary_site_enabled()
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_to_primary_site_enabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">343</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Verifica si la sincronización con el sitio primario está habilitada.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">is_sync_to_primary_site_enabled</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+        <section class="phpdocumentor-description"><p>Comprueba en la configuración si la opción de sincronización de datos hacia el sitio primario está activada.</p>
+</section>
+
+    
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Utils-Helpers.html#method_is_sync_to_primary_site_enabled#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>True si la sincronización con el sitio primario está habilitada, False en caso contrario.</p>
+</section>
+
             </section>
 
 </article>
@@ -1065,7 +1287,7 @@ y los tipos adicionales proporcionados en el parámetro <code class="prettyprint
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">364</span>
+    <span class="phpdocumentor-element-found-in__line">417</span>
 
     </aside>
 
@@ -1117,7 +1339,7 @@ y los tipos adicionales proporcionados en el parámetro <code class="prettyprint
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">304</span>
+    <span class="phpdocumentor-element-found-in__line">353</span>
 
     </aside>
 
@@ -1303,7 +1525,7 @@ de la API configuradas y extrae detalles como URL, clave de API y secreto de API
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/utils/helpers.php"><a href="files/includes-utils-helpers.html"><abbr title="includes/utils/helpers.php">helpers.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">419</span>
+    <span class="phpdocumentor-element-found-in__line">472</span>
 
     </aside>
 
@@ -1521,11 +1743,14 @@ de la API configuradas y extrae detalles como URL, clave de API y secreto de API
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_get_batch_size">get_batch_size()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_get_role">get_role()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_get_site_keys">get_site_keys()</a></li>
-                                            <li><a href="classes/WooHive-Utils-Helpers.html#method_is_create_products_in_secondary_sites_enabled">is_create_products_in_secondary_sites_enabled()</a></li>
+                                            <li><a href="classes/WooHive-Utils-Helpers.html#method_is_create_products_in_site_enabled">is_create_products_in_site_enabled()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_is_primary_site">is_primary_site()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_is_secondary_site">is_secondary_site()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_is_self_request">is_self_request()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_is_sync_only_stock_enabled">is_sync_only_stock_enabled()</a></li>
+                                            <li><a href="classes/WooHive-Utils-Helpers.html#method_is_sync_product_data_enabled">is_sync_product_data_enabled()</a></li>
+                                            <li><a href="classes/WooHive-Utils-Helpers.html#method_is_sync_stock_enabled">is_sync_stock_enabled()</a></li>
+                                            <li><a href="classes/WooHive-Utils-Helpers.html#method_is_sync_to_primary_site_enabled">is_sync_to_primary_site_enabled()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_primary_report_url">primary_report_url()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_primary_site">primary_site()</a></li>
                                             <li><a href="classes/WooHive-Utils-Helpers.html#method_product_query">product_query()</a></li>
