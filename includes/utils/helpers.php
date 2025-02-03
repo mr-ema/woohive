@@ -292,8 +292,8 @@ class Helpers {
      * @return bool True si solo la sincronización de stock está habilitada, False en caso contrario.
      */
     public static function is_sync_only_stock_enabled(): bool {
-        $is_enabled  = (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_stock', 'yes' ) === 'yes' );
-        $is_enabled &= (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_product_data', 'yes' ) !== 'yes' );
+        $is_enabled  = (bool) ( get_option( Constants::PLUGIN_SLUG . '_sync_stock', 'yes' ) === 'yes' );
+        $is_enabled &= (bool) ( get_option( Constants::PLUGIN_SLUG . '_sync_product_data', 'yes' ) !== 'yes' );
 
         return $is_enabled;
     }
@@ -307,7 +307,7 @@ class Helpers {
      * @return bool True si la sincronización de stock está habilitada, False en caso contrario.
      */
     public static function is_sync_stock_enabled(): bool {
-       return (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_stock', 'yes' ) === 'yes' );
+        return (bool) ( get_option( Constants::PLUGIN_SLUG . '_sync_stock', 'yes' ) === 'yes' );
     }
 
     /**
@@ -319,7 +319,7 @@ class Helpers {
      * @return bool True si la sincronización de datos está habilitada, False en caso contrario.
      */
     public static function is_sync_product_data_enabled(): bool {
-       return (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_product_data', 'yes' ) === 'yes' );
+        return (bool) ( get_option( Constants::PLUGIN_SLUG . '_sync_product_data', 'yes' ) === 'yes' );
     }
 
     /**
@@ -329,7 +329,7 @@ class Helpers {
      * @return bool True si la creación de productos está habilitada, False en caso contrario.
      */
     public static function is_create_products_in_site_enabled(): bool {
-        return (bool)( get_option( Constants::PLUGIN_SLUG . '_create_products_in_site', 'yes' ) === 'yes' );
+        return (bool) ( get_option( Constants::PLUGIN_SLUG . '_create_products_in_site', 'yes' ) === 'yes' );
     }
 
     /**
@@ -341,7 +341,7 @@ class Helpers {
      * @return bool True si la sincronización con el sitio primario está habilitada, False en caso contrario.
      */
     public static function is_sync_to_primary_site_enabled(): bool {
-        return (bool)( get_option( Constants::PLUGIN_SLUG . '_sync_to_primary', 'yes' ) === 'yes' );
+        return (bool) ( get_option( Constants::PLUGIN_SLUG . '_sync_to_primary', 'yes' ) === 'yes' );
     }
 
     /**

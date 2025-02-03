@@ -38,7 +38,7 @@ class Sync_Variation {
         if ( 'product_variation' === $post_type ) {
             $variation = new WC_Product_Variation( $post_id );
 
-            $parent = wc_get_product( $variation->get_parent_id() );
+            $parent        = wc_get_product( $variation->get_parent_id() );
             $variation_sku = $variation->get_sku();
 
             $parent_sku = $parent->get_sku();
@@ -60,8 +60,8 @@ class Sync_Variation {
             return;
         }
 
-        $variation = new WC_Product_Variation( $variation_id );
-        $parent = wc_get_product( $variation->get_parent_id() );
+        $variation     = new WC_Product_Variation( $variation_id );
+        $parent        = wc_get_product( $variation->get_parent_id() );
         $variation_sku = $variation->get_sku();
 
         $parent_sku = $parent->get_sku();

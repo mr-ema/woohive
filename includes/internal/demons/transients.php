@@ -38,7 +38,7 @@ class Transients {
      * Establece el estado de sincronización en progreso para un producto.
      *
      * @param string|int $post_sku ID o SKU del producto.
-     * @param bool $in_progress Indica si la sincronización esta en progreso.
+     * @param bool       $in_progress Indica si la sincronización esta en progreso.
      *
      * @return void
      */
@@ -54,7 +54,7 @@ class Transients {
      * Establece el estado de importación en progreso para un producto.
      *
      * @param string|int $post_sku ID o SKU del producto.
-     * @param bool $in_progress Indica si la importación esta en proceso.
+     * @param bool       $in_progress Indica si la importación esta en proceso.
      *
      * @return void
      */
@@ -81,7 +81,7 @@ class Transients {
      * Establece el estado de sincronización en progreso para un producto.
      *
      * @param string|int $post_sku ID o SKU del producto.
-     * @param bool $in_progress Indica si la sincronización esta en progreso.
+     * @param bool       $in_progress Indica si la sincronización esta en progreso.
      *
      * @return void
      */
@@ -108,7 +108,7 @@ class Transients {
      * Establece el estado de sincronización en progreso para un producto.
      *
      * @param string|int $post_sku ID o SKU del producto.
-     * @param bool $in_progress Indica si la sincronización esta en progreso.
+     * @param bool       $in_progress Indica si la sincronización esta en progreso.
      *
      * @return void
      */

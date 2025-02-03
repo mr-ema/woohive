@@ -39,13 +39,13 @@ class Variations {
             '_edit_last',
         );
 
-        $conditional_invalid_props = (function() {
+        $conditional_invalid_props = ( function () {
             if ( ! Helpers::is_sync_stock_enabled() ) {
                 return array( 'stock_quantity', 'stock_status', 'manage_stock' );
             }
 
             return array();
-        })();
+        } )();
 
         $all_invalid_props = array_merge( $invalid_props, $conditional_invalid_props );
         return array_filter(
@@ -89,16 +89,16 @@ class Variations {
                     if ( is_array( $attribute ) && isset( $attribute['name'] ) && isset( $attribute['option'] ) ) {
                         $attribute_name = sanitize_title( $attribute['name'] );
 
-                        $slug = wc_attribute_taxonomy_name( $attribute_name );
+                        $slug      = wc_attribute_taxonomy_name( $attribute_name );
                         $is_global = taxonomy_exists( $slug );
 
                         if ( $is_global ) {
-                            $term = get_term_by('name', $attribute['option'], $slug);
+                            $term = get_term_by( 'name', $attribute['option'], $slug );
                             if ( $term ) {
-                                $carry[$slug] = $term->slug;
+                                $carry[ $slug ] = $term->slug;
                             }
                         } else {
-                            $carry[$attribute_name] = $attribute['option'];
+                            $carry[ $attribute_name ] = $attribute['option'];
                         }
                     }
 
@@ -189,7 +189,7 @@ class Variations {
             $filtered_data = self::clean_data( $data );
 
             if ( Helpers::is_sync_only_stock_enabled() ) {
-                $allowed_keys = array( 'stock_quantity', 'stock_status', 'manage_stock' );
+                $allowed_keys  = array( 'stock_quantity', 'stock_status', 'manage_stock' );
                 $filtered_data = array_intersect_key( $filtered_data, array_flip( $allowed_keys ) );
             }
 

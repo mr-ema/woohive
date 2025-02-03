@@ -38,10 +38,10 @@ class Sync_Price {
      * precio de oferta o precio final).
      *
      * @param WC_Product $product El producto o variación que ha sido actualizado.
-     * @param array $updated_props Lista de propiedades que han cambiado.
+     * @param array      $updated_props Lista de propiedades que han cambiado.
      */
     public static function on_product_or_variation_update( WC_Product $product, $updated_props ): void {
-        $price_keys = ['regular_price', 'sale_price', 'price'];
+        $price_keys = array( 'regular_price', 'sale_price', 'price' );
 
         if ( array_intersect( $price_keys, $updated_props ) ) {
             if ( $product->is_type( 'variation' ) ) {
@@ -78,7 +78,7 @@ class Sync_Price {
      */
     public static function on_variation_update( int $variation_id ): void {
         $variation = new WC_Product_Variation( $variation_id );
-        if ( ! $variation  ) {
+        if ( ! $variation ) {
             return;
         }
 
@@ -110,8 +110,8 @@ class Sync_Price {
 
         $data = array(
             'regular_price' => $product->get_regular_price(),
-            'sale_price' => $product->get_sale_price(),
-            'price' => $product->get_price(),
+            'sale_price'    => $product->get_sale_price(),
+            'price'         => $product->get_price(),
         );
 
         if ( Helpers::is_primary_site() ) {
@@ -127,7 +127,7 @@ class Sync_Price {
      * @param WC_Product_Variation $variation La variación cuyo precio se debe sincronizar.
      */
     public static function sync_variation_price( WC_Product_Variation $variation ): void {
-        $parent_sku = wc_get_product( $variation->get_parent_id() )->get_sku();
+        $parent_sku    = wc_get_product( $variation->get_parent_id() )->get_sku();
         $variation_sku = $variation->get_sku();
 
         if ( ! $variation_sku || ! $parent_sku || Transients::is_sync_price_in_progress( $variation_sku ) ) {
@@ -140,8 +140,8 @@ class Sync_Price {
 
         $data = array(
             'regular_price' => $variation->get_regular_price(),
-            'sale_price' => $variation->get_sale_price(),
-            'price' => $variation->get_price(),
+            'sale_price'    => $variation->get_sale_price(),
+            'price'         => $variation->get_price(),
         );
 
         if ( Helpers::is_primary_site() ) {
@@ -155,7 +155,7 @@ class Sync_Price {
      * Sincroniza el precio de un producto a los sitios secundarios.
      *
      * @param string $sku El SKU del producto.
-     * @param array $data Los datos del precio (precio regular, precio de oferta, precio).
+     * @param array  $data Los datos del precio (precio regular, precio de oferta, precio).
      */
     private static function sync_price_to_secondary_sites( string $sku, array $data ): void {
         $sites = Helpers::sites();
@@ -164,7 +164,7 @@ class Sync_Price {
         }
 
         foreach ( $sites as $site ) {
-            $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+            $client   = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
             $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", $data, array() );
             Debugger::debug( 'Sincronización de precio desde el sitio primario: ', $response );
         }
@@ -174,7 +174,7 @@ class Sync_Price {
      * Sincroniza el precio de un producto al sitio principal.
      *
      * @param string $sku El SKU del producto.
-     * @param array $data Los datos del precio (precio regular, precio de oferta, precio).
+     * @param array  $data Los datos del precio (precio regular, precio de oferta, precio).
      */
     private static function sync_price_to_primary_site( string $sku, array $data ): void {
         if ( ! Helpers::is_sync_to_primary_site_enabled() ) {
@@ -186,8 +186,8 @@ class Sync_Price {
             return;
         }
 
-        $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
-        $headers = array( 'X-Source-Server-Host' => $_SERVER['HTTP_HOST'] );
+        $client   = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+        $headers  = array( 'X-Source-Server-Host' => $_SERVER['HTTP_HOST'] );
         $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", $data, array(), $headers );
         Debugger::debug( 'Sincronización de precio desde el sitio secundario: ', $response );
     }
@@ -196,7 +196,7 @@ class Sync_Price {
      * Sincroniza el precio de una variación de producto a los sitios secundarios.
      *
      * @param string $parent_sku El SKU del producto principal.
-     * @param array $data Los datos del precio (precio regular, precio de oferta, precio).
+     * @param array  $data Los datos del precio (precio regular, precio de oferta, precio).
      * @param string $sku El SKU de la variación.
      */
     private static function sync_variation_price_to_secondary_sites( string $parent_sku, array $data, string $sku ): void {
@@ -206,7 +206,7 @@ class Sync_Price {
         }
 
         foreach ( $sites as $site ) {
-            $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+            $client   = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
             $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$sku}", $data, array() );
             Debugger::debug( 'Sincronización de precio desde el sitio primario para variación: ', $response );
         }
@@ -216,7 +216,7 @@ class Sync_Price {
      * Sincroniza el precio de una variación de producto al sitio principal.
      *
      * @param string $parent_sku El SKU del producto principal.
-     * @param array $data Los datos del precio (precio regular, precio de oferta, precio).
+     * @param array  $data Los datos del precio (precio regular, precio de oferta, precio).
      * @param string $sku El SKU de la variación.
      */
     private static function sync_variation_price_to_primary_site( string $parent_sku, array $data, string $sku ): void {
@@ -229,8 +229,8 @@ class Sync_Price {
             return;
         }
 
-        $client = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
-        $headers = array( 'X-Source-Server-Host' => $_SERVER['HTTP_HOST'] );
+        $client   = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
+        $headers  = array( 'X-Source-Server-Host' => $_SERVER['HTTP_HOST'] );
         $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$sku}", $data, array(), $headers );
         Debugger::debug( 'Sincronización de precio desde el sitio secundario para variación: ', $response );
     }

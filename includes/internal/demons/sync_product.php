@@ -208,7 +208,7 @@ class Sync_Product {
             return;
         }
 
-        $sites         = Helpers::sites();
+        $sites = Helpers::sites();
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 

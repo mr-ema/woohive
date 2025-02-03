@@ -91,7 +91,7 @@ class Products_Endpoint {
         Transients::set_importing_in_progress( $product_sku, true );
         Transients::set_sync_in_progress( $product_sku, true );
 
-        $result     = Tools::import_product( $client, $product_id );
+        $result = Tools::import_product( $client, $product_id );
         if ( is_wp_error( $result ) ) {
             return $result;
         }

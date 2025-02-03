@@ -60,10 +60,10 @@ class Global_Attributes {
         }
 
         $args = array(
-            'name'        => sanitize_text_field( $name ),
-            'slug'        => sanitize_title( $name ),
-            'type'        => 'select',
-            'order_by'    => 'menu_order',
+            'name'         => sanitize_text_field( $name ),
+            'slug'         => sanitize_title( $name ),
+            'type'         => 'select',
+            'order_by'     => 'menu_order',
             'has_archives' => false,
         );
 
@@ -77,21 +77,21 @@ class Global_Attributes {
             Debugger::debug( 'Registrando taxonomia: ' . $taxonomy_name );
 
             register_taxonomy(
-				$taxonomy_name,
-				apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-				apply_filters(
-					'woocommerce_taxonomy_args_' . $taxonomy_name,
-					array(
-						'labels'       => array(
-							'name' => $name,
-						),
-						'hierarchical' => false,
-						'show_ui'      => false,
-						'query_var'    => true,
-						'rewrite'      => false,
-					)
-				)
-			);
+                $taxonomy_name,
+                apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+                apply_filters(
+                    'woocommerce_taxonomy_args_' . $taxonomy_name,
+                    array(
+                        'labels'       => array(
+                            'name' => $name,
+                        ),
+                        'hierarchical' => false,
+                        'show_ui'      => false,
+                        'query_var'    => true,
+                        'rewrite'      => false,
+                    )
+                )
+            );
         }
 
         if ( ! empty( $taxonomy_name ) && ! empty( $options ) ) {
@@ -120,7 +120,7 @@ class Global_Attributes {
     public static function get_attribute_taxonomy_id_by_name( string $name ): int|WP_Error {
         $id = wc_attribute_taxonomy_id_by_name( $name );
         if ( $id === 0 ) {
-            return new WP_Error('taxonomy_not_found', __( 'No se encontró la taxonomía', Constants::TEXT_DOMAIN ) );
+            return new WP_Error( 'taxonomy_not_found', __( 'No se encontró la taxonomía', Constants::TEXT_DOMAIN ) );
         }
 
         return $id;
@@ -140,9 +140,13 @@ class Global_Attributes {
             return new WP_Error( 'term_not_found', __( 'Término no encontrado.', Constants::TEXT_DOMAIN ) );
         }
 
-        wp_update_term( $term_id, $term->taxonomy, array(
-            'name' => sanitize_text_field( $data['name'] ),
-        ) );
+        wp_update_term(
+            $term_id,
+            $term->taxonomy,
+            array(
+                'name' => sanitize_text_field( $data['name'] ),
+            )
+        );
 
         $taxonomy = $term->taxonomy;
         if ( ! taxonomy_exists( $taxonomy ) ) {
@@ -203,13 +207,13 @@ class Global_Attributes {
             return new WP_Error( 'invalid_taxonomy', __( 'El atributo no es global.', Constants::TEXT_DOMAIN ) );
         }
 
-        $term_ids = [];
+        $term_ids = array();
         foreach ( $options as $option ) {
             $term = get_term_by( 'name', $option, $taxonomy );
             if ( $term && ! is_wp_error( $term ) ) {
                 $term_ids[] = $term->term_id;
             } else {
-                $error = new WP_Error( 'term_not_found', sprintf( __( 'La opción "%s" no existe en el atributo "%s".', Constants::TEXT_DOMAIN ), $option, $attribute_name ) );
+                $error = new WP_Error( 'term_not_found', sprintf( __( 'La opción "%1$s" no existe en el atributo "%2$s".', Constants::TEXT_DOMAIN ), $option, $attribute_name ) );
                 Debugger::error( $error );
             }
         }

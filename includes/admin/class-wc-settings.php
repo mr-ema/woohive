@@ -215,28 +215,30 @@ class WC_Setting_Woo_Hive_Page extends WC_Settings_Page {
      */
     public function output(): void {
         parent::output();
-    ?>
-    <script type="text/javascript">
-        jQuery(document).ready(function($) {
-            let syncToPrimary = $('#<?php echo $this->id; ?>_sync_to_primary');
-            let syncStock = $('#<?php echo $this->id; ?>_sync_stock');
 
-            function toggleSyncStock() {
-                if (!syncToPrimary.is(':checked')) {
-                    syncStock.prop('checked', false).prop('disabled', true); // Desmarcar y deshabilitar
-                } else {
-                    syncStock.prop('disabled', false); // Habilitar nuevamente
-                }
-            }
+        ?>
+            <script type="text/javascript">
+                jQuery(document).ready(function($) {
+                    let syncToPrimary = $('#<?php echo $this->id; ?>_sync_to_primary');
+                    let syncStock = $('#<?php echo $this->id; ?>_sync_stock');
 
-            // Ejecutar al cargar la página
-            toggleSyncStock();
+                    function toggleSyncStock() {
+                        if (!syncToPrimary.is(':checked')) {
+                            syncStock.prop('checked', false).prop('disabled', true); // Desmarcar y deshabilitar
+                        } else {
+                            syncStock.prop('disabled', false); // Habilitar nuevamente
+                        }
+                    }
 
-            // Ejecutar cuando cambia el checkbox
-            syncToPrimary.on('change', toggleSyncStock);
-        });
-    </script>
-    <?php
+                    // Ejecutar al cargar la página
+                    toggleSyncStock();
+
+                    // Ejecutar cuando cambia el checkbox
+                    syncToPrimary.on('change', toggleSyncStock);
+                });
+            </script>
+        <?php
+
         include 'views/api-check-modal.html.php';
     }
 }

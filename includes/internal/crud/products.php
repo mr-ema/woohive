@@ -43,13 +43,13 @@ class Products {
      * @return array Datos filtrados con las propiedades inválidas eliminadas.
      */
     public static function clean_data( array $data ): array {
-        $conditional_invalid_props = (function() {
+        $conditional_invalid_props = ( function () {
             if ( ! Helpers::is_sync_stock_enabled() ) {
                 return array( 'stock_quantity', 'stock_status', 'manage_stock' );
             }
 
             return array();
-        })();
+        } )();
 
         $custom_invalid_props = apply_filters( Constants::PLUGIN_SLUG . '_product_invalid_props', array() );
         $all_invalid_props    = array_merge( self::$invalid_props, $custom_invalid_props, $conditional_invalid_props );
@@ -92,7 +92,7 @@ class Products {
         }
 
         if ( Helpers::is_sync_only_stock_enabled() ) {
-            $allowed_keys = array( 'stock_quantity', 'stock_status', 'manage_stock' );
+            $allowed_keys  = array( 'stock_quantity', 'stock_status', 'manage_stock' );
             $filtered_data = array_intersect_key( $body_data, array_flip( $allowed_keys ) );
         }
 
