@@ -87,9 +87,21 @@ class Variations {
                 $data['attributes'],
                 function ( $carry, $attribute ) {
                     if ( is_array( $attribute ) && isset( $attribute['name'] ) && isset( $attribute['option'] ) ) {
-                        $slug           = sanitize_title( $attribute['name'] );
-                        $carry[ $slug ] = $attribute['option'];
+                        $attribute_name = sanitize_title( $attribute['name'] );
+
+                        $slug = wc_attribute_taxonomy_name( $attribute_name );
+                        $is_global = taxonomy_exists( $slug );
+
+                        if ( $is_global ) {
+                            $term = get_term_by('name', $attribute['option'], $slug);
+                            if ( $term ) {
+                                $carry[$slug] = $term->slug;
+                            }
+                        } else {
+                            $carry[$attribute_name] = $attribute['option'];
+                        }
                     }
+
                     return $carry;
                 },
                 array()

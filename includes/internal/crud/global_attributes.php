@@ -2,6 +2,9 @@
 
 namespace WooHive\Internal\Crud;
 
+use WooHive\Config\Constants;
+use WooHive\Utils\Debugger;
+
 use WP_Error;
 
 
@@ -13,103 +16,204 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Global_Attributes {
 
     /**
-     * Verifica si el atributo es global.
+     * Verifica si la taxonomia existe en base a su nombre
      *
-     * @param string $attribute_name El nombre del atributo.
-     * @return bool
+     * @since 1.1.0
+     * @param string $name El nombre o slug del atributo.
+     * @return bool True si el atributo es global, false si no lo es.
      */
-    public static function is_global( string $attribute_name ): bool {
-        $global_attributes = get_option( 'woocommerce_attribute_taxonomies', array() );
-        foreach ( $global_attributes as $attr ) {
-            if ( strtolower( $attr['attribute_name'] ) === strtolower( $attribute_name ) ) {
-                return true;
-            }
+    public static function check_taxonomy_exists( string $name ): bool {
+        if ( wc_attribute_taxonomy_id_by_name( $name ) !== 0 ) {
+            return true;
         }
-        return false;
+
+        if ( ! str_starts_with( $name, 'pa_' ) ) {
+            $name = wc_sanitize_taxonomy_name( $name );
+            $name = 'pa_' . $name;
+        }
+
+        return taxonomy_exists( $name );
     }
 
     /**
-     * Obtiene el nombre del taxonomy para un atributo global.
+     * Verifica si el slug del atributo es un nombre válido para un atributo global.
      *
-     * @param string $attribute_name El nombre del atributo.
-     * @return string
+     * @since 1.1.0
+     * @param string $slug El slug del atributo.
+     * @return bool True si el slug es válido, false si no lo es.
      */
-    public static function get_taxonomy_name( string $attribute_name ): string {
-        return 'pa_' . wc_sanitize_taxonomy_name( $attribute_name );
+    public static function is_global_by_slug( string $slug ): bool {
+        return str_starts_with( $slug, 'pa_' );
     }
 
     /**
-     * Crea un atributo global.
+     * Crea un atributo global usando wc_create_attribute.
      *
-     * @param string $attribute_name Nombre del atributo.
-     * @param array  $options Opciones del atributo.
-     * @return int|WP_Error El ID del atributo creado o WP_Error en caso de error.
+     * @param string $name El nombre del atributo.
+     * @param array  $options Las opciones del atributo.
+     * @return int|WP_Error El ID del atributo creado o WP_Error si falla.
      */
-    public static function create( string $attribute_name, array $options = array() ): int|WP_Error {
-        $attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
-        $args           = array(
-            'slug'    => $attribute_name,
-            'name'    => ucfirst( $attribute_name ),
-            'options' => $options,
+    public static function create( string $name, array $options ): int|WP_Error {
+        $taxonomy_name = self::get_taxonomy_name( $name );
+        if ( self::check_taxonomy_exists( $taxonomy_name ) ) {
+            return new WP_Error( 'attribute_exists', __( 'El atributo ya existe.', Constants::TEXT_DOMAIN ) );
+        }
+
+        $args = array(
+            'name'        => sanitize_text_field( $name ),
+            'slug'        => sanitize_title( $name ),
+            'type'        => 'select',
+            'order_by'    => 'menu_order',
+            'has_archives' => false,
         );
 
-        $result = wp_insert_term( $attribute_name, 'pa_' . $attribute_name, $args );
-        if ( is_wp_error( $result ) ) {
-            return $result;
+        $attribute_id_result = wc_create_attribute( $args );
+        if ( is_wp_error( $attribute_id_result ) ) {
+            return $attribute_id_result;
         }
 
-        return $result['term_id'];  // Return the created term ID
-    }
+        // Forzar registro de taxonomia ya que wc_create_attribute demora en registrar la taxonomia
+        if ( true ) {
+            Debugger::debug( 'Registrando taxonomia: ' . $taxonomy_name );
 
-    /**
-     * Crea o actualiza un término en una taxonomía global (maneja solo un término).
-     *
-     * @param string $attribute_name Nombre del atributo.
-     * @param string $option El término a crear o actualizar.
-     * @return int|WP_Error Devuelve el ID del término creado o actualizado o WP_Error en caso de error.
-     */
-    public static function create_or_update( string $attribute_name, string $option ): int|WP_Error {
-        return self::create( $attribute_name, $option ); // Create handles both create and update for single term
-    }
+            register_taxonomy(
+				$taxonomy_name,
+				apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+				apply_filters(
+					'woocommerce_taxonomy_args_' . $taxonomy_name,
+					array(
+						'labels'       => array(
+							'name' => $name,
+						),
+						'hierarchical' => false,
+						'show_ui'      => false,
+						'query_var'    => true,
+						'rewrite'      => false,
+					)
+				)
+			);
+        }
 
-    /**
-     * Crea o actualiza múltiples términos en una taxonomía global (maneja múltiples términos).
-     *
-     * @param string $attribute_name Nombre del atributo.
-     * @param array  $options Lista de términos.
-     * @return array|WP_Error Devuelve un array de IDs de términos creados o actualizados, o WP_Error en caso de error.
-     */
-    public static function create_or_update_batch( string $attribute_name, array $options ): array|WP_Error {
-        $created_or_updated_ids = array();
-        foreach ( $options as $option ) {
-            $result = self::create_or_update( $attribute_name, $option );
-            if ( is_wp_error( $result ) ) {
-                return $result; // If any error occurs, return the error
+        if ( ! empty( $taxonomy_name ) && ! empty( $options ) ) {
+            foreach ( $options as $option ) {
+                $term = wp_insert_term( sanitize_text_field( $option ), $taxonomy_name );
+                if ( is_wp_error( $term ) ) {
+                    Debugger::error( $term );
+                    continue;
+                }
             }
-            $created_or_updated_ids[] = $result; // Collect term IDs
         }
-        return $created_or_updated_ids; // Return an array of term IDs
+
+        return $attribute_id_result;
     }
 
     /**
-     * Actualiza un término en una taxonomía global (maneja solo un término).
+     * Obtiene el ID de la taxonomía de un atributo global basado en su nombre.
      *
-     * @param string $attribute_name Nombre del atributo.
-     * @param string $option El término a actualizar.
-     * @return int|WP_Error Devuelve el ID del término actualizado o WP_Error en caso de error.
+     * Esta función busca la taxonomía global del atributo por su nombre y devuelve el ID correspondiente.
+     * Si no se encuentra la taxonomía, se devuelve un error.
+     *
+     * @since 1.1.0
+     * @param string $name El nombre del atributo para el cual se desea obtener el ID de la taxonomía.
+     * @return int|WP_Error El ID de la taxonomía si se encuentra, o un objeto WP_Error si no se encuentra.
      */
-    public static function update( string $attribute_name, string $option ): int|WP_Error {
-        return self::create_or_update( $attribute_name, $option ); // Simplified as WP handles duplicate terms
+    public static function get_attribute_taxonomy_id_by_name( string $name ): int|WP_Error {
+        $id = wc_attribute_taxonomy_id_by_name( $name );
+        if ( $id === 0 ) {
+            return new WP_Error('taxonomy_not_found', __( 'No se encontró la taxonomía', Constants::TEXT_DOMAIN ) );
+        }
+
+        return $id;
     }
 
     /**
-     * Actualiza múltiples términos en una taxonomía global (maneja múltiples términos).
+     * Actualiza un atributo global.
      *
-     * @param string $attribute_name Nombre del atributo.
-     * @param array  $options Lista de términos a actualizar.
-     * @return array|WP_Error Devuelve un array de IDs de términos actualizados, o WP_Error en caso de error.
+     * @since 1.1.0
+     * @param int   $term_id El ID del término (atributo global).
+     * @param array $data Datos actualizados para el atributo global.
+     * @return WP_Error|int El ID del término actualizado o WP_Error en caso de error.
      */
-    public static function update_batch( string $attribute_name, array $options ): array|WP_Error {
-        return self::create_or_update_batch( $attribute_name, $options ); // Simplified as WP handles duplicate terms
+    public static function update( int $term_id, array $data ): int|WP_Error {
+        $term = get_term( $term_id );
+        if ( is_wp_error( $term ) ) {
+            return new WP_Error( 'term_not_found', __( 'Término no encontrado.', Constants::TEXT_DOMAIN ) );
+        }
+
+        wp_update_term( $term_id, $term->taxonomy, array(
+            'name' => sanitize_text_field( $data['name'] ),
+        ) );
+
+        $taxonomy = $term->taxonomy;
+        if ( ! taxonomy_exists( $taxonomy ) ) {
+            $taxonomy = wc_attribute_taxonomy_name_by_id( $term_id );
+        }
+
+        foreach ( $data['options'] as $option ) {
+            $result = wp_insert_term( sanitize_text_field( $option ), $taxonomy );
+            if ( is_wp_error( $result ) ) {
+                Debugger::error( $result );
+            }
+        }
+
+        return $term_id;
+    }
+
+    /**
+     * Obtiene el ID del término global por nombre.
+     *
+     * @since 1.1.0
+     * @param string $name El nombre del atributo.
+     * @param string $taxonomy El nombre de la taxonomia.
+     * @return int|WP_Error El ID del término o WP_Error si no se encuentra.
+     */
+    public static function get_term_id_by_name( string $name, string $taxonomy ): int|WP_Error {
+        $taxonomy = self::get_taxonomy_name( $name );
+
+        $term = get_term_by( 'name', $name, $taxonomy );
+        if ( is_wp_error( $term ) || ! $term ) {
+            return new WP_Error( 'term_not_found', __( 'Término no encontrado.', Constants::TEXT_DOMAIN ) );
+        }
+
+        return $term->term_id;
+    }
+
+    /**
+     * Obtiene el nombre de la taxonomía global por nombre.
+     *
+     * @param string $name El nombre del atributo.
+     * @return string El nombre de la taxonomía.
+     */
+    public static function get_taxonomy_name( string $name ): string {
+        $name = wc_sanitize_taxonomy_name( $name );
+        return wc_attribute_taxonomy_name( $name );
+    }
+
+    /**
+     * Obtiene los IDs de términos correspondientes a las opciones proporcionadas para un atributo global.
+     *
+     * @since 1.1.0
+     * @param string $attribute_name El nombre del atributo global.
+     * @param array  $options Las opciones cuyos IDs de término se quieren obtener.
+     * @return array|WP_Error Un array de IDs de términos o WP_Error en caso de error.
+     */
+    public static function get_term_ids_by_options( string $attribute_name, array $options ): array|WP_Error {
+        $taxonomy = self::get_taxonomy_name( $attribute_name );
+        if ( ! self::check_taxonomy_exists( $taxonomy ) ) {
+            return new WP_Error( 'invalid_taxonomy', __( 'El atributo no es global.', Constants::TEXT_DOMAIN ) );
+        }
+
+        $term_ids = [];
+        foreach ( $options as $option ) {
+            $term = get_term_by( 'name', $option, $taxonomy );
+            if ( $term && ! is_wp_error( $term ) ) {
+                $term_ids[] = $term->term_id;
+            } else {
+                $error = new WP_Error( 'term_not_found', sprintf( __( 'La opción "%s" no existe en el atributo "%s".', Constants::TEXT_DOMAIN ), $option, $attribute_name ) );
+                Debugger::error( $error );
+            }
+        }
+
+        return $term_ids;
     }
 }
