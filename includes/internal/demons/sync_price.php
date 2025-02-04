@@ -41,7 +41,7 @@ class Sync_Price {
      * @param array      $updated_props Lista de propiedades que han cambiado.
      */
     public static function on_product_or_variation_update( WC_Product $product, $updated_props ): void {
-        $price_keys = array( 'regular_price', 'sale_price', 'price' );
+        $price_keys      = array( 'regular_price', 'sale_price', 'price' );
         $non_price_props = array_diff( $updated_props, $price_keys );
 
         if ( empty( $non_price_props ) && array_intersect( $updated_props, $price_keys ) ) {
@@ -102,7 +102,7 @@ class Sync_Price {
             return;
         }
 
-        $is_sync_in_progress = Transients::is_sync_price_in_progress( $sku );
+        $is_sync_in_progress  = Transients::is_sync_price_in_progress( $sku );
         $is_sync_in_progress |= Transients::is_importing_in_progress( $sku );
 
         if ( $is_sync_in_progress ) {
@@ -134,7 +134,7 @@ class Sync_Price {
         $parent_sku    = wc_get_product( $variation->get_parent_id() )->get_sku();
         $variation_sku = $variation->get_sku();
 
-        $is_sync_in_progress = Transients::is_sync_price_in_progress( $variation_sku );
+        $is_sync_in_progress  = Transients::is_sync_price_in_progress( $variation_sku );
         $is_sync_in_progress |= Transients::is_importing_in_progress( $variation_sku );
 
         if ( ! $variation_sku || ! $parent_sku || $is_sync_in_progress ) {

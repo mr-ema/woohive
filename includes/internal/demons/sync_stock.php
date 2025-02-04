@@ -143,10 +143,10 @@ class Sync_Stock {
     public static function on_product_set_stock( WC_Product $product ): void {
         $product_sku = $product->get_sku();
 
-        $is_sync_in_progress = Transients::is_sync_stock_in_progress( $product_sku );
+        $is_sync_in_progress  = Transients::is_sync_stock_in_progress( $product_sku );
         $is_sync_in_progress |= Transients::is_importing_in_progress( $product_sku );
 
-        if ( ! $product_sku ||  $is_sync_in_progress ) {
+        if ( ! $product_sku || $is_sync_in_progress ) {
             return;
         }
 
@@ -165,7 +165,7 @@ class Sync_Stock {
     public static function on_variation_set_stock( WC_Product_Variation $variation ): void {
         $variation_sku = $variation->get_sku();
 
-        $is_sync_in_progress = Transients::is_sync_stock_in_progress( $variation_sku );
+        $is_sync_in_progress  = Transients::is_sync_stock_in_progress( $variation_sku );
         $is_sync_in_progress |= Transients::is_importing_in_progress( $variation_sku );
 
         if ( ! $variation_sku || $is_sync_in_progress ) {
@@ -283,7 +283,7 @@ class Sync_Stock {
             return;
         }
 
-        $data   = array( 'stock_status' => $variation->get_stock_status() );
+        $data = array( 'stock_status' => $variation->get_stock_status() );
         if ( $variation->managing_stock() ) {
             $old_stock = Transients::get_old_stock( $sku );
             $new_stock = $variation->get_stock_quantity();
