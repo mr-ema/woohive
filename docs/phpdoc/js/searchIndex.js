@@ -716,6 +716,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/WooHive-Internal-Demons-Sync-Product.html#method_init"
         },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Product\u003A\u003Aon_product_update_props\u0028\u0029",
+            "name": "on_product_update_props",
+            "summary": "Se\u0020activa\u0020cuando\u0020se\u0020actualizan\u0020propiedades\u0020de\u0020un\u0020producto\u0020o\u0020variaci\u00F3n\u0020en\u0020WooCommerce.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Product.html#method_on_product_update_props"
+        },                {
             "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Product\u003A\u003Aon_sync_product\u0028\u0029",
             "name": "on_sync_product",
             "summary": "Maneja\u0020la\u0020sincronizaci\u00F3n\u0020de\u0020un\u0020producto\u0020espec\u00EDfico.",
@@ -770,6 +775,16 @@ Search.appendIndex(
             "name": "init",
             "summary": "",
             "url": "classes/WooHive-Internal-Demons-Sync-Stock.html#method_init"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Stock\u003A\u003Astore_old_stock\u0028\u0029",
+            "name": "store_old_stock",
+            "summary": "Guarda\u0020el\u0020stock\u0020antiguo\u0020antes\u0020de\u0020actualizar.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Stock.html#method_store_old_stock"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Stock\u003A\u003Astore_old_variation_stock\u0028\u0029",
+            "name": "store_old_variation_stock",
+            "summary": "Guarda\u0020el\u0020stock\u0020antiguo\u0020antes\u0020de\u0020actualizar.",
+            "url": "classes/WooHive-Internal-Demons-Sync-Stock.html#method_store_old_variation_stock"
         },                {
             "fqsen": "\\WooHive\\Internal\\Demons\\Sync_Stock\u003A\u003Async_product_stock\u0028\u0029",
             "name": "sync_product_stock",
@@ -890,6 +905,16 @@ Search.appendIndex(
             "name": "set_sync_price_in_progress",
             "summary": "Establece\u0020el\u0020estado\u0020de\u0020sincronizaci\u00F3n\u0020en\u0020progreso\u0020para\u0020un\u0020producto.",
             "url": "classes/WooHive-Internal-Demons-Transients.html#method_set_sync_price_in_progress"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Transients\u003A\u003Aget_old_stock\u0028\u0029",
+            "name": "get_old_stock",
+            "summary": "Obtiene\u0020el\u0020stock\u0020antiguo\u0020almacenado\u0020en\u0020transientes.",
+            "url": "classes/WooHive-Internal-Demons-Transients.html#method_get_old_stock"
+        },                {
+            "fqsen": "\\WooHive\\Internal\\Demons\\Transients\u003A\u003Aset_old_stock\u0028\u0029",
+            "name": "set_old_stock",
+            "summary": "Establece\u0020el\u0020stock\u0020antiguo\u0020en\u0020un\u0020transiente\u0020antes\u0020de\u0020una\u0020actualizaci\u00F3n.",
+            "url": "classes/WooHive-Internal-Demons-Transients.html#method_set_old_stock"
         },                {
             "fqsen": "\\WooHive\\Internal\\Tools",
             "name": "Tools",

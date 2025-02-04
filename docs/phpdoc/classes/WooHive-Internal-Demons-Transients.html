@@ -175,6 +175,13 @@
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Internal-Demons-Transients.html#method_get_old_stock">get_old_stock()</a>
+    <span>
+                                &nbsp;: int    </span>
+</dt>
+<dd>Obtiene el stock antiguo almacenado en transientes.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/WooHive-Internal-Demons-Transients.html#method_is_importing_in_progress">is_importing_in_progress()</a>
     <span>
                                 &nbsp;: bool    </span>
@@ -208,6 +215,13 @@
                                 &nbsp;: void    </span>
 </dt>
 <dd>Establece el estado de importación en progreso para un producto.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/WooHive-Internal-Demons-Transients.html#method_set_old_stock">set_old_stock()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Establece el stock antiguo en un transiente antes de una actualización.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/WooHive-Internal-Demons-Transients.html#method_set_sync_in_progress">set_sync_in_progress()</a>
@@ -245,6 +259,69 @@
             <a href="classes/WooHive-Internal-Demons-Transients.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_get_old_stock">
+        get_old_stock()
+        <a href="classes/WooHive-Internal-Demons-Transients.html#method_get_old_stock" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/demons/transients.php"><a href="files/includes-internal-demons-transients.html"><abbr title="includes/internal/demons/transients.php">transients.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">130</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Obtiene el stock antiguo almacenado en transientes.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">get_old_stock</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string|int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post_sku</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$post_sku</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string|int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>ID o SKU del producto.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Demons-Transients.html#method_get_old_stock#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">int</span>
+            </section>
+
+</article>
                     <article
         class="phpdocumentor-element
             -method
@@ -487,6 +564,74 @@
             </dl>
 
     
+
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_set_old_stock">
+        set_old_stock()
+        <a href="classes/WooHive-Internal-Demons-Transients.html#method_set_old_stock" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/internal/demons/transients.php"><a href="files/includes-internal-demons-transients.html"><abbr title="includes/internal/demons/transients.php">transients.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">142</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Establece el stock antiguo en un transiente antes de una actualización.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">set_old_stock</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string|int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post_sku</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$stock</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$post_sku</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string|int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>ID o SKU del producto.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$stock</span>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Cantidad de stock antiguo.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/WooHive-Internal-Demons-Transients.html#method_set_old_stock#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">since</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                            <span class="phpdocumentor-tag-link">1.1.0</span>
+                                                                                
+                                             
+                                    </dd>
+                                            </dl>
 
     
 </article>
@@ -762,11 +907,13 @@
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                            <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_get_old_stock">get_old_stock()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_is_importing_in_progress">is_importing_in_progress()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_is_sync_in_progress">is_sync_in_progress()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_is_sync_price_in_progress">is_sync_price_in_progress()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_is_sync_stock_in_progress">is_sync_stock_in_progress()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_set_importing_in_progress">set_importing_in_progress()</a></li>
+                                            <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_set_old_stock">set_old_stock()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_set_sync_in_progress">set_sync_in_progress()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_set_sync_price_in_progress">set_sync_price_in_progress()</a></li>
                                             <li><a href="classes/WooHive-Internal-Demons-Transients.html#method_set_sync_stock_in_progress">set_sync_stock_in_progress()</a></li>
