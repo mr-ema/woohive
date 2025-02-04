@@ -7,7 +7,7 @@ Todos los cambios importantes en este proyecto serán documentados en este archi
 
 ### **Agregado**  
 
-- **Agregar soporte para atributos globales** Ahora se soporta la sincornizacion de atributos globales.
+- **Agregar soporte para atributos globales:** Ahora se soporta la sincornizacion de atributos globales.
 - **Sincronizacion individual de precios:** Ahora si se cambia el precio se actualiza solo el precio y no todo el producto
 - **Mejora en la sincronización de productos:** Ahora la caché se actualiza automáticamente cuando un producto es modificado.  
 - **Opciones personalizables para la sincronización:** Se agregaron nuevas opciones en el panel de configuración para personalizar la sincronización del plugin, incluyendo:  
@@ -23,6 +23,7 @@ Todos los cambios importantes en este proyecto serán documentados en este archi
 
 ### **Corregido**  
 
+- **inconsistencias en normalizacion de stock:** Ahora ya no se generan inconsistencias con el stock.
 - **Error en la opción de sincronizar solo stock:** Se solucionó un problema donde la opción de "sincronizar solo stock" no funcionaba correctamente.  
 
 <br>  
