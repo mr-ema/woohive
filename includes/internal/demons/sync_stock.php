@@ -44,6 +44,10 @@ class Sync_Stock {
 
         if ( $product->managing_stock() ) {
             $old_stock = get_post_meta( $product->get_id(), '_stock', true );
+            if ( empty( $old_stock ) ) {
+                $old_stock = 0;
+            }
+
             Transients::set_old_stock( $sku, $old_stock );
         }
     }
@@ -63,6 +67,10 @@ class Sync_Stock {
 
         if ( $variation->managing_stock() ) {
             $old_stock = get_post_meta( $variation->get_id(), '_stock', true );
+            if ( empty( $old_stock ) ) {
+                $old_stock = 0;
+            }
+
             Transients::set_old_stock( $sku, $old_stock );
         }
     }
@@ -76,7 +84,7 @@ class Sync_Stock {
      */
     public static function sync_product_stock( WC_Product $product ): void {
         $product_sku = $product->get_sku();
-        if ( ! $product_sku || Transients::is_sync_stock_in_progress( $product_sku ) ) {
+        if ( ! $product_sku ) {
             return;
         }
 
@@ -91,6 +99,8 @@ class Sync_Stock {
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_to_primary_site( $product );
             }
+
+            Transients::set_sync_stock_in_progress( $product_sku, false );
         }
     }
 
@@ -103,7 +113,7 @@ class Sync_Stock {
      */
     public static function sync_variation_stock( WC_Product_Variation $variation ): void {
         $variation_sku = $variation->get_sku();
-        if ( ! $variation_sku || Transients::is_sync_stock_in_progress( $variation_sku ) ) {
+        if ( ! $variation_sku ) {
             return;
         }
 
@@ -118,6 +128,8 @@ class Sync_Stock {
             } elseif ( Helpers::is_secondary_site() ) {
                 self::sync_variation_to_primary_site( $variation );
             }
+
+            Transients::set_sync_stock_in_progress( $variation_sku, false );
         }
     }
 
@@ -130,7 +142,11 @@ class Sync_Stock {
      */
     public static function on_product_set_stock( WC_Product $product ): void {
         $product_sku = $product->get_sku();
-        if ( ! $product_sku || Transients::is_sync_stock_in_progress( $product_sku ) ) {
+
+        $is_sync_in_progress = Transients::is_sync_stock_in_progress( $product_sku );
+        $is_sync_in_progress |= Transients::is_importing_in_progress( $product_sku );
+
+        if ( ! $product_sku ||  $is_sync_in_progress ) {
             return;
         }
 
@@ -148,7 +164,11 @@ class Sync_Stock {
      */
     public static function on_variation_set_stock( WC_Product_Variation $variation ): void {
         $variation_sku = $variation->get_sku();
-        if ( ! $variation_sku || Transients::is_sync_stock_in_progress( $variation_sku ) ) {
+
+        $is_sync_in_progress = Transients::is_sync_stock_in_progress( $variation_sku );
+        $is_sync_in_progress |= Transients::is_importing_in_progress( $variation_sku );
+
+        if ( ! $variation_sku || $is_sync_in_progress ) {
             return;
         }
 
@@ -277,8 +297,6 @@ class Sync_Stock {
             $data['old_stock']      = $old_stock;
             $data['stock_change']   = $stock_diff;
         }
-
-        Debugger::debug('xd', $data);
 
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );

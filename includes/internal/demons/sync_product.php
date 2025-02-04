@@ -20,12 +20,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Product {
 
     public static function init(): void {
-        add_action( 'save_post_product', array( self::class, 'on_product_save' ), 10, 3 );
-
         add_filter( 'woocommerce_product_import_get_product_object', array( self::class, 'on_import_start' ), 10, 2 );
         add_action( 'woocommerce_product_import_inserted_product_object', array( self::class, 'on_import_finished' ), 10, 2 );
 
+        add_action( 'woocommerce_new_product', array( self::class, 'on_product_create' ), 10, 1 );
+        add_action( 'woocommerce_product_object_updated_props', array( self::class, 'on_product_update_props' ), 10, 2 );
+
         add_action( Constants::PLUGIN_SLUG . '_sync_product', array( self::class, 'on_sync_product' ) );
+    }
+
+    /**
+     * Se activa cuando se actualizan propiedades de un producto o variación en WooCommerce.
+     *
+     * Este hook detecta cambios en las propiedades del producto.
+     *
+     * @param WC_Product $product El producto o variación que ha sido actualizado.
+     * @param array      $updated_props Lista de propiedades que han cambiado.
+     *
+     * @return void
+     * @since 1.1.0
+     */
+    public static function on_product_update_props( WC_Product $product, $updated_props ): void {
+        if ( $product->is_type( 'variation' ) ) {
+            return;
+        }
+
+        $post_sku = $product->get_sku();
+        if ( ! $post_sku || self::is_sync_in_progress( $post_sku ) ) {
+            return;
+        }
+
+        if ( Helpers::should_sync( $product ) ) {
+            Debugger::debug( 'Product Sync On Update Has Been Fired' );
+            do_action( Constants::PLUGIN_SLUG . '_sync_product', $product );
+        }
     }
 
     /**

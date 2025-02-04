@@ -42,8 +42,9 @@ class Sync_Price {
      */
     public static function on_product_or_variation_update( WC_Product $product, $updated_props ): void {
         $price_keys = array( 'regular_price', 'sale_price', 'price' );
+        $non_price_props = array_diff( $updated_props, $price_keys );
 
-        if ( array_intersect( $price_keys, $updated_props ) ) {
+        if ( empty( $non_price_props ) && array_intersect( $updated_props, $price_keys ) ) {
             if ( $product->is_type( 'variation' ) ) {
                 do_action( Constants::PLUGIN_SLUG . '_sync_variation_price', $product );
             } else {
@@ -101,7 +102,10 @@ class Sync_Price {
             return;
         }
 
-        if ( Transients::is_sync_price_in_progress( $sku ) ) {
+        $is_sync_in_progress = Transients::is_sync_price_in_progress( $sku );
+        $is_sync_in_progress |= Transients::is_importing_in_progress( $sku );
+
+        if ( $is_sync_in_progress ) {
             return;
         }
 
@@ -130,7 +134,10 @@ class Sync_Price {
         $parent_sku    = wc_get_product( $variation->get_parent_id() )->get_sku();
         $variation_sku = $variation->get_sku();
 
-        if ( ! $variation_sku || ! $parent_sku || Transients::is_sync_price_in_progress( $variation_sku ) ) {
+        $is_sync_in_progress = Transients::is_sync_price_in_progress( $variation_sku );
+        $is_sync_in_progress |= Transients::is_importing_in_progress( $variation_sku );
+
+        if ( ! $variation_sku || ! $parent_sku || $is_sync_in_progress ) {
             return;
         }
 

@@ -90,6 +90,8 @@ class Products_Endpoint {
 
         Transients::set_importing_in_progress( $product_sku, true );
         Transients::set_sync_in_progress( $product_sku, true );
+        Transients::set_sync_stock_in_progress( $product_sku, true );
+        Transients::set_sync_price_in_progress( $product_sku, true );
 
         $result = Tools::import_product( $client, $product_id );
         if ( is_wp_error( $result ) ) {
@@ -97,7 +99,6 @@ class Products_Endpoint {
         }
 
         Transients::set_importing_in_progress( $product_sku, false );
-        Transients::set_sync_in_progress( $product_sku, false );
 
         $product_id = $result;
         return new WP_REST_Response(
@@ -132,6 +133,8 @@ class Products_Endpoint {
         }
 
         Transients::set_sync_in_progress( $product_sku, true );
+        Transients::set_sync_stock_in_progress( $product_sku, true );
+        Transients::set_sync_price_in_progress( $product_sku, true );
 
         $body_data = self::get_body_data( $request );
         if ( ! empty( $body_data ) ) {
@@ -164,8 +167,6 @@ class Products_Endpoint {
         if ( is_wp_error( $result ) ) {
             return $result;
         }
-
-        Transients::set_sync_in_progress( $product_sku, false );
 
         $product_id = $result;
         return new WP_REST_Response(
