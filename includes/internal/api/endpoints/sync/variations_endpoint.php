@@ -94,6 +94,12 @@ class Variations_Endpoint {
         Transients::set_sync_in_progress( $product_sku, true );
         Transients::set_sync_in_progress( $variation_sku, true );
 
+        Transients::set_sync_stock_in_progress( $product_sku, true );
+        Transients::set_sync_stock_in_progress( $variation_sku, true );
+
+        Transients::set_sync_price_in_progress( $product_sku, true );
+        Transients::set_sync_price_in_progress( $variation_sku, true );
+
         $body_data = self::get_body_data( $request );
         if ( ! empty( $body_data ) ) {
             $result = Variations::get_by_sku( $product_sku, $variation_sku );
@@ -107,9 +113,6 @@ class Variations_Endpoint {
                 return $result;
             }
         }
-
-        Transients::set_sync_in_progress( $product_sku, false );
-        Transients::set_sync_in_progress( $variation_sku, false );
 
         return new WP_REST_Response( array( 'message' => __( 'Variación actualizada exitosamente.', Constants::TEXT_DOMAIN ) ), 200 );
     }

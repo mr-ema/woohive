@@ -45,7 +45,7 @@ class Products {
     public static function clean_data( array $data ): array {
         $conditional_invalid_props = ( function () {
             if ( ! Helpers::is_sync_stock_enabled() ) {
-                return array( 'stock_quantity', 'stock_status', 'manage_stock' );
+                return array( 'stock_quantity', 'stock_status', 'manage_stock', 'old_stock', 'stock_change', 'low_stock_amount' );
             }
 
             return array();
@@ -458,12 +458,14 @@ class Products {
             );
         }
 
-        $incoming_stock = (int) $data['stock_quantity'];
-        if ( $product->managing_stock() ) {
-            $current_stock    = $product->get_stock_quantity();
-            $stock_difference = $incoming_stock - $current_stock;
+        $current_stock = $product->get_stock_quantity() ?? 0;
+        if ( empty( $data['stock_change'] ) ) {
+            return $current_stock;
+        }
 
-            $new_stock = $current_stock + $stock_difference;
+        $stock_change = (int) $data['stock_change'];
+        if ( $product->managing_stock() ) {
+            $new_stock = $current_stock + $stock_change;
             $new_stock = max( 0, $new_stock );
 
             $product->set_stock_quantity( $new_stock );

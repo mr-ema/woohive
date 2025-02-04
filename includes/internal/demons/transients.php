@@ -119,4 +119,27 @@ class Transients {
             delete_transient( Constants::PLUGIN_SLUG . '_sync_price_in_progress_' . $post_sku );
         }
     }
+
+    /**
+     * Obtiene el stock antiguo almacenado en transientes.
+     *
+     * @param string|int $post_sku ID o SKU del producto.
+     * @return int
+     * @since 1.1.0
+     */
+    public static function get_old_stock( string|int $post_sku ): int {
+        return (int) get_transient( Constants::PLUGIN_SLUG . '_old_stock_' . $post_sku );
+    }
+
+    /**
+     * Establece el stock antiguo en un transiente antes de una actualización.
+     *
+     * @param string|int $post_sku ID o SKU del producto.
+     * @param int        $stock    Cantidad de stock antiguo.
+     * @return void
+     * @since 1.1.0
+     */
+    public static function set_old_stock( string|int $post_sku, int $stock ): void {
+        set_transient( Constants::PLUGIN_SLUG . '_old_stock_' . $post_sku, $stock, 5 * MINUTE_IN_SECONDS );
+    }
 }
