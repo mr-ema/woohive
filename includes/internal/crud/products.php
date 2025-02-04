@@ -459,11 +459,17 @@ class Products {
         }
 
         $incoming_stock = (int) $data['stock_quantity'];
+        $stock_change   = (int) $data['stock_change'] ?? 0;
+
         if ( $product->managing_stock() ) {
             $current_stock    = $product->get_stock_quantity();
             $stock_difference = $incoming_stock - $current_stock;
 
             $new_stock = $current_stock + $stock_difference;
+            if ( ! empty( $stock_change ) ) {
+                $new_stock = $current_stock + $stock_change;
+            }
+
             $new_stock = max( 0, $new_stock );
 
             $product->set_stock_quantity( $new_stock );

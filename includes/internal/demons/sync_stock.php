@@ -19,11 +19,52 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Sync_Stock {
 
     public static function init(): void {
+        add_action( 'woocommerce_product_before_set_stock', array( self::class, 'store_old_stock' ), 6, 1 );
+        add_action( 'woocommerce_variation_before_set_stock', array( self::class, 'store_old_variation_stock' ), 6, 1 );
+
         add_action( 'woocommerce_product_set_stock', array( self::class, 'on_product_set_stock' ), 6, 2 );
         add_action( 'woocommerce_variation_set_stock', array( self::class, 'on_variation_set_stock' ), 6, 2 );
 
         add_action( Constants::PLUGIN_SLUG . '_sync_product_stock', array( self::class, 'sync_product_stock' ) );
         add_action( Constants::PLUGIN_SLUG . '_sync_variation_stock', array( self::class, 'sync_variation_stock' ) );
+    }
+
+    /**
+     * Guarda el stock antiguo antes de actualizar.
+     *
+     * @param WC_Product $product Instancia del producto.
+     * @return void
+     * @since 1.1.0
+     */
+    public static function store_old_stock( WC_Product $product ): void {
+        $sku = $product->get_sku();
+        if ( empty( $sku ) ) {
+            return;
+        }
+
+        if ( $product->managing_stock() ) {
+            $old_stock = get_post_meta( $product->get_id(), '_stock', true );
+            Transients::set_old_stock( $sku, $old_stock );
+        }
+    }
+
+    /**
+     * Guarda el stock antiguo antes de actualizar.
+     *
+     * @param WC_Product $product Instancia del producto.
+     * @return void
+     * @since 1.1.0
+     */
+    public static function store_old_variation_stock( WC_Product_Variation $variation ): void {
+        $sku = $variation->get_sku();
+        if ( empty( $sku ) ) {
+            return;
+        }
+
+        if ( $variation->managing_stock() ) {
+            $old_stock = get_post_meta( $variation->get_id(), '_stock', true );
+            Transients::set_old_stock( $sku, $old_stock );
+        }
     }
 
     /**
@@ -134,13 +175,25 @@ class Sync_Stock {
             return;
         }
 
+        $data = array( 'stock_status' => $product->get_stock_status() );
+        if ( $product->managing_stock() ) {
+            $old_stock = Transients::get_old_stock( $sku );
+            $new_stock = $product->get_stock_quantity();
+
+            $stock_diff = $new_stock - $old_stock;
+            if ( $stock_diff === 0 ) {
+                return;
+            }
+
+            $data['stock_quantity'] = $new_stock;
+            $data['old_stock']      = $old_stock;
+            $data['stock_change']   = $stock_diff;
+        }
+
+        Debugger::debug('xd', $data);
+
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-            $data   = array( 'stock_status' => $product->get_stock_status() );
-
-            if ( $product->managing_stock() ) {
-                $data['stock_quantity'] = $product->get_stock_quantity();
-            }
 
             $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", $data, array() );
             Debugger::debug( 'sync stock from primary: ', $response );
@@ -171,10 +224,20 @@ class Sync_Stock {
 
         $client  = Client::create( $main_site['url'], $main_site['api_key'], $main_site['api_secret'] );
         $headers = array( 'X-Source-Server-Host' => $_SERVER['HTTP_HOST'] );
-        $data    = array( 'stock_status' => $product->get_stock_status() );
 
+        $data = array( 'stock_status' => $product->get_stock_status() );
         if ( $product->managing_stock() ) {
-            $data['stock_quantity'] = $product->get_stock_quantity();
+            $old_stock = Transients::get_old_stock( $sku );
+            $new_stock = $product->get_stock_quantity();
+
+            $stock_diff = $new_stock - $old_stock;
+            if ( $stock_diff === 0 ) {
+                return;
+            }
+
+            $data['stock_quantity'] = $new_stock;
+            $data['old_stock']      = $old_stock;
+            $data['stock_change']   = $stock_diff;
         }
 
         $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", $data, array(), $headers );
@@ -202,13 +265,25 @@ class Sync_Stock {
             return;
         }
 
+        $data   = array( 'stock_status' => $variation->get_stock_status() );
+        if ( $variation->managing_stock() ) {
+            $old_stock = Transients::get_old_stock( $sku );
+            $new_stock = $variation->get_stock_quantity();
+
+            $stock_diff = $new_stock - $old_stock;
+            if ( $stock_diff === 0 ) {
+                return;
+            }
+
+            $data['stock_quantity'] = $new_stock;
+            $data['old_stock']      = $old_stock;
+            $data['stock_change']   = $stock_diff;
+        }
+
+        Debugger::debug('xd', $data);
+
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
-            $data   = array( 'stock_status' => $variation->get_stock_status() );
-
-            if ( $variation->managing_stock() ) {
-                $data['stock_quantity'] = $variation->get_stock_quantity();
-            }
 
             $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$sku}", $data, array() );
             Debugger::debug( 'sync stock from primary: ', $response );
@@ -245,7 +320,17 @@ class Sync_Stock {
         $data    = array( 'stock_status' => $variation->get_stock_status() );
 
         if ( $variation->managing_stock() ) {
-            $data['stock_quantity'] = $variation->get_stock_quantity();
+            $old_stock = Transients::get_old_stock( $sku );
+            $new_stock = $variation->get_stock_quantity();
+
+            $stock_diff = $new_stock - $old_stock;
+            if ( $stock_diff === 0 ) {
+                return;
+            }
+
+            $data['stock_quantity'] = $new_stock;
+            $data['old_stock']      = $old_stock;
+            $data['stock_change']   = $stock_diff;
         }
 
         $response = $client->put( Constants::INTERNAL_API_BASE_NAME . "/products/{$parent_sku}/variations/{$sku}", $data, array(), $headers );
