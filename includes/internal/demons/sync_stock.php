@@ -190,8 +190,6 @@ class Sync_Stock {
             $data['stock_change']   = $stock_diff;
         }
 
-        Debugger::debug('xd', $data);
-
         foreach ( $sites as $site ) {
             $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
 
