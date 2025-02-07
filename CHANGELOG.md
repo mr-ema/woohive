@@ -3,7 +3,7 @@ Todos los cambios importantes en este proyecto serán documentados en este archi
 
 <br>  
 
-## [v1.1.0] - UNRELEASED
+## [v1.1.0] - 2025-02-07
 
 ### **Agregado**  
 
