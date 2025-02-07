@@ -168,7 +168,7 @@ class Global_Attributes {
      */
     public static function get_term_id_by_name( string $name, string $taxonomy ): int|WP_Error {
         $taxonomy = self::get_taxonomy_name( $name );
-        $name = sanitize_text_field( $name );
+        $name     = sanitize_text_field( $name );
 
         $term = get_term_by( 'name', $name, $taxonomy );
         if ( is_wp_error( $term ) || ! $term ) {
