@@ -104,6 +104,10 @@ class Global_Attributes {
             }
         }
 
+        if ( true ) {
+            clean_taxonomy_cache( $taxonomy_name );
+        }
+
         return $attribute_id_result;
     }
 
@@ -130,37 +134,28 @@ class Global_Attributes {
      * Actualiza un atributo global.
      *
      * @since 1.1.0
-     * @param int   $term_id El ID del término (atributo global).
+     * @param int   $attribute_id El ID del término (atributo global).
      * @param array $data Datos actualizados para el atributo global.
      * @return WP_Error|int El ID del término actualizado o WP_Error en caso de error.
      */
-    public static function update( int $term_id, array $data ): int|WP_Error {
-        $term = get_term( $term_id );
-        if ( is_wp_error( $term ) ) {
-            return new WP_Error( 'term_not_found', __( 'Término no encontrado.', Constants::TEXT_DOMAIN ) );
-        }
-
-        wp_update_term(
-            $term_id,
-            $term->taxonomy,
-            array(
-                'name' => sanitize_text_field( $data['name'] ),
-            )
-        );
-
-        $taxonomy = $term->taxonomy;
-        if ( ! taxonomy_exists( $taxonomy ) ) {
-            $taxonomy = wc_attribute_taxonomy_name_by_id( $term_id );
+    public static function update( int $attribute_id, array $data ): int|WP_Error {
+        $taxonomy_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+        if ( ! $taxonomy_name || ! self::check_taxonomy_exists( $taxonomy_name ) ) {
+            return new WP_Error( 'attribute_not_found', __( 'El atributo global no existe.', Constants::TEXT_DOMAIN ) );
         }
 
         foreach ( $data['options'] as $option ) {
-            $result = wp_insert_term( sanitize_text_field( $option ), $taxonomy );
+            $result = wp_insert_term( sanitize_text_field( $option ), $taxonomy_name );
             if ( is_wp_error( $result ) ) {
                 Debugger::error( $result );
             }
         }
 
-        return $term_id;
+        if ( true ) {
+            clean_taxonomy_cache( $taxonomy_name );
+        }
+
+        return $attribute_id;
     }
 
     /**
@@ -173,6 +168,7 @@ class Global_Attributes {
      */
     public static function get_term_id_by_name( string $name, string $taxonomy ): int|WP_Error {
         $taxonomy = self::get_taxonomy_name( $name );
+        $name = sanitize_text_field( $name );
 
         $term = get_term_by( 'name', $name, $taxonomy );
         if ( is_wp_error( $term ) || ! $term ) {
@@ -209,6 +205,8 @@ class Global_Attributes {
 
         $term_ids = array();
         foreach ( $options as $option ) {
+            $option = sanitize_text_field( $option );
+
             $term = get_term_by( 'name', $option, $taxonomy );
             if ( $term && ! is_wp_error( $term ) ) {
                 $term_ids[] = $term->term_id;
