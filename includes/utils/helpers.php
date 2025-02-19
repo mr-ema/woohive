@@ -383,11 +383,13 @@ class Helpers {
         $exclude_skus = apply_filters( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', array() );
         if ( is_array( $exclude_skus ) ) {
             $sku = $product->get_sku();
-            if ( empty( $sku ) ) {
-                if ( $product instanceof WC_Product_Variation ) {
-                    $parent = wc_get_product( $product->get_parent_id() );
 
-                    $sku = $parent->get_sku();
+            if ( $product->is_type( 'variation' ) ) {
+                $parent = wc_get_product( $product->get_parent_id() );
+
+                $parent_sku = $parent->get_sku();
+                if ( ! empty( $parent_sku ) && in_array( $parent_sku, $exclude_skus ) ) {
+                    return false;
                 }
             }
 
@@ -429,11 +431,13 @@ class Helpers {
         $exclude_skus = apply_filters( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', array() );
         if ( is_array( $exclude_skus ) ) {
             $sku = $product->get_sku();
-            if ( empty( $sku ) ) {
-                if ( $product instanceof WC_Product_Variation ) {
-                    $parent = wc_get_product( $product->get_parent_id() );
 
-                    $sku = $parent->get_sku();
+            if ( $product->is_type( 'variation' ) ) {
+                $parent = wc_get_product( $product->get_parent_id() );
+
+                $parent_sku = $parent->get_sku();
+                if ( ! empty( $parent_sku ) && in_array( $parent_sku, $exclude_skus ) ) {
+                    return false;
                 }
             }
 
