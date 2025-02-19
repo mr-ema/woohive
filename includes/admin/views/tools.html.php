@@ -17,15 +17,13 @@
             <h2 style="margin-bottom: 2rem;"><?php esc_html_e( 'Herramientas', Constants::TEXT_DOMAIN ); ?></h2>
 
             <div class="tools">
-                <?php if ( false ) : ?>
-                    <div class="tool">
-                        <div class="title"><?php _e( 'Sincronizar Todo', Constants::TEXT_DOMAIN ); ?></div>
-                        <div class="desc"><?php _e( 'Actualiza los inventarios segundarios, sincronizando desde el inventario principal.', Constants::TEXT_DOMAIN ); ?></div>
-                        <div class="action">
-                            <a href="<?php echo $urls['push_all']; ?>" class="button button-primary"><?php _e( 'Sincronizar', Constants::TEXT_DOMAIN ); ?></a>
-                        </div>
+                <div class="tool">
+                    <div class="title"><?php _e( 'Exportacion masiva de productos', Constants::TEXT_DOMAIN ); ?></div>
+                    <div class="desc"><?php _e( 'Exporta productos masivamente, exportanto desde el inventario principal.', Constants::TEXT_DOMAIN ); ?></div>
+                    <div class="action">
+                        <a href="<?php echo $urls['push_all']; ?>" class="button button-primary"><?php _e( 'Exportar', Constants::TEXT_DOMAIN ); ?></a>
                     </div>
-                <?php endif; ?>
+                </div>
 
                 <div class="tool">
                     <div class="title"><?php _e( 'Importacion masiva de productos', Constants::TEXT_DOMAIN ); ?></div>

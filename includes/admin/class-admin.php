@@ -219,6 +219,98 @@ class Admin_Page {
         wp_send_json_success( __( 'El producto fue importado exitosamente.', Constants::TEXT_DOMAIN ) );
     }
 
+    public function push_all(): void {
+        check_ajax_referer( Constants::PLUGIN_PREFIX . '-push-all', 'security' );
+
+        if ( ! current_user_can( 'manage_woocommerce' ) ) {
+            wp_send_json( array( 'message' => 'Permission denied' ), 403 );
+        }
+
+        // If we are completing the whole update, update timestamp
+        if ( isset( $_POST['complete'] ) && $_POST['complete'] ) {
+            update_option( Constants::PLUGIN_SLUG . '_last_updated', time() );
+            wp_send_json( null, 200 );
+        }
+
+        $page  = intval( $_POST['page'] );
+        $limit = intval( $_POST['limit'] );
+
+        $site = Helpers::site_by_key( $_POST['site_key'] );
+        if ( empty( $site ) ) {
+            wp_send_json( array( 'message' => 'Sitio no encontrado' ), 404 );
+        }
+
+        $client = Client::create( $site['url'], $site['api_key'], $site['api_secret'] );
+
+        // Get products for this page
+        $args = array(
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
+            'posts_per_page' => $limit,
+            'paged'          => $page,
+            'fields'         => 'ids',
+        );
+
+        $product_ids = get_posts( $args );
+
+        if ( empty( $product_ids ) ) {
+            wp_send_json( array( 'status' => 'error', 'message' => 'No products found' ), 404 );
+        }
+
+        $errors  = array();
+        $success = 0;
+
+        foreach ( $product_ids as $product_id ) {
+            $product = wc_get_product( $product_id );
+            if ( ! $product ) {
+                continue;
+            }
+
+            $sku = $product->get_sku();
+            if ( empty( $sku ) ) {
+                continue;
+            }
+
+            add_filter(
+                Constants::PLUGIN_SLUG . '_exclude_skus_from_sync',
+                function () use ( $sku ) {
+                    return array( $sku );
+                }
+            );
+
+            $response = $client->post( Constants::INTERNAL_API_BASE_NAME . "/products/{$sku}", array() );
+            if ( $response->has_error() ) {
+                $errors[] = array(
+                    'sku'     => $sku,
+                    'message' => $response->json_fmt(),
+                );
+            } else {
+                $success++;
+            }
+
+            remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
+        }
+
+        $total       = wp_count_posts( 'product' )->publish;
+        $total_pages = ceil( $total / $limit );
+
+        $response_data = array(
+            'status'    => 'processed',
+            'total'     => $total,
+            'pages'     => $total_pages,
+            'page'      => $page,
+            'last_page' => $total_pages == $page,
+            'count'     => $success,
+        );
+
+        // Add errors if any
+        if ( ! empty( $errors ) ) {
+            $response_data['errors'] = $errors;
+        }
+
+        wp_send_json( $response_data, 200 );
+    }
+
     public function massive_import_ajax(): void {
         check_ajax_referer( Constants::PLUGIN_PREFIX . '-massive-import', 'security' );
 
