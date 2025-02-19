@@ -153,7 +153,7 @@ class Check_Api {
             )
         );
 
-        if ( $response->status_code() === 200 && ! empty( $response->body() ) ) {
+        if ( $response->status_code() === 200 ) {
             // All Good, podemos seguir al siguiente paso
             return;
         }
