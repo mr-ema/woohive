@@ -254,7 +254,13 @@ class Admin_Page {
         $product_ids = get_posts( $args );
 
         if ( empty( $product_ids ) ) {
-            wp_send_json( array( 'status' => 'error', 'message' => 'No products found' ), 404 );
+            wp_send_json(
+                array(
+                    'status'  => 'error',
+                    'message' => 'No products found',
+                ),
+                404
+            );
         }
 
         $errors  = array();
@@ -285,7 +291,7 @@ class Admin_Page {
                     'message' => $response->json_fmt(),
                 );
             } else {
-                $success++;
+                ++$success;
             }
 
             remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
