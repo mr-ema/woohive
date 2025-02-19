@@ -21,11 +21,12 @@ class Variations {
     /**
      * Limpia los datos para eliminar propiedades inválidas en una variación.
      *
-     * @param array $data Datos sin procesar de la variación.
+     * @param array  $data Datos sin procesar de la variación.
+     * @param string $operation operacion a realizar en el crud [update, create, delete]
      *
      * @return array Datos filtrados con las propiedades inválidas eliminadas.
      */
-    public static function clean_data( array $data ): array {
+    public static function clean_data( array $data, string $operation = 'create' ): array {
         $invalid_props = array(
             'id',
             'date_created',
@@ -39,8 +40,10 @@ class Variations {
             '_edit_last',
         );
 
+        $operation = strtolower( $operation );
+
         $conditional_invalid_props = ( function () {
-            if ( ! Helpers::is_sync_stock_enabled() ) {
+            if ( ! Helpers::is_sync_stock_enabled() && $operation === 'update' ) {
                 return array( 'stock_quantity', 'stock_status', 'manage_stock', 'old_stock', 'stock_change', 'low_stock_amount' );
             }
 
@@ -146,7 +149,7 @@ class Variations {
         }
 
         try {
-            $filtered_data = self::clean_data( $filtered_data );
+            $filtered_data = self::clean_data( $filtered_data, 'create' );
             $variation     = new WC_Product_Variation();
 
             $variation->set_parent_id( $wc_product->get_id() );
@@ -186,7 +189,7 @@ class Variations {
         }
 
         try {
-            $filtered_data = self::clean_data( $data );
+            $filtered_data = self::clean_data( $data, 'update' );
 
             if ( Helpers::is_sync_only_stock_enabled() ) {
                 $allowed_keys  = array( 'stock_quantity', 'stock_status', 'manage_stock' );

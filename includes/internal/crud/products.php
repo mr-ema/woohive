@@ -38,13 +38,16 @@ class Products {
     /**
      * Limpia los datos para eliminar propiedades inválidas.
      *
-     * @param array $data Datos sin procesar.
+     * @param array  $data Datos sin procesar.
+     * @param string $operation operacion a realizar en el crud [update, create, delete]
      *
      * @return array Datos filtrados con las propiedades inválidas eliminadas.
      */
-    public static function clean_data( array $data ): array {
+    public static function clean_data( array $data, string $operation = 'create' ): array {
+        $operation = strtolower( $operation );
+
         $conditional_invalid_props = ( function () {
-            if ( ! Helpers::is_sync_stock_enabled() ) {
+            if ( ! Helpers::is_sync_stock_enabled() && $operation === 'update' ) {
                 return array( 'stock_quantity', 'stock_status', 'manage_stock', 'old_stock', 'stock_change', 'low_stock_amount' );
             }
 
@@ -86,7 +89,7 @@ class Products {
             return new WP_Error( 'product_not_found', __( "El producto con ID $product_id no existe.", Constants::TEXT_DOMAIN ) );
         }
 
-        $filtered_data = self::clean_data( $data );
+        $filtered_data = self::clean_data( $data, 'update' );
         if ( empty( $filtered_data ) ) {
             return new WP_Error( 'invalid_data', __( 'No se proporcionaron campos válidos para actualizar.', Constants::TEXT_DOMAIN ) );
         }
@@ -212,7 +215,7 @@ class Products {
      * @return int|WP_Error El ID del producto creado o un WP_Error en caso de fallo.
      */
     public static function create( array $data ): int|WP_Error {
-        $filtered_data = self::clean_data( $data );
+        $filtered_data = self::clean_data( $data, 'create' );
         if ( empty( $filtered_data ) ) {
             return new WP_Error( 'invalid_data', __( 'No se proporcionaron campos válidos para crear el producto.', Constants::TEXT_DOMAIN ) );
         }

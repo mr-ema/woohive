@@ -384,15 +384,10 @@ class Helpers {
         if ( is_array( $exclude_skus ) ) {
             $sku = $product->get_sku();
             if ( empty( $sku ) ) {
-                return true;
-            }
+                if ( $product instanceof WC_Product_Variation ) {
+                    $parent = wc_get_product( $product->get_parent_id() );
 
-            if ( $product instanceof WC_Product_Variation ) {
-                $parent = wc_get_product( $product->get_parent_id() );
-
-                $sku = $parent->get_sku();
-                if ( empty( $sku ) ) {
-                    return true;
+                    $sku = $parent->get_sku();
                 }
             }
 
@@ -435,15 +430,10 @@ class Helpers {
         if ( is_array( $exclude_skus ) ) {
             $sku = $product->get_sku();
             if ( empty( $sku ) ) {
-                return true;
-            }
+                if ( $product instanceof WC_Product_Variation ) {
+                    $parent = wc_get_product( $product->get_parent_id() );
 
-            if ( $product instanceof WC_Product_Variation ) {
-                $parent = wc_get_product( $product->get_parent_id() );
-
-                $sku = $parent->get_sku();
-                if ( empty( $sku ) ) {
-                    return true;
+                    $sku = $parent->get_sku();
                 }
             }
 
