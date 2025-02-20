@@ -264,7 +264,6 @@ class Admin_Page {
         }
 
         $errors  = array();
-        $success = 0;
 
         foreach ( $product_ids as $product_id ) {
             $product = wc_get_product( $product_id );
@@ -290,8 +289,6 @@ class Admin_Page {
                     'sku'     => $sku,
                     'message' => $response->json_fmt(),
                 );
-            } else {
-                ++$success;
             }
 
             remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
@@ -306,7 +303,7 @@ class Admin_Page {
             'pages'     => $total_pages,
             'page'      => $page,
             'last_page' => $total_pages == $page,
-            'count'     => $success,
+            'count'     => $limit,
         );
 
         // Add errors if any

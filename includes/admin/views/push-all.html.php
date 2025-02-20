@@ -155,13 +155,11 @@ var app = new Vue({
                     } else if (response.status === 'error') {
                         Debugger.error("Error processing site: " + site.formatted_url);
                         Debugger.error(response);
-                        site.status = 'pending';
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     Debugger.error("AJAX error on site: " + site.formatted_url + " | " + textStatus);
                     Debugger.error(jqXHR);
-                    site.status = 'pending';
                 }
             });
         },
