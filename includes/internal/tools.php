@@ -4,6 +4,7 @@ namespace WooHive\Internal;
 
 use WooHive\Config\Constants;
 use WooHive\Utils\Debugger;
+use WooHive\Utils\Helpers;
 use WooHive\WCApi\Client;
 use WooHive\Internal\Crud;
 
@@ -83,6 +84,11 @@ class Tools {
         }
 
         remove_filter( Constants::PLUGIN_SLUG . '_exclude_skus_from_sync', '__return_false' );
+
+        if ( Helpers::is_primary_site() ) {
+            $wc_product = wc_get_product( $internal_product_id );
+            do_action( Constants::PLUGIN_SLUG . '_sync_product', $wc_product );
+        }
 
         return $internal_product_id;
     }
